@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T19:36:42.383749+00:00",
+  "generated_at": "2026-10-11T19:37:49.128341+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -37,6 +37,17 @@
     },
     {
       "contract_side": "NO",
+      "edge_pp": 7.85387555,
+      "market_id": "KXNFLGAME-26OCT18LACKC-KC",
+      "matchup": "LAC at KC",
+      "model_probability": 0.27853875545741724,
+      "price": 0.2,
+      "sport": "NFL",
+      "start_time": "2026-10-18T20:25:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
       "edge_pp": 21.40850086,
       "market_id": "1198922",
       "matchup": "DAL at GB",
@@ -49,10 +60,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-11T19:36:30.654110+00:00",
+  "source_feed_generated_at": "2026-10-11T19:37:16.311245+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 5
   }
 }
