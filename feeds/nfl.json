@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T22:07:33.407147+00:00",
+  "generated_at": "2026-10-11T22:09:38.132727+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -25,20 +25,20 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 8.62027789,
-      "market_id": "KXNFLGAME-26OCT18BUFLV-LV",
+      "contract_side": "YES",
+      "edge_pp": 8.87027789,
+      "market_id": "1198920",
       "matchup": "BUF at LV",
       "model_probability": 0.7862027788819019,
-      "price": 0.7,
+      "price": 0.6975,
       "sport": "NFL",
       "start_time": "2026-10-18T20:25:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-11T22:07:28.197917+00:00",
+  "source_feed_generated_at": "2026-10-11T22:09:35.099928+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
