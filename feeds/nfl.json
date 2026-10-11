@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-11T18:16:05.223192+00:00",
+  "generated_at": "2026-10-11T18:18:09.650844+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -45,25 +45,14 @@
       "sport": "NFL",
       "start_time": "2026-10-18T17:00:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 21.15850086,
-      "market_id": "KXNFLGAME-26OCT18DALGB-GB",
-      "matchup": "DAL at GB",
-      "model_probability": 0.6915850086191034,
-      "price": 0.48,
-      "sport": "NFL",
-      "start_time": "2026-10-19T00:20:00+00:00",
-      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-11T18:15:14.327800+00:00",
+  "source_feed_generated_at": "2026-10-11T18:18:03.661614+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 4
   }
 }
