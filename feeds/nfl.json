@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-10-11T16:54:28.973506+00:00",
+  "generated_at": "2026-10-11T16:56:35.916511+00:00",
   "lane": "NFL",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 19.48591036,
+      "edge_pp": 19.23591036,
       "market_id": "1083103",
       "matchup": "CHI at GB",
       "model_probability": 0.6773591035884879,
-      "price": 0.4825,
+      "price": 0.485,
       "sport": "NFL",
       "start_time": "2026-10-11T17:00:00+00:00",
       "venue": "POLYMARKET"
@@ -115,7 +115,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-11T16:53:47.525409+00:00",
+  "source_feed_generated_at": "2026-10-11T16:56:34.255248+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
