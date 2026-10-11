@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-10-11T20:02:09.549369+00:00",
+  "generated_at": "2026-10-11T20:03:13.087275+00:00",
   "lane": "NFL",
   "plays": [
+    {
+      "contract_side": "YES",
+      "edge_pp": 22.97544818,
+      "market_id": "1083109",
+      "matchup": "BAL at ATL",
+      "model_probability": 0.6147544818161963,
+      "price": 0.385,
+      "sport": "NFL",
+      "start_time": "2026-10-12T00:20:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "NO",
       "edge_pp": 10.64727304,
@@ -15,17 +26,6 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 22.97544818,
-      "market_id": "1083109",
-      "matchup": "BAL at ATL",
-      "model_probability": 0.6147544818161963,
-      "price": 0.385,
-      "sport": "NFL",
-      "start_time": "2026-10-12T00:20:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
       "edge_pp": 14.8246578,
       "market_id": "1106139",
       "matchup": "BUF at LA",
@@ -34,36 +34,14 @@
       "sport": "NFL",
       "start_time": "2026-10-13T00:15:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 30.09870714,
-      "market_id": "1198904",
-      "matchup": "CAR at PHI",
-      "model_probability": 0.8209870713930228,
-      "price": 0.52,
-      "sport": "NFL",
-      "start_time": "2026-10-18T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 22.15850086,
-      "market_id": "KXNFLGAME-26OCT18DALGB-DAL",
-      "matchup": "DAL at GB",
-      "model_probability": 0.6915850086191034,
-      "price": 0.47,
-      "sport": "NFL",
-      "start_time": "2026-10-19T00:20:00+00:00",
-      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-11T20:02:01.584184+00:00",
+  "source_feed_generated_at": "2026-10-11T20:03:11.356966+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 3
   }
 }
