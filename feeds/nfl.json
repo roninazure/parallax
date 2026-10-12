@@ -1,28 +1,17 @@
 {
-  "generated_at": "2026-10-12T03:24:10.398338+00:00",
+  "generated_at": "2026-10-12T03:25:14.176226+00:00",
   "lane": "NFL",
   "plays": [
     {
-      "contract_side": "YES",
-      "edge_pp": 14.8246578,
-      "market_id": "1106139",
-      "matchup": "BUF at LA",
-      "model_probability": 0.5307465780009113,
-      "price": 0.3825,
-      "sport": "NFL",
-      "start_time": "2026-10-13T00:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 13.89658597,
-      "market_id": "KXNFLGAME-26OCT15SEADEN-DEN",
+      "contract_side": "NO",
+      "edge_pp": 15.14658597,
+      "market_id": "1155064",
       "matchup": "SEA at DEN",
       "model_probability": 0.5489658596686993,
-      "price": 0.41,
+      "price": 0.3975,
       "sport": "NFL",
       "start_time": "2026-10-16T00:15:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -67,11 +56,22 @@
       "sport": "NFL",
       "start_time": "2026-10-19T00:20:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 14.8246578,
+      "market_id": "1106139",
+      "matchup": "BUF at LA",
+      "model_probability": 0.5307465780009113,
+      "price": 0.3825,
+      "sport": "NFL",
+      "start_time": "2026-10-13T00:15:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-12T03:24:03.912242+00:00",
+  "source_feed_generated_at": "2026-10-12T03:25:12.968741+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
