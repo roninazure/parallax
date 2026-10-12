@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T07:15:15.615290+00:00",
+  "generated_at": "2026-10-12T07:17:23.683310+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -48,11 +48,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 8.87027789,
+      "edge_pp": 8.37027789,
       "market_id": "1198920",
       "matchup": "BUF at LV",
       "model_probability": 0.7862027788819019,
-      "price": 0.6975,
+      "price": 0.7025,
       "sport": "NFL",
       "start_time": "2026-10-18T20:25:00+00:00",
       "venue": "POLYMARKET"
@@ -71,7 +71,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-12T07:14:51.168680+00:00",
+  "source_feed_generated_at": "2026-10-12T07:17:09.575956+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
