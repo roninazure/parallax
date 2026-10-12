@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-10-12T00:19:57.741181+00:00",
+  "generated_at": "2026-10-12T00:22:02.241111+00:00",
   "lane": "NFL",
   "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 23.72544818,
-      "market_id": "1083109",
-      "matchup": "BAL at ATL",
-      "model_probability": 0.6147544818161963,
-      "price": 0.3775,
-      "sport": "NFL",
-      "start_time": "2026-10-12T00:20:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "YES",
       "edge_pp": 14.8246578,
@@ -49,10 +38,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-12T00:19:52.300409+00:00",
+  "source_feed_generated_at": "2026-10-12T00:22:00.114906+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 3
   }
 }
