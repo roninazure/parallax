@@ -1,25 +1,13 @@
 {
-  "generated_at": "2026-10-12T19:53:53.994563+00:00",
+  "generated_at": "2026-10-12T20:54:13.521015+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 19.46009632,
-      "market_id": "1225090",
-      "matchup": "Notre Dame at BYU",
-      "model_probability": 0.4296009632110327,
-      "price": 0.235,
-      "sport": "CFB",
-      "start_time": "2026-10-17T23:30:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-12T19:53:36.840166+00:00",
+  "source_feed_generated_at": "2026-10-12T20:54:03.318163+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 1
+    "buy": 0
   }
 }
