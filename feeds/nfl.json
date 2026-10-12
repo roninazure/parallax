@@ -1,40 +1,7 @@
 {
-  "generated_at": "2026-10-12T03:46:22.399609+00:00",
+  "generated_at": "2026-10-12T03:47:25.692123+00:00",
   "lane": "NFL",
   "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 15.14658597,
-      "market_id": "1155064",
-      "matchup": "SEA at DEN",
-      "model_probability": 0.5489658596686993,
-      "price": 0.3975,
-      "sport": "NFL",
-      "start_time": "2026-10-16T00:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 28.34870714,
-      "market_id": "1198904",
-      "matchup": "CAR at PHI",
-      "model_probability": 0.8209870713930228,
-      "price": 0.5375,
-      "sport": "NFL",
-      "start_time": "2026-10-18T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 8.62027789,
-      "market_id": "KXNFLGAME-26OCT18BUFLV-LV",
-      "matchup": "BUF at LV",
-      "model_probability": 0.7862027788819019,
-      "price": 0.7,
-      "sport": "NFL",
-      "start_time": "2026-10-18T20:25:00+00:00",
-      "venue": "KALSHI"
-    },
     {
       "contract_side": "NO",
       "edge_pp": 19.19510616,
@@ -56,11 +23,44 @@
       "sport": "NFL",
       "start_time": "2026-10-13T00:15:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 28.34870714,
+      "market_id": "1198904",
+      "matchup": "CAR at PHI",
+      "model_probability": 0.8209870713930228,
+      "price": 0.5375,
+      "sport": "NFL",
+      "start_time": "2026-10-18T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 12.59099688,
+      "market_id": "1198908",
+      "matchup": "CHI at ATL",
+      "model_probability": 0.5334099688249078,
+      "price": 0.4075,
+      "sport": "NFL",
+      "start_time": "2026-10-18T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 15.14658597,
+      "market_id": "1155064",
+      "matchup": "SEA at DEN",
+      "model_probability": 0.5489658596686993,
+      "price": 0.3975,
+      "sport": "NFL",
+      "start_time": "2026-10-16T00:15:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-12T03:46:21.757962+00:00",
+  "source_feed_generated_at": "2026-10-12T03:47:24.245066+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
