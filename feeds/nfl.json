@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T10:52:10.238164+00:00",
+  "generated_at": "2026-10-12T10:53:13.683040+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -15,17 +15,6 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 30.09870714,
-      "market_id": "1198904",
-      "matchup": "CAR at PHI",
-      "model_probability": 0.8209870713930228,
-      "price": 0.52,
-      "sport": "NFL",
-      "start_time": "2026-10-18T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
       "edge_pp": 15.14658597,
       "market_id": "1155064",
       "matchup": "SEA at DEN",
@@ -33,6 +22,17 @@
       "price": 0.3975,
       "sport": "NFL",
       "start_time": "2026-10-16T00:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 30.09870714,
+      "market_id": "1198904",
+      "matchup": "CAR at PHI",
+      "model_probability": 0.8209870713930228,
+      "price": 0.52,
+      "sport": "NFL",
+      "start_time": "2026-10-18T17:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -45,14 +45,25 @@
       "sport": "NFL",
       "start_time": "2026-10-18T20:25:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 19.19510616,
+      "market_id": "1198922",
+      "matchup": "DAL at GB",
+      "model_probability": 0.699451061606963,
+      "price": 0.5075,
+      "sport": "NFL",
+      "start_time": "2026-10-19T00:20:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-12T10:52:10.000965+00:00",
+  "source_feed_generated_at": "2026-10-12T10:52:18.742232+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 5
   }
 }
