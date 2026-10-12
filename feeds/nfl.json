@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T02:43:38.021154+00:00",
+  "generated_at": "2026-10-12T02:46:43.867029+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -11,6 +11,17 @@
       "price": 0.3825,
       "sport": "NFL",
       "start_time": "2026-10-13T00:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 14.64658597,
+      "market_id": "1155064",
+      "matchup": "SEA at DEN",
+      "model_probability": 0.5489658596686993,
+      "price": 0.4025,
+      "sport": "NFL",
+      "start_time": "2026-10-16T00:15:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -37,30 +48,19 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 14.64658597,
-      "market_id": "1155064",
-      "matchup": "SEA at DEN",
-      "model_probability": 0.5489658596686993,
-      "price": 0.4025,
+      "edge_pp": 19.19510616,
+      "market_id": "1198922",
+      "matchup": "DAL at GB",
+      "model_probability": 0.699451061606963,
+      "price": 0.5075,
       "sport": "NFL",
-      "start_time": "2026-10-16T00:15:00+00:00",
+      "start_time": "2026-10-19T00:20:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 7.62027789,
-      "market_id": "KXNFLGAME-26OCT18BUFLV-BUF",
-      "matchup": "BUF at LV",
-      "model_probability": 0.7862027788819019,
-      "price": 0.71,
-      "sport": "NFL",
-      "start_time": "2026-10-18T20:25:00+00:00",
-      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-12T02:43:35.841030+00:00",
+  "source_feed_generated_at": "2026-10-12T02:46:36.921615+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
