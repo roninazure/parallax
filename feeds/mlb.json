@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-12T23:56:55.941495+00:00",
+  "generated_at": "2026-10-13T00:58:32.672233+00:00",
   "lane": "MLB",
   "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-12T23:56:38.576181+00:00",
+  "source_feed_generated_at": "2026-10-13T00:57:57.510432+00:00",
   "source_schedule_state": "COMPLETE",
   "state": "LIVE",
   "summary": {
