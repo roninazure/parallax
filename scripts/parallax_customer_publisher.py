@@ -246,6 +246,50 @@ def verify_payloads(worktree: Path, expected: dict, revision: str) -> dict:
     return result
 
 
+
+def recover_pending_publication(worktree: Path, head: str, remote: str) -> None:
+    """Finish only an intact, single unpublished publisher commit.
+
+    Never reset, rebase, force push, or reconcile divergent history.  The
+    remote must still be the pending commit's direct parent at push time.
+    """
+    parent = git(worktree, "rev-parse", "HEAD^").stdout.strip()
+    if parent != remote:
+        raise RuntimeError("customer worktree has divergent history; manual review required")
+
+    paths = git(worktree, "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD").stdout.splitlines()
+    allowed = {f"feeds/{lane}.json" for lane in LANES}
+    if not paths or any(path not in allowed for path in paths):
+        raise RuntimeError("unpublished commit contains non-customer-feed changes")
+    subject = git(worktree, "log", "-1", "--format=%s", "HEAD").stdout.strip()
+    if not subject.startswith("data(parallax): unified customer publish "):
+        raise RuntimeError("unpublished commit is not a customer publisher commit")
+
+    for path in paths:
+        payload = json.loads((worktree / path).read_text(encoding="utf-8"))
+        count = payload.get("summary", {}).get("buy")
+        plays = payload.get("plays")
+        if (payload.get("schema_version") != CUSTOMER_SCHEMA
+                or payload.get("lane") != Path(path).stem.upper()
+                or payload.get("state") != "LIVE"
+                or payload.get("read_only") is not True
+                or type(count) is not int
+                or not isinstance(plays, list)
+                or count != len(plays)):
+            raise RuntimeError(f"unpublished customer payload invalid: {path}")
+
+    live = git(worktree, "ls-remote", "--heads", "origin", "parallax-live-data").stdout.split()
+    if len(live) != 2 or live[0] != remote:
+        raise RuntimeError("remote branch changed before pending publication recovery")
+
+    pushed = git(worktree, "push", "origin", "HEAD:refs/heads/parallax-live-data", check=False)
+    if pushed.returncode:
+        raise RuntimeError(f"pending customer push failed: {(pushed.stderr or pushed.stdout).strip()[:400]}")
+    confirmed = git(worktree, "ls-remote", "--heads", "origin", "parallax-live-data").stdout.split()
+    if len(confirmed) != 2 or confirmed[0] != head:
+        raise RuntimeError("pending customer push remote SHA verification failed")
+
+
 def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetime) -> dict:
     state.mkdir(parents=True, exist_ok=True, mode=0o700)
     with (state / "customer_publisher.lock").open("a+") as lock:
@@ -257,8 +301,9 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
             head = checked_worktree(worktree)
             git(worktree, "fetch", "origin", "parallax-live-data")
             remote_before = git(worktree, "rev-parse", "origin/parallax-live-data").stdout.strip()
-            if head != remote_before:
-                raise RuntimeError("customer worktree is behind or ahead of origin/parallax-live-data")
+            recovered_pending_commit = head != remote_before
+            if recovered_pending_commit:
+                recover_pending_publication(worktree, head, remote_before)
             expected, _ = build_all(directory, db, now)
             changed = []
             for lane in LANES:
@@ -286,6 +331,7 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
             counts = verify_payloads(worktree, expected, remote_sha)
             health = {"state": "HEALTHY", "checked_at": datetime.now(timezone.utc).isoformat(),
                       "remote_head": remote_sha, "changed_lanes": changed, "lanes": counts,
+                      "recovered_pending_commit": recovered_pending_commit,
                       "publisher_release_sha": os.environ.get("PARALLAX_PUBLISHER_SHA")}
             atomic_json(state / "customer_publisher_health.json", health)
             return health

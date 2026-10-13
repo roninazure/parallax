@@ -284,3 +284,119 @@ def test_deployment_bootstrap_failure_restores_prior_plists_and_loaded_jobs(tmp_
     for label in deployment.LABELS:
         assert (daemons / f"{label}.plist").read_bytes() == before[label]
     assert len(list(backups.glob("*/manifest.json"))) == 1
+
+
+def _pending_commit_fixture(tmp_path):
+    worktree = tmp_path / "customer-worktree"
+    (worktree / "feeds").mkdir(parents=True)
+    feed, db = fixtures(tmp_path)
+    expected, _ = publisher.build_all(feed, db, NOW)
+    for lane in publisher.LANES:
+        (worktree / "feeds" / f"{lane}.json").write_text(json.dumps(expected[lane]))
+    return worktree, feed, db
+
+
+def _pending_git(worktree, *, paths="feeds/nfl.json\n", parent=None, subject=None,
+                 live_before=None, push_code=0):
+    remote, local = "a" * 40, "b" * 40
+    calls = []
+    state = {"pushed": False}
+    parent = remote if parent is None else parent
+    subject = subject if subject is not None else "data(parallax): unified customer publish 2026-10-08T00:30:00+00:00"
+
+    def fake_git(_worktree, *args, **_kwargs):
+        calls.append(args)
+        command = args[0]
+        if command == "rev-parse":
+            return subprocess.CompletedProcess(args, 0, parent + "\n", "")
+        if command == "diff-tree":
+            return subprocess.CompletedProcess(args, 0, paths, "")
+        if command == "log":
+            return subprocess.CompletedProcess(args, 0, subject + "\n", "")
+        if command == "ls-remote":
+            sha = local if state["pushed"] else (live_before or remote)
+            return subprocess.CompletedProcess(args, 0, sha + "\trefs/heads/parallax-live-data\n", "")
+        if command == "push":
+            if push_code == 0:
+                state["pushed"] = True
+            return subprocess.CompletedProcess(args, push_code, "", "simulated transient failure" if push_code else "")
+        if command == "show":
+            lane = args[1].split("/")[-1]
+            return subprocess.CompletedProcess(args, 0, (worktree / "feeds" / lane).read_text(), "")
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    return fake_git, calls, state, remote, local
+
+
+def test_one_pending_customer_commit_recovers_without_force(monkeypatch, tmp_path):
+    worktree, _feed, _db = _pending_commit_fixture(tmp_path)
+    fake_git, calls, state, remote, local = _pending_git(worktree)
+    monkeypatch.setattr(publisher, "git", fake_git)
+    publisher.recover_pending_publication(worktree, local, remote)
+    assert state["pushed"] is True
+    pushes = [args for args in calls if args[0] == "push"]
+    assert pushes == [("push", "origin", "HEAD:refs/heads/parallax-live-data")]
+    assert sum(args[0] == "ls-remote" for args in calls) == 2
+
+
+def test_pending_commit_with_different_parent_fails_closed(monkeypatch, tmp_path):
+    worktree, _feed, _db = _pending_commit_fixture(tmp_path)
+    fake_git, calls, _state, remote, local = _pending_git(worktree, parent="c" * 40)
+    monkeypatch.setattr(publisher, "git", fake_git)
+    with pytest.raises(RuntimeError, match="divergent history"):
+        publisher.recover_pending_publication(worktree, local, remote)
+    assert not any(args[0] == "push" for args in calls)
+
+
+@pytest.mark.parametrize("paths", ["feeds/nfl.json\nscripts/other.py\n", "", "feeds/custom.json\n"])
+def test_pending_commit_must_only_touch_customer_feeds(monkeypatch, tmp_path, paths):
+    worktree, _feed, _db = _pending_commit_fixture(tmp_path)
+    fake_git, calls, _state, remote, local = _pending_git(worktree, paths=paths)
+    monkeypatch.setattr(publisher, "git", fake_git)
+    with pytest.raises(RuntimeError, match="non-customer-feed changes"):
+        publisher.recover_pending_publication(worktree, local, remote)
+    assert not any(args[0] == "push" for args in calls)
+
+
+def test_pending_commit_remote_movement_fails_closed(monkeypatch, tmp_path):
+    worktree, _feed, _db = _pending_commit_fixture(tmp_path)
+    fake_git, calls, _state, remote, local = _pending_git(worktree, live_before="c" * 40)
+    monkeypatch.setattr(publisher, "git", fake_git)
+    with pytest.raises(RuntimeError, match="remote branch changed"):
+        publisher.recover_pending_publication(worktree, local, remote)
+    assert not any(args[0] == "push" for args in calls)
+
+
+def test_pending_commit_push_failure_does_not_force_or_claim_recovery(monkeypatch, tmp_path):
+    worktree, _feed, _db = _pending_commit_fixture(tmp_path)
+    fake_git, calls, state, remote, local = _pending_git(worktree, push_code=1)
+    monkeypatch.setattr(publisher, "git", fake_git)
+    with pytest.raises(RuntimeError, match="pending customer push failed"):
+        publisher.recover_pending_publication(worktree, local, remote)
+    assert not state["pushed"]
+    assert [args for args in calls if args[0] == "push"] == [
+        ("push", "origin", "HEAD:refs/heads/parallax-live-data")
+    ]
+
+
+def test_publish_recovers_pending_commit_and_writes_verified_health(monkeypatch, tmp_path):
+    worktree, feed, db = _pending_commit_fixture(tmp_path)
+    fake_git, calls, state, remote, local = _pending_git(worktree)
+    monkeypatch.setattr(publisher, "git", fake_git)
+    monkeypatch.setattr(publisher, "checked_worktree", lambda _path: local)
+    original_git = fake_git
+
+    def git_with_fetch(_worktree, *args, **kwargs):
+        if args == ("rev-parse", "origin/parallax-live-data"):
+            return subprocess.CompletedProcess(args, 0, remote + "\n", "")
+        return original_git(_worktree, *args, **kwargs)
+
+    monkeypatch.setattr(publisher, "git", git_with_fetch)
+    health = publisher.publish(worktree, feed, db, tmp_path / "health", NOW)
+    assert health["state"] == "HEALTHY"
+    assert health["recovered_pending_commit"] is True
+    assert health["remote_head"] == local
+    assert state["pushed"]
+    assert [args for args in calls if args[0] == "push"] == [
+        ("push", "origin", "HEAD:refs/heads/parallax-live-data")
+    ]
