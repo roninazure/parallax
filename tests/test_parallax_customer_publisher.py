@@ -352,3 +352,30 @@ def test_deployment_bootstrap_failure_restores_prior_plists_and_loaded_jobs(tmp_
     for label in deployment.LABELS:
         assert (daemons / f"{label}.plist").read_bytes() == before[label]
     assert len(list(backups.glob("*/manifest.json"))) == 1
+
+
+def test_deployment_preflight_checks_remote_as_configured_user(monkeypatch, tmp_path):
+    release, worktree = tmp_path / "release", tmp_path / "customer-worktree"
+    (release / "scripts").mkdir(parents=True)
+    (release / "scripts" / "parallax_customer_publisher.py").write_text("# release\n")
+    sha = "a" * 40
+    remote_sha = "b" * 40
+    calls = []
+
+    def fake_command(self, *args, check=True):
+        calls.append(args)
+        output = ""
+        if args[0] == "/usr/bin/git" and args[-2:] == ("rev-parse", "HEAD"):
+            output = sha + "\n" if str(release) in args else remote_sha + "\n"
+        elif args[0] == "/usr/bin/git" and "branch" in args:
+            output = "parallax-live-data\n"
+        elif args[0] == "/usr/bin/sudo":
+            output = remote_sha + "\trefs/heads/parallax-live-data\n"
+        return subprocess.CompletedProcess(args, 0, output, "")
+
+    monkeypatch.setattr(deployment.Deployment, "command", fake_command)
+    deployment.Deployment().preflight(release, sha, worktree, "scottsteele")
+
+    assert ("/usr/bin/sudo", "-H", "-u", "scottsteele", "/usr/bin/git", "-C", str(worktree),
+            "ls-remote", "--heads", "origin", "parallax-live-data") in calls
+    assert not any(args[0] == "/usr/bin/git" and "ls-remote" in args for args in calls)
