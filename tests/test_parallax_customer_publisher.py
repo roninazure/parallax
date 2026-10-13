@@ -296,7 +296,7 @@ def _pending_commit_fixture(tmp_path):
     return worktree, feed, db
 
 
-def _pending_git(worktree, *, paths="feeds/nfl.json\\n", parent=None, subject=None,
+def _pending_git(worktree, *, paths="feeds/nfl.json\n", parent=None, subject=None,
                  live_before=None, push_code=0):
     remote, local = "a" * 40, "b" * 40
     calls = []
@@ -308,14 +308,14 @@ def _pending_git(worktree, *, paths="feeds/nfl.json\\n", parent=None, subject=No
         calls.append(args)
         command = args[0]
         if command == "rev-parse":
-            return subprocess.CompletedProcess(args, 0, parent + "\\n", "")
+            return subprocess.CompletedProcess(args, 0, parent + "\n", "")
         if command == "diff-tree":
             return subprocess.CompletedProcess(args, 0, paths, "")
         if command == "log":
-            return subprocess.CompletedProcess(args, 0, subject + "\\n", "")
+            return subprocess.CompletedProcess(args, 0, subject + "\n", "")
         if command == "ls-remote":
             sha = local if state["pushed"] else (live_before or remote)
-            return subprocess.CompletedProcess(args, 0, sha + "\\trefs/heads/parallax-live-data\\n", "")
+            return subprocess.CompletedProcess(args, 0, sha + "\trefs/heads/parallax-live-data\n", "")
         if command == "push":
             if push_code == 0:
                 state["pushed"] = True
@@ -348,7 +348,7 @@ def test_pending_commit_with_different_parent_fails_closed(monkeypatch, tmp_path
     assert not any(args[0] == "push" for args in calls)
 
 
-@pytest.mark.parametrize("paths", ["feeds/nfl.json\\nscripts/other.py\\n", "", "feeds/custom.json\\n"])
+@pytest.mark.parametrize("paths", ["feeds/nfl.json\nscripts/other.py\n", "", "feeds/custom.json\n"])
 def test_pending_commit_must_only_touch_customer_feeds(monkeypatch, tmp_path, paths):
     worktree, _feed, _db = _pending_commit_fixture(tmp_path)
     fake_git, calls, _state, remote, local = _pending_git(worktree, paths=paths)
@@ -388,7 +388,7 @@ def test_publish_recovers_pending_commit_and_writes_verified_health(monkeypatch,
 
     def git_with_fetch(_worktree, *args, **kwargs):
         if args == ("rev-parse", "origin/parallax-live-data"):
-            return subprocess.CompletedProcess(args, 0, remote + "\\n", "")
+            return subprocess.CompletedProcess(args, 0, remote + "\n", "")
         return original_git(_worktree, *args, **kwargs)
 
     monkeypatch.setattr(publisher, "git", git_with_fetch)
