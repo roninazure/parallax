@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-14T04:24:27.848045+00:00",
+  "generated_at": "2026-10-14T04:40:03.750430+00:00",
   "lane": "NFL",
   "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-14T04:24:23.968905+00:00",
+  "source_feed_generated_at": "2026-10-14T04:39:52.719684+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
