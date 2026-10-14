@@ -216,6 +216,21 @@ def build_all(directory: Path, db: Path, now: datetime) -> tuple[dict, dict, dic
     return expected, hashes, health
 
 
+def build_stable_snapshot(directory: Path, db: Path, now: datetime) -> tuple[dict, dict, dict]:
+    """Build from one immutable read, retrying if an atomic feed replacement races it."""
+    snapshot_time = now
+    for attempt in range(3):
+        snapshot = build_all(directory, db, snapshot_time)
+        try:
+            assert_sources_unchanged(directory, snapshot[1])
+            return snapshot
+        except RuntimeError as exc:
+            if "source changed during publication" not in str(exc) or attempt == 2:
+                raise
+            snapshot_time = max(datetime.now(timezone.utc), snapshot_time)
+    raise RuntimeError("source snapshot could not be stabilized")
+
+
 def git(worktree: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     cp = subprocess.run(["/usr/bin/git", "-C", str(worktree), *args], text=True,
                         capture_output=True, env={**os.environ, "GIT_TERMINAL_PROMPT": "0"})
@@ -421,7 +436,7 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
             head = checked_worktree(worktree)
             git(worktree, "fetch", "origin", "parallax-live-data")
             remote_before = git(worktree, "rev-parse", "origin/parallax-live-data").stdout.strip()
-            expected, hashes, lane_health = build_all(directory, db, now)
+            expected, hashes, lane_health = build_stable_snapshot(directory, db, now)
             recovered_pending_commit = False
             if head != remote_before:
                 recovered_pending_commit = recover_stranded_commit(worktree, remote_before, head, expected)
@@ -439,7 +454,6 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
                     changed.append(lane)
                 else:
                     expected[lane] = old
-            assert_sources_unchanged(directory, hashes)
             for lane in changed:
                 atomic_json(worktree / "feeds" / f"{lane}.json", expected[lane])
             if changed:
@@ -491,8 +505,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.dry_run:
             checked_worktree(args.worktree)
-            expected, hashes, lane_health = build_all(args.public_feed, args.db, datetime.now(timezone.utc))
-            assert_sources_unchanged(args.public_feed, hashes)
+            expected, _hashes, lane_health = build_stable_snapshot(
+                args.public_feed, args.db, datetime.now(timezone.utc))
             print("DRY_RUN_OK " + " ".join(f"{lane.upper()}={expected[lane]['summary']['buy']}:{lane_health[lane]['source_state']}" for lane in LANES))
         else:
             health = publish(args.worktree, args.public_feed, args.db, args.state, datetime.now(timezone.utc))

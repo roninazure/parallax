@@ -107,6 +107,27 @@ def test_source_read_is_an_immutable_snapshot_after_atomic_replacement(tmp_path)
         publisher.assert_sources_unchanged(feed, hashes)
 
 
+def test_snapshot_capture_retries_an_atomic_nfl_update(monkeypatch, tmp_path):
+    feed, db = fixtures(tmp_path)
+    original_assert = publisher.assert_sources_unchanged
+    attempts = 0
+
+    def replace_during_first_validation(directory, hashes):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            (feed / "nfl.json").write_text(json.dumps(source(
+                "nfl", plays=[], buy=0, generated_at=datetime.now(timezone.utc).isoformat())))
+        return original_assert(directory, hashes)
+
+    monkeypatch.setattr(publisher, "assert_sources_unchanged", replace_during_first_validation)
+    expected, _hashes, health = publisher.build_stable_snapshot(feed, db, datetime.now(timezone.utc))
+    assert attempts == 2
+    assert health["nfl"]["source_state"] == "FRESH"
+    assert expected["nfl"]["summary"]["buy"] == 0
+    assert expected["nfl"]["plays"] == []
+
+
 def test_stale_cfb_is_suppressed_while_fresh_nfl_and_mlb_remain_publishable(tmp_path):
     feed, db = fixtures(tmp_path)
     stale_cfb = source("cfb", plays=[{"action": "BUY", "publication_eligible": True}], generated_at="2026-10-07T22:00:00+00:00")
