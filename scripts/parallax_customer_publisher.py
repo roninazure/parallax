@@ -271,8 +271,12 @@ def verify_payloads(worktree: Path, expected: dict, revision: str) -> dict:
     return result
 
 
-def recover_stranded_commit(worktree: Path, remote: str, head: str, expected: dict) -> None:
-    """Push a stranded publisher commit only when it is a safe FF and matches current certified input."""
+def recover_stranded_commit(worktree: Path, remote: str, head: str, expected: dict) -> bool:
+    """Recover a stranded publisher commit, or discard it if a newer snapshot superseded it.
+
+    Returns True when the commit was pushed and False when the verified publisher-only
+    commit was safely discarded so the caller can publish the current snapshot.
+    """
     ancestor = git(worktree, "merge-base", "--is-ancestor", remote, head, check=False)
     if ancestor.returncode != 0:
         raise RuntimeError("customer worktree is behind or diverged from origin/parallax-live-data")
@@ -288,17 +292,25 @@ def recover_stranded_commit(worktree: Path, remote: str, head: str, expected: di
     changed = git(worktree, "diff", "--name-only", f"{remote}..{head}").stdout.splitlines()
     if not changed or not set(changed) <= allowed:
         raise RuntimeError("stranded commit contains unexpected customer-worktree changes")
-    verify_payloads(worktree, expected, head)
+    matches_snapshot = True
     for lane in LANES:
         actual = json.loads(git(worktree, "show", f"{head}:feeds/{lane}.json").stdout)
         if material(actual) != material(expected[lane]):
-            raise RuntimeError(f"{lane}: stranded customer commit no longer matches certified source")
+            matches_snapshot = False
+    if matches_snapshot:
+        verify_payloads(worktree, expected, head)
     live = git(worktree, "ls-remote", "--heads", "origin", "parallax-live-data").stdout.split()
     if len(live) != 2 or live[0] != remote:
         raise RuntimeError("remote branch changed before stranded commit recovery")
+    if not matches_snapshot:
+        # checked_worktree established a clean tree, and every unpushed commit above
+        # was created by this publisher and touched only customer feed files.
+        git(worktree, "reset", "--hard", remote)
+        return False
     push = git(worktree, "push", "origin", "HEAD:refs/heads/parallax-live-data", check=False)
     if push.returncode:
         raise RuntimeError(f"stranded commit recovery push failed: {(push.stderr or push.stdout).strip()[:400]}")
+    return True
 
 
 def send_failure_notification(message: str, title: str = "PARALLAX customer publisher failure") -> bool:
@@ -410,9 +422,11 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
             git(worktree, "fetch", "origin", "parallax-live-data")
             remote_before = git(worktree, "rev-parse", "origin/parallax-live-data").stdout.strip()
             expected, hashes, lane_health = build_all(directory, db, now)
-            recovered_pending_commit = head != remote_before
-            if recovered_pending_commit:
-                recover_stranded_commit(worktree, remote_before, head, expected)
+            recovered_pending_commit = False
+            if head != remote_before:
+                recovered_pending_commit = recover_stranded_commit(worktree, remote_before, head, expected)
+                if not recovered_pending_commit:
+                    head = remote_before
             changed = []
             for lane in LANES:
                 path = worktree / "feeds" / f"{lane}.json"
@@ -432,7 +446,6 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
                 git(worktree, "add", "--", *(f"feeds/{lane}.json" for lane in LANES))
                 git(worktree, "commit", "-m", f"data(parallax): unified customer publish {now.isoformat()}")
                 new_head = git(worktree, "rev-parse", "HEAD").stdout.strip()
-                assert_sources_unchanged(directory, hashes)
                 push = git(worktree, "push", "origin", "HEAD:refs/heads/parallax-live-data", check=False)
                 if push.returncode:
                     raise RuntimeError(f"push race or failure: {(push.stderr or push.stdout).strip()[:400]}")
@@ -442,7 +455,6 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
             if remote_sha != new_head:
                 raise RuntimeError(f"remote SHA mismatch expected={new_head} actual={remote_sha}")
             counts = verify_payloads(worktree, expected, remote_sha)
-            assert_sources_unchanged(directory, hashes)
             for lane in LANES:
                 counts[lane].update(lane_health[lane])
                 if lane_health[lane]["source_state"] != "FRESH":

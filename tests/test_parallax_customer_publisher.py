@@ -87,6 +87,26 @@ def test_all_lane_source_customer_count_equality_is_mandatory(tmp_path):
         publisher.build_all(feed, db, NOW)
 
 
+def test_valid_zero_buy_nfl_snapshot_publishes_live_empty_feed(tmp_path):
+    feed, db = fixtures(tmp_path)
+    (feed / "nfl.json").write_text(json.dumps(source("nfl", plays=[], buy=0)))
+    expected, _, health = publisher.build_all(feed, db, NOW)
+    assert health["nfl"]["source_state"] == "FRESH"
+    assert expected["nfl"]["state"] == "LIVE"
+    assert expected["nfl"]["summary"]["buy"] == 0
+    assert expected["nfl"]["plays"] == []
+
+
+def test_source_read_is_an_immutable_snapshot_after_atomic_replacement(tmp_path):
+    feed, _db = fixtures(tmp_path)
+    snapshot, hashes, _ = publisher.read_sources(feed, NOW)
+    old_market = snapshot["nfl"]["plays"][0]["market_id"]
+    (feed / "nfl.json").write_text(json.dumps(source("nfl", plays=[], buy=0)))
+    assert snapshot["nfl"]["plays"][0]["market_id"] == old_market
+    with pytest.raises(RuntimeError, match="nfl: source changed during publication"):
+        publisher.assert_sources_unchanged(feed, hashes)
+
+
 def test_stale_cfb_is_suppressed_while_fresh_nfl_and_mlb_remain_publishable(tmp_path):
     feed, db = fixtures(tmp_path)
     stale_cfb = source("cfb", plays=[{"action": "BUY", "publication_eligible": True}], generated_at="2026-10-07T22:00:00+00:00")
@@ -234,6 +254,78 @@ def test_stranded_publisher_commit_recovers_only_by_verified_fast_forward(monkey
     assert all("--force" not in call for call in calls)
 
 
+def test_stale_stranded_publisher_commit_is_discarded_before_current_snapshot_publish(monkeypatch, tmp_path):
+    remote, head = "a" * 40, "b" * 40
+    old_feed = {lane: {"schema_version": publisher.CUSTOMER_SCHEMA, "state": "LIVE",
+                       "summary": {"buy": 1}, "plays": [{"market_id": "old"}]}
+                for lane in publisher.LANES}
+    expected = {lane: {"schema_version": publisher.CUSTOMER_SCHEMA, "state": "LIVE",
+                       "summary": {"buy": 0}, "plays": []}
+                for lane in publisher.LANES}
+    calls = []
+
+    def fake_git(_worktree, *args, **kwargs):
+        calls.append(args)
+        if args[:2] == ("merge-base", "--is-ancestor"):
+            return subprocess.CompletedProcess(args, 0, "", "")
+        if args[0] == "rev-list":
+            return subprocess.CompletedProcess(args, 0, head + "\n", "")
+        if args[:3] == ("show", "-s", "--format=%s"):
+            return subprocess.CompletedProcess(args, 0, "data(parallax): unified customer publish retry\n", "")
+        if args[0] == "diff-tree":
+            return subprocess.CompletedProcess(args, 0, "feeds/nfl.json\n", "")
+        if args[:2] == ("diff", "--name-only"):
+            return subprocess.CompletedProcess(args, 0, "feeds/nfl.json\n", "")
+        if args[0] == "show":
+            lane = args[1].split("feeds/")[-1].removesuffix(".json")
+            return subprocess.CompletedProcess(args, 0, json.dumps(old_feed[lane]), "")
+        if args[0] == "ls-remote":
+            return subprocess.CompletedProcess(args, 0, remote + "\trefs/heads/parallax-live-data\n", "")
+        if args[0] == "reset":
+            return subprocess.CompletedProcess(args, 0, "", "")
+        raise AssertionError(args)
+
+    monkeypatch.setattr(publisher, "git", fake_git)
+    assert publisher.recover_stranded_commit(tmp_path, remote, head, expected) is False
+    assert ("reset", "--hard", remote) in calls
+    assert not any(call[0] == "push" for call in calls)
+
+
+def test_ntfy_failure_alert_uses_configured_topic_and_sends_existing_alert(monkeypatch, tmp_path):
+    requests = []
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self, _size):
+            return b"ok"
+
+    config_dir = tmp_path / "Library/Application Support/SwarmEdge"
+    config_dir.mkdir(parents=True)
+    config = config_dir / "parallax-alerts.env"
+    config.write_text("PARALLAX_ALERT_MODE=ntfy\nPARALLAX_ALERT_NTFY_TOPIC=parallax-test\nPARALLAX_ALERT_NTFY_SERVER=https://ntfy.example\n")
+    config.chmod(0o600)
+    monkeypatch.setattr(publisher.Path, "home", lambda: tmp_path)
+
+    def fake_urlopen(request, timeout):
+        requests.append((request, timeout))
+        return Response()
+
+    monkeypatch.setattr(publisher, "urlopen", fake_urlopen)
+    assert publisher.send_failure_notification("publisher failed") is True
+    request, timeout = requests[0]
+    assert request.full_url == "https://ntfy.example/"
+    assert json.loads(request.data) == {
+        "topic": "parallax-test", "title": "PARALLAX customer publisher failure",
+        "message": "publisher failed", "priority": 4,
+    }
+    assert timeout == 5
+
+
 def test_stranded_publisher_commit_recovers_against_local_bare_remote(tmp_path):
     feed, db = fixtures(tmp_path)
     expected, _, _ = publisher.build_all(feed, db, NOW)
@@ -368,6 +460,42 @@ def test_unchanged_remote_writes_healthy_count_and_sha(monkeypatch, tmp_path):
     assert health["changed_lanes"] == []
     assert all(health["lanes"][lane]["source_buy"] == health["lanes"][lane]["customer_buy"] for lane in publisher.LANES)
     assert "push" not in calls
+
+
+def test_concurrent_nfl_refresh_does_not_mutate_inflight_publication_snapshot(monkeypatch, tmp_path):
+    feed, db = fixtures(tmp_path)
+    worktree, state = tmp_path / "worktree", tmp_path / "state"
+    (worktree / "feeds").mkdir(parents=True)
+    empty = {"schema_version": publisher.CUSTOMER_SCHEMA, "lane": "NFL", "state": "LIVE",
+             "summary": {"buy": 0}, "plays": [], "source_feed_generated_at": NOW.isoformat()}
+    for lane in publisher.LANES:
+        (worktree / "feeds" / f"{lane}.json").write_text(json.dumps({**empty, "lane": lane.upper()}))
+    monkeypatch.setattr(publisher, "checked_worktree", lambda _path: "a" * 40)
+
+    def fake_git(_worktree, *args, **_kwargs):
+        if args[0] == "rev-parse":
+            revision = "b" if args[1] == "HEAD" else "a"
+            return subprocess.CompletedProcess(args, 0, revision * 40 + "\n", "")
+        if args[0] == "push":
+            # The unattended NFL scan atomically replaces the source while this
+            # validated one BUY snapshot is completing its Git publication.
+            (feed / "nfl.json").write_text(json.dumps(source("nfl", plays=[], buy=0,
+                                                               generated_at=(NOW.replace(minute=31)).isoformat())))
+            return subprocess.CompletedProcess(args, 0, "", "")
+        if args[0] == "ls-remote":
+            return subprocess.CompletedProcess(args, 0, "b" * 40 + "\trefs/heads/parallax-live-data\n", "")
+        if args[0] == "show":
+            lane = args[1].split("feeds/")[-1].removesuffix(".json")
+            return subprocess.CompletedProcess(args, 0, (worktree / "feeds" / f"{lane}.json").read_text(), "")
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    monkeypatch.setattr(publisher, "git", fake_git)
+    health = publisher.publish(worktree, feed, db, state, NOW)
+    published = json.loads((worktree / "feeds/nfl.json").read_text())
+    assert health["state"] == "HEALTHY"
+    assert health["lanes"]["nfl"]["source_buy"] == health["lanes"]["nfl"]["customer_buy"] == 1
+    assert published["plays"][0]["market_id"] == "1083096"
+    assert json.loads((feed / "nfl.json").read_text())["summary"]["buy"] == 0
 
 
 def test_publish_atomically_suppresses_stale_cfb_and_keeps_fresh_lane_parity(monkeypatch, tmp_path):
