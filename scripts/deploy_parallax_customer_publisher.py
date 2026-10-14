@@ -97,11 +97,15 @@ class Deployment:
                 health = json.loads(health_path.read_text())
                 checked = datetime.fromisoformat(health["checked_at"])
                 if checked >= started:
-                    if health.get("state") == "HEALTHY" and health.get("publisher_release_sha") == sha and all(
-                        health.get("lanes", {}).get(lane, {}).get("source_buy") ==
-                        health.get("lanes", {}).get(lane, {}).get("customer_buy")
+                    lanes = health.get("lanes", {})
+                    parity_ok = all(
+                        (lanes.get(lane, {}).get("parity") == "STALE_SUPPRESSED" and
+                         lanes.get(lane, {}).get("customer_buy") == 0) or
+                        (lanes.get(lane, {}).get("source_state") == "FRESH" and
+                         lanes.get(lane, {}).get("source_buy") == lanes.get(lane, {}).get("customer_buy"))
                         for lane in ("nfl", "cfb", "mlb")
-                    ):
+                    )
+                    if health.get("state") in {"HEALTHY", "DEGRADED"} and health.get("publisher_release_sha") == sha and parity_ok:
                         return
                     raise RuntimeError(f"publisher health failed: {health.get('error', 'count mismatch')}")
             except (FileNotFoundError, json.JSONDecodeError, KeyError, ValueError):

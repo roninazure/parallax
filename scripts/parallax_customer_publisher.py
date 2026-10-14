@@ -58,32 +58,49 @@ def venue(value: object) -> str:
     return "POLYMARKET" if result == "PMUS" else result
 
 
-def read_sources(directory: Path, now: datetime) -> tuple[dict, dict]:
-    sources, hashes = {}, {}
+def read_sources(directory: Path, now: datetime) -> tuple[dict, dict, dict]:
+    sources, hashes, health = {}, {}, {}
     for lane in LANES:
         path = directory / f"{lane}.json"
-        raw = path.read_bytes()
-        hashes[lane] = hashlib.sha256(raw).hexdigest()
-        feed = json.loads(raw)
-        if not isinstance(feed, dict) or feed.get("schema_version") != SOURCE_SCHEMA or feed.get("lane") != lane.upper():
-            raise ValueError(f"{lane}: wrong source schema or lane")
-        if feed.get("read_only") is not True or not isinstance(feed.get("plays"), list) or not isinstance(feed.get("summary"), dict):
-            raise ValueError(f"{lane}: malformed sanitized feed")
-        count = feed["summary"].get("buy")
-        if type(count) is not int or count < 0:
-            raise ValueError(f"{lane}: invalid source BUY count")
-        age = now - timestamp(feed.get("generated_at"))
-        if not timedelta(0) <= age <= MAX_AGE:
-            raise ValueError(f"{lane}: source feed stale or future dated")
-        if count and feed.get("buy_publication_eligible") is not True:
-            raise ValueError(f"{lane}: BUY publication disabled")
-        sources[lane] = feed
-    return sources, hashes
+        count, age, generated_at = None, None, None
+        try:
+            raw = path.read_bytes()
+            hashes[lane] = hashlib.sha256(raw).hexdigest()
+            feed = json.loads(raw)
+            if not isinstance(feed, dict) or feed.get("schema_version") != SOURCE_SCHEMA or feed.get("lane") != lane.upper():
+                raise ValueError("wrong source schema or lane")
+            if feed.get("read_only") is not True or not isinstance(feed.get("plays"), list) or not isinstance(feed.get("summary"), dict):
+                raise ValueError("malformed sanitized feed")
+            count = feed["summary"].get("buy")
+            if type(count) is not int or count < 0:
+                raise ValueError("invalid source BUY count")
+            generated_at = feed.get("generated_at")
+            generated = timestamp(generated_at)
+            age = now - generated
+            if not timedelta(0) <= age <= MAX_AGE:
+                raise ValueError("source feed stale or future dated")
+            if count and feed.get("buy_publication_eligible") is not True:
+                raise ValueError("BUY publication disabled")
+            sources[lane] = feed
+            health[lane] = {"source_state": "FRESH", "source_buy": count, "source_age_seconds": int(age.total_seconds())}
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            if lane not in hashes:
+                hashes[lane] = None
+            # Suppress the affected lane; never reuse its previous LIVE payload.
+            sources[lane] = None
+            source_state = "STALE" if "stale or future dated" in str(exc) else "UNAVAILABLE"
+            health[lane] = {"source_state": source_state, "source_buy": count,
+                            "source_age_seconds": int(age.total_seconds()) if age is not None else None,
+                            "error": str(exc)[:240]}
+            health[lane]["source_feed_generated_at"] = generated_at
+    return sources, hashes, health
 
 
 def assert_sources_unchanged(directory: Path, hashes: dict) -> None:
     for lane in LANES:
-        if hashlib.sha256((directory / f"{lane}.json").read_bytes()).hexdigest() != hashes[lane]:
+        path = directory / f"{lane}.json"
+        current = hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
+        if current != hashes[lane]:
             raise RuntimeError(f"{lane}: source changed during publication")
 
 
@@ -184,9 +201,19 @@ def build(lane: str, source: dict, db: Path, now: datetime) -> dict:
             "read_only": True, "state": "LIVE", "summary": {"buy": len(buys)}, "plays": buys}
 
 
-def build_all(directory: Path, db: Path, now: datetime) -> tuple[dict, dict]:
-    sources, hashes = read_sources(directory, now)
-    return {lane: build(lane, sources[lane], db, now) for lane in LANES}, hashes
+def build_all(directory: Path, db: Path, now: datetime) -> tuple[dict, dict, dict]:
+    sources, hashes, health = read_sources(directory, now)
+    expected = {}
+    for lane in LANES:
+        source = sources[lane]
+        if source is None:
+            expected[lane] = {"schema_version": CUSTOMER_SCHEMA, "lane": lane.upper(),
+                "generated_at": now.isoformat(), "source_feed_generated_at": health[lane].get("source_feed_generated_at"),
+                "source_schedule_state": "STALE", "read_only": True, "state": "STALE",
+                "summary": {"buy": 0}, "plays": []}
+        else:
+            expected[lane] = build(lane, source, db, now)
+    return expected, hashes, health
 
 
 def git(worktree: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -235,10 +262,12 @@ def verify_payloads(worktree: Path, expected: dict, revision: str) -> dict:
     for lane in LANES:
         raw = git(worktree, "show", f"{revision}:feeds/{lane}.json").stdout
         actual = json.loads(raw)
-        if actual.get("schema_version") != CUSTOMER_SCHEMA or actual.get("summary", {}).get("buy") != expected[lane]["summary"]["buy"] or actual.get("plays") != expected[lane]["plays"]:
+        if actual.get("schema_version") != CUSTOMER_SCHEMA or actual.get("state") != expected[lane].get("state") or actual.get("summary", {}).get("buy") != expected[lane]["summary"]["buy"] or actual.get("plays") != expected[lane]["plays"]:
             raise RuntimeError(f"{lane}: remote customer BUY mismatch")
-        result[lane] = {"source_buy": expected[lane]["summary"]["buy"],
-                        "customer_buy": actual["summary"]["buy"]}
+        stale = expected[lane].get("state") == "STALE"
+        result[lane] = {"source_buy": None if stale else expected[lane]["summary"]["buy"],
+                        "customer_buy": actual["summary"]["buy"], "source_state": "UNAVAILABLE" if stale else "FRESH",
+                        "parity": "STALE_SUPPRESSED" if stale else "EQUAL"}
     return result
 
 
@@ -272,7 +301,7 @@ def recover_stranded_commit(worktree: Path, remote: str, head: str, expected: di
         raise RuntimeError(f"stranded commit recovery push failed: {(push.stderr or push.stdout).strip()[:400]}")
 
 
-def send_failure_notification(message: str) -> bool:
+def send_failure_notification(message: str, title: str = "PARALLAX customer publisher failure") -> bool:
     """Send an actionable failure through the existing ntfy configuration."""
     config_path = Path.home() / "Library/Application Support/SwarmEdge/parallax-alerts.env"
     values = {}
@@ -296,7 +325,7 @@ def send_failure_notification(message: str) -> bool:
     server = values.get("PARALLAX_ALERT_NTFY_SERVER", "https://ntfy.sh").strip().rstrip("/")
     request = Request(
         f"{server}/",
-        data=json.dumps({"topic": topic, "title": "PARALLAX customer publisher failure",
+        data=json.dumps({"topic": topic, "title": title,
                          "message": message, "priority": 4}).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST",
@@ -304,6 +333,35 @@ def send_failure_notification(message: str) -> bool:
     with urlopen(request, timeout=5) as response:
         response.read(1024)
     return True
+
+
+def degradation_health(state: Path, health: dict, previous: dict, now: datetime) -> dict:
+    """Notify only for sustained degraded operation and its recovery."""
+    if health["state"] == "DEGRADED":
+        was_degraded = previous.get("state") == "DEGRADED"
+        first = previous.get("failure_started_at") if was_degraded else now.isoformat()
+        last_alert = previous.get("last_failure_alert_at") if was_degraded else None
+        result = {"failure_started_at": first,
+                  "consecutive_failures": int(previous.get("consecutive_failures", 0)) + 1 if was_degraded else 1,
+                  "last_failure_alert_at": last_alert}
+        if now - timestamp(first) >= timedelta(minutes=5) and (
+                not last_alert or now - timestamp(last_alert) >= timedelta(hours=6)):
+            lanes = [lane.upper() for lane, detail in health["lanes"].items() if detail["source_state"] != "FRESH"]
+            try:
+                if send_failure_notification("Stale or unavailable source feed(s): " + ", ".join(lanes)):
+                    result["last_failure_alert_at"] = now.isoformat()
+            except Exception as exc:
+                result["last_failure_alert_at"] = now.isoformat()
+                result["notification_error"] = type(exc).__name__
+        return result
+    if previous.get("state") in {"DEGRADED", "FAILED"} and previous.get("last_failure_alert_at"):
+        try:
+            if send_failure_notification("All source lanes are fresh and publishing normally.",
+                                         "PARALLAX customer publisher recovered"):
+                return {"last_recovery_notification_at": now.isoformat()}
+        except Exception as exc:
+            return {"notification_error": type(exc).__name__}
+    return {}
 
 
 def failure_health(state: Path, exc: Exception, now: datetime) -> dict:
@@ -351,7 +409,7 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
             head = checked_worktree(worktree)
             git(worktree, "fetch", "origin", "parallax-live-data")
             remote_before = git(worktree, "rev-parse", "origin/parallax-live-data").stdout.strip()
-            expected, hashes = build_all(directory, db, now)
+            expected, hashes, lane_health = build_all(directory, db, now)
             recovered_pending_commit = head != remote_before
             if recovered_pending_commit:
                 recover_stranded_commit(worktree, remote_before, head, expected)
@@ -359,8 +417,11 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
             for lane in LANES:
                 path = worktree / "feeds" / f"{lane}.json"
                 old = json.loads(path.read_text())
-                old_at = timestamp(old.get("source_feed_generated_at")) if isinstance(old, dict) else now - HEARTBEAT
-                if material(old) != material(expected[lane]) or timestamp(expected[lane]["source_feed_generated_at"]) - old_at >= HEARTBEAT:
+                old_source_at = old.get("source_feed_generated_at") if isinstance(old, dict) else None
+                old_at = timestamp(old_source_at) if old_source_at else now
+                expected_source_at = expected[lane].get("source_feed_generated_at")
+                heartbeat_due = bool(expected_source_at) and timestamp(expected_source_at) - old_at >= HEARTBEAT
+                if material(old) != material(expected[lane]) or heartbeat_due:
                     changed.append(lane)
                 else:
                     expected[lane] = old
@@ -382,10 +443,21 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
                 raise RuntimeError(f"remote SHA mismatch expected={new_head} actual={remote_sha}")
             counts = verify_payloads(worktree, expected, remote_sha)
             assert_sources_unchanged(directory, hashes)
-            health = {"state": "HEALTHY", "checked_at": datetime.now(timezone.utc).isoformat(),
+            for lane in LANES:
+                counts[lane].update(lane_health[lane])
+                if lane_health[lane]["source_state"] != "FRESH":
+                    counts[lane]["parity"] = "STALE_SUPPRESSED"
+            degraded = any(lane_health[lane]["source_state"] != "FRESH" for lane in LANES)
+            previous_health = {}
+            try:
+                previous_health = json.loads((state / "customer_publisher_health.json").read_text())
+            except (OSError, json.JSONDecodeError):
+                pass
+            health = {"state": "DEGRADED" if degraded else "HEALTHY", "checked_at": datetime.now(timezone.utc).isoformat(),
                       "remote_head": remote_sha, "changed_lanes": changed, "lanes": counts,
                       "recovered_pending_commit": recovered_pending_commit,
                       "publisher_release_sha": os.environ.get("PARALLAX_PUBLISHER_SHA")}
+            health.update(degradation_health(state, health, previous_health, datetime.now(timezone.utc)))
             atomic_json(state / "customer_publisher_health.json", health)
             return health
         except Exception as exc:
@@ -407,12 +479,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.dry_run:
             checked_worktree(args.worktree)
-            expected, hashes = build_all(args.public_feed, args.db, datetime.now(timezone.utc))
+            expected, hashes, lane_health = build_all(args.public_feed, args.db, datetime.now(timezone.utc))
             assert_sources_unchanged(args.public_feed, hashes)
-            print("DRY_RUN_OK " + " ".join(f"{lane.upper()}={expected[lane]['summary']['buy']}" for lane in LANES))
+            print("DRY_RUN_OK " + " ".join(f"{lane.upper()}={expected[lane]['summary']['buy']}:{lane_health[lane]['source_state']}" for lane in LANES))
         else:
             health = publish(args.worktree, args.public_feed, args.db, args.state, datetime.now(timezone.utc))
-            print("HEALTHY " + " ".join(f"{lane.upper()}={health['lanes'][lane]['customer_buy']}" for lane in LANES) + f" head={health['remote_head']}")
+            print(health["state"] + " " + " ".join(f"{lane.upper()}={health['lanes'][lane]['customer_buy']}" for lane in LANES) + f" head={health['remote_head']}")
         return 0
     except Exception as exc:
         print(f"FAILED {type(exc).__name__}: {exc}", file=sys.stderr)

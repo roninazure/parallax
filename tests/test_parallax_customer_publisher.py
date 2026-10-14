@@ -26,10 +26,10 @@ def play(market_id="1083096", *, title=True, matchup=None, start="2026-10-11T17:
     return result
 
 
-def source(lane="nfl", plays=None, buy=None):
+def source(lane="nfl", plays=None, buy=None, generated_at=None):
     plays = [play()] if plays is None and lane == "nfl" else (plays or [])
     result = {"schema_version": "parallax.public.v1", "lane": lane.upper(), "read_only": True,
-              "generated_at": NOW.isoformat(), "buy_publication_eligible": True,
+              "generated_at": generated_at or NOW.isoformat(), "buy_publication_eligible": True,
               "summary": {"buy": len(plays) if buy is None else buy}, "plays": plays}
     if lane == "nfl":
         result["slate"] = {"dates": [{"games": [{"away_team": "IND", "home_team": "PIT",
@@ -51,7 +51,7 @@ def fixtures(tmp_path):
 
 def test_missing_nfl_matchup_1083096_uses_only_sanitized_title_and_slate(tmp_path):
     feed, db = fixtures(tmp_path)
-    expected, _ = publisher.build_all(feed, db, NOW)
+    expected, _, _ = publisher.build_all(feed, db, NOW)
     assert expected["nfl"]["summary"]["buy"] == 1
     assert expected["nfl"]["plays"][0]["matchup"] == "IND at PIT"
     assert expected["nfl"]["plays"][0]["start_time"] == "2026-10-11T17:00:00+00:00"
@@ -72,7 +72,7 @@ def test_db_enrichment_requires_exact_sport_venue_market_and_side(tmp_path):
     with sqlite3.connect(db) as con:
         con.execute("INSERT INTO buy_alert_state VALUES (?,?,?,?,?,?)",
                     ("CFB", "POLYMARKET", "777", "NO", "Texas at Oklahoma", "2026-10-10T19:30:00+00:00"))
-    expected, _ = publisher.build_all(feed, db, NOW)
+    expected, _, _ = publisher.build_all(feed, db, NOW)
     assert expected["cfb"]["plays"][0]["matchup"] == "Texas at Oklahoma"
     assert expected["cfb"]["plays"][0]["start_time"] == "2026-10-10T19:30:00+00:00"
 
@@ -85,6 +85,58 @@ def test_all_lane_source_customer_count_equality_is_mandatory(tmp_path):
     (feed / "nfl.json").write_text(json.dumps(source(plays=[{**play(), "publication_eligible": False}])))
     with pytest.raises(ValueError, match="uncertified source BUY"):
         publisher.build_all(feed, db, NOW)
+
+
+def test_stale_cfb_is_suppressed_while_fresh_nfl_and_mlb_remain_publishable(tmp_path):
+    feed, db = fixtures(tmp_path)
+    stale_cfb = source("cfb", plays=[{"action": "BUY", "publication_eligible": True}], generated_at="2026-10-07T22:00:00+00:00")
+    (feed / "cfb.json").write_text(json.dumps(stale_cfb))
+    expected, hashes, lanes = publisher.build_all(feed, db, NOW)
+    publisher.assert_sources_unchanged(feed, hashes)
+    assert lanes["cfb"]["source_state"] == "STALE"
+    assert lanes["cfb"]["source_buy"] == 1
+    assert expected["cfb"]["state"] == "STALE"
+    assert expected["cfb"]["summary"]["buy"] == 0 and expected["cfb"]["plays"] == []
+    for lane in ("nfl", "mlb"):
+        assert lanes[lane]["source_state"] == "FRESH"
+        assert expected[lane]["state"] == "LIVE"
+        assert expected[lane]["summary"]["buy"] == lanes[lane]["source_buy"]
+
+
+def test_unavailable_cfb_scan_does_not_block_other_lanes(tmp_path):
+    feed, db = fixtures(tmp_path)
+    (feed / "cfb.json").unlink()
+    expected, hashes, lanes = publisher.build_all(feed, db, NOW)
+    assert expected["cfb"]["state"] == "STALE"
+    assert lanes["cfb"]["source_state"] == "UNAVAILABLE"
+    publisher.assert_sources_unchanged(feed, hashes)
+    (feed / "cfb.json").write_text(json.dumps(source("cfb")))
+    with pytest.raises(RuntimeError, match="changed during publication"):
+        publisher.assert_sources_unchanged(feed, hashes)
+
+
+def test_recovery_notification_only_follows_previously_alerted_degradation(monkeypatch, tmp_path):
+    sent = []
+    monkeypatch.setattr(publisher, "send_failure_notification",
+                        lambda message, title="failure": sent.append((title, message)) or True)
+    prior = {"state": "DEGRADED", "last_failure_alert_at": NOW.isoformat()}
+    result = publisher.degradation_health(tmp_path, {"state": "HEALTHY"}, prior, NOW)
+    assert result["last_recovery_notification_at"] == NOW.isoformat()
+    assert sent[0][0] == "PARALLAX customer publisher recovered"
+    assert publisher.degradation_health(tmp_path, {"state": "HEALTHY"}, {"state": "DEGRADED"}, NOW) == {}
+    assert len(sent) == 1
+
+
+def test_sustained_cfb_degradation_alerts_once_after_threshold(monkeypatch, tmp_path):
+    sent = []
+    monkeypatch.setattr(publisher, "send_failure_notification", lambda message: sent.append(message) or True)
+    health = {"state": "DEGRADED", "lanes": {"cfb": {"source_state": "UNAVAILABLE"}}}
+    first = publisher.degradation_health(tmp_path, health, {}, NOW)
+    assert sent == []
+    first.update({"state": "DEGRADED"})
+    later = publisher.degradation_health(tmp_path, health, first, NOW.replace(minute=36))
+    assert len(sent) == 1 and "CFB" in sent[0]
+    assert later["last_failure_alert_at"] == NOW.replace(minute=36).isoformat()
 
 
 def test_wrong_and_dirty_customer_worktree_fail_closed(monkeypatch, tmp_path):
@@ -153,7 +205,7 @@ def test_remote_payload_verification_rejects_count_drift(monkeypatch, tmp_path):
 
 def test_stranded_publisher_commit_recovers_only_by_verified_fast_forward(monkeypatch, tmp_path):
     feed, db = fixtures(tmp_path)
-    expected, _ = publisher.build_all(feed, db, NOW)
+    expected, _, _ = publisher.build_all(feed, db, NOW)
     calls = []
     def fake_git(_worktree, *args, **kwargs):
         calls.append(args)
@@ -184,7 +236,7 @@ def test_stranded_publisher_commit_recovers_only_by_verified_fast_forward(monkey
 
 def test_stranded_publisher_commit_recovers_against_local_bare_remote(tmp_path):
     feed, db = fixtures(tmp_path)
-    expected, _ = publisher.build_all(feed, db, NOW)
+    expected, _, _ = publisher.build_all(feed, db, NOW)
     remote, seed, worktree = tmp_path / "remote.git", tmp_path / "seed", tmp_path / "worktree"
     def run_git(*args):
         return subprocess.run(["/usr/bin/git", *map(str, args)], text=True, capture_output=True, check=True)
@@ -238,7 +290,7 @@ def test_stranded_publisher_commit_rejects_unrelated_change(monkeypatch, tmp_pat
 
 def test_stranded_publisher_commit_rejects_remote_movement(monkeypatch, tmp_path):
     feed, db = fixtures(tmp_path)
-    expected, _ = publisher.build_all(feed, db, NOW)
+    expected, _, _ = publisher.build_all(feed, db, NOW)
     calls = []
     def fake_git(_worktree, *args, **_kwargs):
         calls.append(args)
@@ -294,7 +346,7 @@ def test_unchanged_remote_writes_healthy_count_and_sha(monkeypatch, tmp_path):
     feed, db = fixtures(tmp_path)
     worktree, state = tmp_path / "worktree", tmp_path / "state"
     (worktree / "feeds").mkdir(parents=True)
-    expected, _ = publisher.build_all(feed, db, NOW)
+    expected, _, _ = publisher.build_all(feed, db, NOW)
     for lane in publisher.LANES:
         (worktree / "feeds" / f"{lane}.json").write_text(json.dumps(expected[lane]))
     monkeypatch.setattr(publisher, "checked_worktree", lambda _path: "a" * 40)
@@ -316,6 +368,42 @@ def test_unchanged_remote_writes_healthy_count_and_sha(monkeypatch, tmp_path):
     assert health["changed_lanes"] == []
     assert all(health["lanes"][lane]["source_buy"] == health["lanes"][lane]["customer_buy"] for lane in publisher.LANES)
     assert "push" not in calls
+
+
+def test_publish_atomically_suppresses_stale_cfb_and_keeps_fresh_lane_parity(monkeypatch, tmp_path):
+    feed, db = fixtures(tmp_path)
+    (feed / "cfb.json").write_text(json.dumps(source("cfb", plays=[{"action": "BUY"}],
+                                                       generated_at="2026-10-07T22:00:00+00:00")))
+    expected, _, _ = publisher.build_all(feed, db, NOW)
+    worktree, state = tmp_path / "worktree", tmp_path / "state"
+    (worktree / "feeds").mkdir(parents=True)
+    for lane in publisher.LANES:
+        old = dict(expected[lane])
+        old.update(state="LIVE", source_schedule_state="COMPLETE", source_feed_generated_at=NOW.isoformat())
+        (worktree / "feeds" / f"{lane}.json").write_text(json.dumps(old))
+    monkeypatch.setattr(publisher, "checked_worktree", lambda _path: "a" * 40)
+
+    def fake_git(_worktree, *args, **_kwargs):
+        if args[0] == "rev-parse":
+            return subprocess.CompletedProcess(args, 0, "a" * 40 + "\n", "")
+        if args[0] == "ls-remote":
+            return subprocess.CompletedProcess(args, 0, "a" * 40 + "\trefs/heads/parallax-live-data\n", "")
+        if args[0] == "show":
+            lane = args[1].split("/")[-1]
+            return subprocess.CompletedProcess(args, 0, (worktree / "feeds" / lane).read_text(), "")
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    monkeypatch.setattr(publisher, "git", fake_git)
+    health = publisher.publish(worktree, feed, db, state, NOW)
+    customer_cfb = json.loads((worktree / "feeds/cfb.json").read_text())
+    assert health["state"] == "DEGRADED"
+    assert customer_cfb["state"] == "STALE" and customer_cfb["plays"] == []
+    assert health["lanes"]["cfb"]["source_buy"] == 1
+    assert health["lanes"]["cfb"]["customer_buy"] == 0
+    assert health["lanes"]["cfb"]["parity"] == "STALE_SUPPRESSED"
+    for lane in ("nfl", "mlb"):
+        assert health["lanes"][lane]["source_state"] == "FRESH"
+        assert health["lanes"][lane]["source_buy"] == health["lanes"][lane]["customer_buy"]
 
 
 def test_deployment_bootstrap_failure_restores_prior_plists_and_loaded_jobs(tmp_path):
