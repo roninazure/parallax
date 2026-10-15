@@ -566,8 +566,9 @@ class AlertDeliveryStore:
             for delivery_id in obsolete:
                 conn.execute(
                     "UPDATE alert_deliveries SET status = 'FAILED', "
-                    "error_code = 'OBSOLETE_ALERT', "
-                    "error_summary = 'Source alert is no longer current; retry suppressed.' "
+                    "error_summary = CASE WHEN COALESCE(error_summary, '') = '' "
+                    "THEN 'Source alert is no longer current; retry suppressed.' "
+                    "ELSE error_summary || ' Retry suppressed: source alert is no longer current.' END "
                     "WHERE delivery_id = ? AND status = 'PENDING'",
                     (delivery_id,),
                 )

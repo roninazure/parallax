@@ -264,9 +264,14 @@ def test_restart_retires_three_orphaned_historical_buy_retries_and_allows_new_bu
     alert_dispatcher.dispatch([])
     with sqlite3.connect(alert_dispatcher.store.path) as conn:
         rows = conn.execute(
-            "SELECT status,attempt_count,error_code FROM alert_deliveries ORDER BY delivery_id"
+            "SELECT status,attempt_count,http_status,error_code,error_summary "
+            "FROM alert_deliveries ORDER BY delivery_id"
         ).fetchall()
-    assert rows == [("FAILED", 1, "OBSOLETE_ALERT")] * 3
+    assert rows == [
+        ("FAILED", 1, 429, "HTTP_429", "Source alert is no longer current; retry suppressed."),
+        ("FAILED", 1, 429, "HTTP_429", "Source alert is no longer current; retry suppressed."),
+        ("FAILED", 1, 502, "HTTP_5XX", "Source alert is no longer current; retry suppressed."),
+    ]
     assert transport.calls == []
 
     # A fresh independently identified BUY can still be delivered once.
