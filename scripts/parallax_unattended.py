@@ -34,6 +34,14 @@ SPORTS_INTERVAL_SECONDS = {
     "mlb": 3600,
 }
 RECONCILIATION_INTERVAL_SECONDS = 300
+# Keep the first unattended cycle bounded after launch. Subsequent cadence is
+# unchanged; CFB's first request is delayed a full hour to preserve its quota.
+STARTUP_OFFSETS_SECONDS = {
+    "nfl": 0,
+    "mlb": 120,
+    "reconciliation": 240,
+    "cfb": 3600,
+}
 
 
 def utc_now() -> str:
@@ -148,7 +156,9 @@ class UnattendedScheduler:
         self.last_nfl_refresh: str | None = None
         self.nfl_provider_state: dict[str, object] | None = None
         startup = self.monotonic()
-        self.next_due: dict[str, float] = {lane: startup for lane in LANES}
+        self.next_due: dict[str, float] = {
+            lane: startup + STARTUP_OFFSETS_SECONDS[lane] for lane in LANES
+        }
         self.recent_errors: list[str] = []
 
     @property

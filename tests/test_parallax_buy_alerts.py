@@ -241,6 +241,40 @@ def test_ntfy_429_retries_same_buy_after_cooldown_without_alert_flood(tmp_path):
     assert alert_dispatcher.status()["sent"] == 1
 
 
+def test_restart_retires_three_orphaned_historical_buy_retries_and_allows_new_buy(tmp_path):
+    transport = FakeTransport()
+    alert_dispatcher = dispatcher(tmp_path, transport)
+    historical = (
+        ("old-502", "inbox-old-502", 502, "HTTP_5XX"),
+        ("old-429-a", "inbox-old-429-a", 429, "HTTP_429"),
+        ("old-429-b", "inbox-old-429-b", 429, "HTTP_429"),
+    )
+    with sqlite3.connect(alert_dispatcher.store.path) as conn:
+        for delivery_id, inbox_id, http_status, error_code in historical:
+            conn.execute(
+                """INSERT INTO alert_deliveries
+                (delivery_id,inbox_id,attention_class,priority,channel,status,attempt_count,
+                 created_at,last_attempt_at,http_status,error_code)
+                VALUES (?,?,'ACTIONABLE_PLAY','CRITICAL','ntfy','PENDING',1,
+                        '2026-10-05T12:00:00+00:00','2026-10-05T12:00:01+00:00',?,?)""",
+                (delivery_id, inbox_id, http_status, error_code),
+            )
+
+    # Startup dispatch with no current item retires the orphaned retries in place.
+    alert_dispatcher.dispatch([])
+    with sqlite3.connect(alert_dispatcher.store.path) as conn:
+        rows = conn.execute(
+            "SELECT status,attempt_count,error_code FROM alert_deliveries ORDER BY delivery_id"
+        ).fetchall()
+    assert rows == [("FAILED", 1, "OBSOLETE_ALERT")] * 3
+    assert transport.calls == []
+
+    # A fresh independently identified BUY can still be delivered once.
+    result = send(alert_dispatcher, play())
+    assert result["status"] == "SENT"
+    assert len(transport.calls) == 1
+
+
 def test_ntfy_429_globally_blocks_distinct_buy_attempts_during_cooldown(tmp_path):
     transport = FakeTransport(
         DeliveryResult(

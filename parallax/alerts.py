@@ -530,6 +530,49 @@ class AlertDeliveryStore:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    def retire_obsolete_pending(self, channel: str, current_inbox_ids: set[str]) -> int:
+        """Make outbox retries terminal when their source item is no longer current."""
+        now = utcnow()
+        with self._connect() as conn:
+            has_inbox = conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='inbox_items'"
+            ).fetchone() is not None
+            if has_inbox:
+                rows = conn.execute(
+                    "SELECT d.delivery_id, d.inbox_id, i.status, i.expires_at "
+                    "FROM alert_deliveries d LEFT JOIN inbox_items i USING(inbox_id) "
+                    "WHERE d.channel = ? AND d.status = 'PENDING'",
+                    (channel,),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT delivery_id, inbox_id, NULL AS status, NULL AS expires_at "
+                    "FROM alert_deliveries WHERE channel = ? AND status = 'PENDING'",
+                    (channel,),
+                ).fetchall()
+            obsolete = [
+                row["delivery_id"]
+                for row in rows
+                if row["inbox_id"] not in current_inbox_ids
+                and (
+                    row["status"] != "ACTIVE"
+                    or row["status"] is None
+                    or (
+                        row["expires_at"]
+                        and (timestamp(row["expires_at"]) is None or timestamp(row["expires_at"]) <= now)
+                    )
+                )
+            ]
+            for delivery_id in obsolete:
+                conn.execute(
+                    "UPDATE alert_deliveries SET status = 'FAILED', "
+                    "error_code = 'OBSOLETE_ALERT', "
+                    "error_summary = 'Source alert is no longer current; retry suppressed.' "
+                    "WHERE delivery_id = ? AND status = 'PENDING'",
+                    (delivery_id,),
+                )
+        return len(obsolete)
+
     def channel_rate_limited(self, channel: str) -> bool:
         """Return True while a recent HTTP 429 cooldown is active for the channel."""
         retry_before = (
@@ -694,6 +737,13 @@ class AlertDispatcher:
             if item.get("attention_class") in ALERT_PRIORITIES
             and item.get("status") == "ACTIVE"
             and (
+                not item.get("expires_at")
+                or (
+                    timestamp(item.get("expires_at")) is not None
+                    and timestamp(item.get("expires_at")) > utcnow()
+                )
+            )
+            and (
                 item.get("attention_class") == AttentionClass.ACTIONABLE_PLAY.value
                 or not self.store.has_actionable_delivery(
                     self.channel,
@@ -704,6 +754,9 @@ class AlertDispatcher:
         ]
         for item in eligible:
             self.store.ensure_delivery(item, self.channel)
+        self.store.retire_obsolete_pending(
+            self.channel, {str(item["inbox_id"]) for item in eligible}
+        )
         if self.config.mode == "ntfy" and self.store.channel_rate_limited(self.channel):
             return
         for delivery in self.store.pending(self.channel):

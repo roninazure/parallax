@@ -102,8 +102,9 @@ def test_atomic_health_replace_never_leaves_temporary_file(tmp_path):
     assert not list(tmp_path.glob(f".{HEALTH_FILENAME}.*"))
 
 
-def test_startup_runs_active_nfl_mlb_and_reconciliation_immediately(tmp_path):
+def test_startup_staggers_lanes_and_preserves_future_schedule(tmp_path):
     calls = []
+    now = [0.0]
 
     def runner(command, **kwargs):
         calls.append((command, kwargs))
@@ -114,20 +115,52 @@ def test_startup_runs_active_nfl_mlb_and_reconciliation_immediately(tmp_path):
         state_dir=tmp_path / "state",
         runner=runner,
         clock=lambda: "2026-09-17T00:00:00+00:00",
+        monotonic=lambda: now[0],
     )
     health = scheduler.run_cycle()
-
-    assert [command for command, _ in calls] == [
-        [sys.executable, str((tmp_path / "release/scripts/nfl_live_scan.py").resolve())],
-        [sys.executable, "-m", "parallax", "scan", "--limit", "6"],
-        [sys.executable, str((tmp_path / "release/scripts/parallax_reconcile_prospective.py").resolve())],
-    ]
+    assert len(calls) == 1
+    assert calls[0][0] == [sys.executable, str((tmp_path / "release/scripts/nfl_live_scan.py").resolve())]
+    now[0] = 120
+    health = scheduler.run_cycle()
+    assert len(calls) == 3
+    assert calls[2][0] == [sys.executable, "-m", "parallax", "scan", "--limit", "6"]
+    now[0] = 240
+    health = scheduler.run_cycle()
+    assert len(calls) == 5  # MLB and reconciliation join on separate startup offsets.
+    assert calls[-1][0] == [sys.executable, str((tmp_path / "release/scripts/parallax_reconcile_prospective.py").resolve())]
     assert health["state"] == "RUNNING"
     assert health["last_successful_nfl_scan"] is not None
     assert health["last_successful_cfb_scan"] is None
     assert health["last_successful_mlb_scan"] is not None
     assert health["last_successful_reconciliation"] is not None
     assert json.loads((tmp_path / "state" / HEALTH_FILENAME).read_text()) == health
+
+
+def test_enabled_cfb_waits_one_hour_after_start_and_never_scans_twice_per_hour(tmp_path):
+    calls = []
+    now = [0.0]
+    runtime_env = tmp_path / "runtime.env"
+    runtime_env.write_text("PARALLAX_CFB_ENABLED=true\n")
+
+    def runner(command, **kwargs):
+        calls.append(command)
+        return subprocess.CompletedProcess(command, 0, completed_cfb_stdout(), "")
+
+    scheduler = UnattendedScheduler(
+        root=tmp_path / "release", state_dir=tmp_path / "state",
+        runtime_env=runtime_env, runner=runner, monotonic=lambda: now[0],
+    )
+    scheduler.run_cycle()
+    assert not any("cfb_live_scan.py" in str(command) for command in calls)
+    now[0] = 3600
+    scheduler.run_cycle()
+    assert sum("cfb_live_scan.py" in str(command) for command in calls) == 1
+    now[0] = 7199.9
+    scheduler.run_cycle()
+    assert sum("cfb_live_scan.py" in str(command) for command in calls) == 1
+    now[0] = 7200
+    scheduler.run_cycle()
+    assert sum("cfb_live_scan.py" in str(command) for command in calls) == 2
 
 
 def test_nfl_runs_independently_while_cfb_and_mlb_remain_hourly(tmp_path):
@@ -146,15 +179,15 @@ def test_nfl_runs_independently_while_cfb_and_mlb_remain_hourly(tmp_path):
         monotonic=lambda: now[0],
     )
     scheduler.run_cycle()
-    assert len(calls) == 3
+    assert len(calls) == 1
 
     now[0] = 300
     scheduler.run_cycle()
-    assert len(calls) == 5
+    assert len(calls) == 4  # NFL, then separately staggered MLB and reconciliation.
 
     now[0] = 3600
     health = scheduler.run_cycle()
-    assert len(calls) == 8
+    assert len(calls) == 6
     assert health["last_successful_nfl_scan"] is not None
     assert health["last_successful_cfb_scan"] is None
     assert health["last_successful_mlb_scan"] is not None
@@ -179,13 +212,17 @@ def test_nfl_scheduler_boundary_is_45_seconds_and_reconciliation_stays_five_minu
     scheduler.run_cycle()
     now[0] = 45.0
     scheduler.run_cycle()
+    now[0] = 120
+    scheduler.run_cycle()
+    now[0] = 240
+    scheduler.run_cycle()
 
     nfl = [call for call in calls if call[1].endswith("nfl_live_scan.py")]
     mlb = [call for call in calls if call[1] == "-m"]
     reconciliation = [
         call for call in calls if call[1].endswith("parallax_reconcile_prospective.py")
     ]
-    assert len(nfl) == 2
+    assert len(nfl) == 4
     assert len(mlb) == 1
     assert len(reconciliation) == 1
 
@@ -244,6 +281,7 @@ def test_cfb_requires_explicit_enable_and_isolated_failure(tmp_path):
         clock=lambda: "2026-09-17T00:00:00+00:00",
         monotonic=lambda: 0.0,
     )
+    scheduler.next_due = {lane: 0.0 for lane in ("nfl", "cfb", "mlb", "reconciliation")}
     health = scheduler.run_cycle()
 
     assert len(calls) == 4
@@ -268,6 +306,7 @@ def test_all_enabled_lane_failures_write_failed_health(tmp_path):
         clock=lambda: "2026-09-17T00:00:00+00:00",
         monotonic=lambda: 0.0,
     )
+    scheduler.next_due = {lane: 0.0 for lane in ("nfl", "cfb", "mlb", "reconciliation")}
     health = scheduler.run_cycle()
     assert health["state"] == "FAILED"
     assert len(health["recent_errors"]) == 4
@@ -423,6 +462,7 @@ def test_incomplete_market_data_exports_degraded_feed_without_advancing_success(
         clock=lambda: "2026-09-24T00:00:00+00:00",
     )
     scheduler.last_success[incomplete_lane] = old_success
+    scheduler.next_due = {lane: 0.0 for lane in ("nfl", "cfb", "mlb", "reconciliation")}
 
     health = scheduler.run_cycle()
 
@@ -465,6 +505,7 @@ def test_completed_certified_cfb_buy_replaces_public_feed_while_unverified(tmp_p
         monotonic=lambda: 0.0,
         clock=lambda: "2026-09-24T00:00:00+00:00",
     )
+    scheduler.next_due = {lane: 0.0 for lane in ("nfl", "cfb", "mlb", "reconciliation")}
 
     health = scheduler.run_cycle()
 
@@ -504,6 +545,7 @@ def test_malformed_cfb_output_preserves_feed_and_fails_lane(tmp_path):
         clock=lambda: "2026-09-24T00:00:00+00:00",
     )
     scheduler.last_success["cfb"] = "2026-09-23T00:00:00+00:00"
+    scheduler.next_due = {lane: 0.0 for lane in ("nfl", "cfb", "mlb", "reconciliation")}
 
     health = scheduler.run_cycle()
 
