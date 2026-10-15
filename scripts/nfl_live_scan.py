@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import re
 import signal
-import subprocess
 import sys
-from collections.abc import Callable
 from collections import Counter
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -36,17 +36,21 @@ from parallax.fees import attach_fees
 from parallax.inbox import default_inbox_store
 from parallax.models import Action, Side, timestamp, utcnow
 from parallax.nfl import (
+    NFL_TEAM_NAMES,
     VALIDATION_ECE,
     NFLEvidenceProvider,
-    NFL_TEAM_NAMES,
     economic_team_for_side,
     fetch_games,
-    market_support_reason,
     map_market_to_game,
+    market_support_reason,
     probability_for_game,
 )
+from parallax.nfl_runtime_state import (
+    KALSHI_REFRESH_MAX_MARKETS,
+    NFLRuntimeState,
+    kalshi_kickoff_tier,
+)
 from parallax.normalization import normalize_kalshi, normalize_pmus
-from parallax.nfl_runtime_state import KALSHI_REFRESH_MAX_MARKETS, NFLRuntimeState, kalshi_kickoff_tier
 from parallax.pmus_acquisition import PMUSAcquisition
 from parallax.pmus_market_data import (
     PMUSMarketDataStream,
@@ -67,6 +71,7 @@ PMUS_NFL_STREAM_STALE_SECONDS = float(MAX_AGE_SECONDS)
 
 # nflverse uses LA for the Rams; both venues use LAR in contract identity.
 NFL_VENUE_TEAM_CODES = {"LA": "LAR"}
+logger = logging.getLogger(__name__)
 
 
 def _upcoming_slate(games, now):
@@ -1045,10 +1050,17 @@ def _scan(
                     try:
                         fast_publisher(finalized_game)
                         statuses["FAST_PUBLICATION_FINALIZED"] += 1
-                    except Exception:
+                    except Exception as exc:
                         # Local publication is fail-closed and must not disturb
                         # scoring, provider budgets, or completed reconciliation.
                         statuses["FAST_PUBLICATION_ERROR"] += 1
+                        logger.error(
+                            "NFL incremental public-feed publication failed "
+                            "game_id=%s error_type=%s detail=%s",
+                            batch_game_id,
+                            type(exc).__name__,
+                            redact_sensitive(exc)[:240],
+                        )
     finally:
         if pmus_stream is not None:
             startup_readiness = pmus_stream_diagnostics.get(
@@ -1253,34 +1265,6 @@ def _scan(
     return result
 
 
-def _kick_nfl_publisher_for_current_buy(payload, destination: Path) -> bool:
-    """Kick the existing NFL publisher only when this game's BUY survived sanitization."""
-    public = json.loads(destination.read_text(encoding="utf-8"))
-    market_ids = {
-        str(row.get("market_id") or "")
-        for row in payload.get("summary", {}).get("rows", [])
-        if row.get("market_id")
-    }
-    has_current_buy = any(
-        play.get("action") == "BUY"
-        and play.get("publication_eligible") is True
-        and str(play.get("market_id") or "") in market_ids
-        for play in public.get("plays", [])
-    )
-    if not has_current_buy:
-        return False
-    subprocess.run(
-        [
-            "launchctl",
-            "kickstart",
-            "system/com.swarmaxis.parallax-nfl-publisher",
-        ],
-        check=True,
-        timeout=15,
-    )
-    return True
-
-
 if __name__ == "__main__":
     state_dir = os.environ.get("PARALLAX_PUBLIC_FEED_STATE_DIR")
     fast_publisher = None
@@ -1288,7 +1272,5 @@ if __name__ == "__main__":
         from parallax.public_feed import publish_incremental_nfl_game
 
         def fast_publisher(payload):
-            destination = publish_incremental_nfl_game(payload, Path(state_dir))
-            _kick_nfl_publisher_for_current_buy(payload, destination)
-            return destination
+            return publish_incremental_nfl_game(payload, Path(state_dir))
     print(json.dumps(_scan(fast_publisher=fast_publisher), default=lambda value: value.value if hasattr(value, "value") else value, allow_nan=False))
