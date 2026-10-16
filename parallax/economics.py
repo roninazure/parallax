@@ -23,7 +23,7 @@ def valid_price(price: float, mechanics: Mechanics) -> bool:
 
 
 def pmus_fill_fees(
-    fills: list[tuple[float, float]], theta: float = 0.05
+    fills: list[tuple[float, float]], theta: float = 0.0695
 ) -> tuple[Decimal, ...]:
     """(quantity, price) fills: half-even fees with the cumulative exact-fee cap."""
     rate, exact_total, collected = decimal(theta), Decimal(0), Decimal(0)

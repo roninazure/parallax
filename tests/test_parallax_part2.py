@@ -29,25 +29,33 @@ def inputs():
 def test_pmus_current_theta_and_bankers_rounding(inputs):
     now, markets, _, _ = inputs
     market = attach_fees(markets[0], now)
-    assert market.mechanics.fee_rate == 0.05
-    assert pmus_fill_fees([(1000, 0.50)]) == (Decimal("12.50"),)
-    assert pmus_fill_fees([(1000, 0.10)]) == (Decimal("4.50"),)
-    # Exact .045 and .075 tie cases with current theta.
-    assert pmus_fill_fees([(3, 0.50)]) == (Decimal(".04"),)
-    assert pmus_fill_fees([(5, 0.50)]) == (Decimal(".06"),)
+    assert market.mechanics.fee_rate == 0.0695
+    assert pmus_fill_fees([(1000, 0.50)]) == (Decimal("17.38"),)
+    assert pmus_fill_fees([(1000, 0.10)]) == (Decimal("6.26"),)
+    # Explicit half-cent ties retain banker’s rounding behavior.
+    assert pmus_fill_fees([(3, 0.50)], theta=0.06) == (Decimal(".04"),)
+    assert pmus_fill_fees([(5, 0.50)], theta=0.06) == (Decimal(".08"),)
     example = retail_example(2.5, 0.50, 100, market.mechanics)
-    assert example.fees_estimate == 0.06
+    assert example.fees_estimate == 0.09
     assert "April" not in market.original_metadata["fee_provenance"]["reason"]
+
+
+def test_pmus_special_table_tennis_scope_fails_closed(inputs):
+    now, markets, _, _ = inputs
+    special = replace(markets[0], category="Table Tennis")
+    result = attach_fees(special, now)
+    assert result.mechanics.fee_rate is None
+    assert result.mechanics.fee_status == "UNVERIFIED"
 
 
 def test_pmus_multiple_fills_cumulative_cap():
     assert pmus_fill_fees([(1, 0.50), (1, 0.50), (1, 0.50)]) == (
+        Decimal(".02"),
         Decimal(".01"),
-        Decimal(".01"),
-        Decimal(".01"),
+        Decimal(".02"),
     )
     # Capping only reduces charges; it never increases a rounded-down fill fee.
-    assert pmus_fill_fees([(0.1, 0.50)] * 10) == (Decimal(0),) * 10
+    assert pmus_fill_fees([(0.1, 0.50)] * 10) == (Decimal("0.00"),) * 10
 
 
 @pytest.mark.parametrize(
@@ -136,6 +144,17 @@ def test_static_policy_review_never_renews_on_refresh(inputs):
         ).mechanics.fee_rate
         is None
     )
+
+
+def test_fee_review_warns_in_advance_once_without_touching_alert_state(inputs, caplog):
+    import parallax.fees as fees
+
+    now, markets, _, _ = inputs
+    fees._expiry_warning_emitted = False
+    warning_at = timestamp(REVIEW_EXPIRES) - fees.REVIEW_WARNING_LEAD
+    attach_fees(markets[0], warning_at)
+    attach_fees(markets[0], warning_at + timedelta(minutes=1))
+    assert caplog.text.count("fee policy review expires") == 1
 
 
 def test_kalshi_six_decimal_rounding_and_account_precision():

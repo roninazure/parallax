@@ -3,6 +3,7 @@
 from dataclasses import replace
 from datetime import datetime, timedelta
 from decimal import Decimal
+import logging
 
 from .models import NormalizedMarket, Venue, timestamp
 from .normalization import number
@@ -11,11 +12,26 @@ PMUS_SCHEDULE = "https://docs.polymarket.us/fees"
 KALSHI_SCHEDULE = "https://kalshi.com/docs/kalshi-fee-schedule.pdf"
 KALSHI_ROUNDING = "https://docs.kalshi.com/getting_started/fee_rounding"
 # Fixed review window: refreshing books must not renew a static policy review.
-REVIEWED_AT = "2026-09-12T20:40:00+00:00"
-REVIEW_EXPIRES = "2026-10-12T20:40:00+00:00"
+REVIEWED_AT = "2026-10-16T04:39:00+00:00"
+REVIEW_EXPIRES = "2026-11-15T04:39:00+00:00"
+REVIEW_WARNING_LEAD = timedelta(days=14)
+_expiry_warning_emitted = False
+logger = logging.getLogger(__name__)
 
 
 def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=None):
+    global _expiry_warning_emitted
+    expires = timestamp(REVIEW_EXPIRES)
+    if (
+        expires is not None
+        and not _expiry_warning_emitted
+        and expires - REVIEW_WARNING_LEAD <= now < expires
+    ):
+        logger.warning(
+            "PARALLAX fee policy review expires at %s; renew documented venue evidence before expiry",
+            REVIEW_EXPIRES,
+        )
+        _expiry_warning_emitted = True
     source = PMUS_SCHEDULE if market.venue == Venue.POLYMARKET else KALSHI_SCHEDULE
     proof = {
         "schedule": source,
@@ -40,16 +56,29 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
     reason = "Fee policy review expired or not yet effective"
     if reviewed <= now < expires:
         if market.venue == Venue.POLYMARKET:
-            mechanics = replace(
-                mechanics,
-                fee_rate=0.05,
-                fee_rounding="HALF_EVEN",
-                fee_status="VERIFIED_UPPER_BOUND",
-                fee_valid_until=expires.isoformat(),
-            )
-            proof["effective_at"] = "2026-04-03T15:00:00-04:00"
+            proof["effective_at"] = "2026-10-07T10:00:00-04:00"
+            proof["market_scope"] = "Standard Polymarket US markets; Table Tennis has theta 0.10 and remains unverified"
             proof["maker_rebate_coefficient"] = -0.0125
-            reason = "Exchange-wide taker theta 0.05; half-even cumulative order cap; maker rebate recorded separately"
+            scope_text = " ".join(
+                str(value or "")
+                for value in (
+                    market.category,
+                    market.title,
+                    market.description,
+                    market.event_title,
+                )
+            ).casefold()
+            if "table tennis" in scope_text:
+                reason = "Table Tennis uses theta 0.10; market-specific fee model is not enabled"
+            else:
+                mechanics = replace(
+                    mechanics,
+                    fee_rate=0.0695,
+                    fee_rounding="HALF_EVEN",
+                    fee_status="VERIFIED_UPPER_BOUND",
+                    fee_valid_until=expires.isoformat(),
+                )
+                reason = "Standard taker theta 0.0695; half-even cumulative order cap; maker rebate recorded separately"
         elif (
             event
             and series
@@ -118,6 +147,7 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
                     fee_balance_precision=0.01,
                 )
                 proof["rounding_source"] = KALSHI_ROUNDING
+                proof["schedule_effective_at"] = "2026-07-07"
                 proof["effective_multiplier"] = multiplier
                 proof["verified_series"] = series.get("ticker")
                 proof["account_precision"] = (
