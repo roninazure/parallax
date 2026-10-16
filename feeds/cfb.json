@@ -1,13 +1,58 @@
 {
-  "generated_at": "2026-10-16T05:02:50.014251+00:00",
+  "generated_at": "2026-10-16T05:49:58.314963+00:00",
   "lane": "CFB",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 33.87241315,
+      "market_id": "1225097",
+      "matchup": "Utah at Colorado",
+      "model_probability": 0.47872413148657633,
+      "price": 0.14,
+      "sport": "CFB",
+      "start_time": "2026-10-18T02:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 28.45267208,
+      "market_id": "1229862",
+      "matchup": "Penn State at Michigan",
+      "model_probability": 0.6045267208035262,
+      "price": 0.32,
+      "sport": "CFB",
+      "start_time": "2026-10-17T19:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 24.8807169,
+      "market_id": "1225085",
+      "matchup": "Kentucky at Oklahoma",
+      "model_probability": 0.5688071689879158,
+      "price": 0.32,
+      "sport": "CFB",
+      "start_time": "2026-10-17T23:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 21.46009632,
+      "market_id": "1225090",
+      "matchup": "Notre Dame at BYU",
+      "model_probability": 0.4296009632110327,
+      "price": 0.215,
+      "sport": "CFB",
+      "start_time": "2026-10-17T23:30:00+00:00",
+      "venue": "POLYMARKET"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-16T03:32:19.127674+00:00",
-  "source_schedule_state": "STALE",
-  "state": "STALE",
+  "source_feed_generated_at": "2026-10-16T05:49:39.382524+00:00",
+  "source_schedule_state": "UNVERIFIED",
+  "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 4
   }
 }
