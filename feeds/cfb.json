@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-10-16T13:53:00.879756+00:00",
+  "generated_at": "2026-10-16T14:55:13.334359+00:00",
   "lane": "CFB",
   "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 33.87241315,
-      "market_id": "1225097",
-      "matchup": "Utah at Colorado",
-      "model_probability": 0.47872413148657633,
-      "price": 0.14,
-      "sport": "CFB",
-      "start_time": "2026-10-18T02:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "YES",
       "edge_pp": 28.45267208,
@@ -45,11 +34,22 @@
       "sport": "CFB",
       "start_time": "2026-10-17T23:30:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 15.84592698,
+      "market_id": "1225068",
+      "matchup": "Alabama at Tennessee",
+      "model_probability": 0.4184592698401154,
+      "price": 0.26,
+      "sport": "CFB",
+      "start_time": "2026-10-17T19:30:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-16T13:52:55.359089+00:00",
+  "source_feed_generated_at": "2026-10-16T14:54:36.736877+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
