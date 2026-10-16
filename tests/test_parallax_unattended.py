@@ -412,7 +412,7 @@ def test_exporter_exception_preserves_successful_scan_and_later_lanes(
 
 
 @pytest.mark.parametrize("incomplete_lane", ["nfl", "mlb"])
-def test_incomplete_market_data_exports_degraded_feed_without_advancing_success(
+def test_incomplete_market_data_exports_degraded_feed_and_advances_success(
     tmp_path, incomplete_lane
 ):
     old_success = "2026-09-23T00:00:00+00:00"
@@ -466,9 +466,11 @@ def test_incomplete_market_data_exports_degraded_feed_without_advancing_success(
 
     health = scheduler.run_cycle()
 
-    assert health[f"last_successful_{incomplete_lane}_scan"] == old_success
+    assert health[f"last_successful_{incomplete_lane}_scan"] != old_success
     assert health["state"] == "DEGRADED"
-    assert any("market_data_complete is false" in error for error in health["recent_errors"])
+    assert health["lanes"][incomplete_lane]["state"] == "DEGRADED"
+    assert health["lanes"][incomplete_lane]["market_data_complete"] is False
+    assert "providers" in health["lanes"][incomplete_lane]
     public = json.loads(
         (tmp_path / "state" / "public_feed" / f"{incomplete_lane}.json").read_text()
     )
@@ -477,6 +479,36 @@ def test_incomplete_market_data_exports_degraded_feed_without_advancing_success(
     assert public["health_state"] == "DEGRADED"
     assert public["summary"]["buy"] == 0
     assert public["plays"] == []
+
+
+def test_idle_cycle_preserves_failed_lane_health(tmp_path):
+    calls = []
+    scheduler = UnattendedScheduler(
+        root=tmp_path / "release", state_dir=tmp_path / "state",
+        runner=lambda command, **kwargs: (calls.append(command) or subprocess.CompletedProcess(command, 1, "", "boom")),
+        monotonic=lambda: 0.0, clock=lambda: "2026-09-24T00:00:00+00:00",
+    )
+    scheduler.next_due = {lane: 0.0 for lane in ("nfl", "cfb", "mlb", "reconciliation")}
+    failed = scheduler.run_cycle()
+    scheduler.next_due = {lane: 10.0 for lane in ("nfl", "cfb", "mlb", "reconciliation")}
+    idle = scheduler.run_cycle()
+    assert failed["state"] == "FAILED"
+    assert idle["state"] == "FAILED"
+    assert idle["lanes"] == failed["lanes"]
+    assert len(calls) == 3
+
+
+@pytest.mark.parametrize("stdout", ["not-json", "[]"])
+def test_invalid_scan_output_is_failed_and_does_not_advance_success(tmp_path, stdout):
+    scheduler = UnattendedScheduler(
+        root=tmp_path / "release", state_dir=tmp_path / "state",
+        runner=lambda command, **kwargs: subprocess.CompletedProcess(command, 0, stdout, ""),
+        monotonic=lambda: 0.0, clock=lambda: "2026-09-24T00:00:00+00:00",
+    )
+    scheduler.next_due = {lane: 0.0 for lane in ("nfl", "cfb", "mlb", "reconciliation")}
+    health = scheduler.run_cycle()
+    assert health["last_successful_nfl_scan"] is None
+    assert health["lanes"]["nfl"]["state"] == "FAILED"
 
 
 def test_completed_certified_cfb_buy_replaces_public_feed_while_unverified(tmp_path):

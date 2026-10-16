@@ -16,14 +16,12 @@ import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime, timezone
+from collections.abc import Callable, Mapping, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable, Mapping, Sequence
 
 from parallax.public_feed import export_completed_scan
 
-
-UTC = timezone.utc
 HEALTH_FILENAME = "parallax_unattended_health.json"
 LOCK_FILENAME = "parallax_unattended.lock"
 LANES = ("nfl", "cfb", "mlb", "reconciliation")
@@ -155,6 +153,8 @@ class UnattendedScheduler:
         self.last_success: dict[str, str | None] = {lane: None for lane in LANES}
         self.last_nfl_refresh: str | None = None
         self.nfl_provider_state: dict[str, object] | None = None
+        self.lane_health: dict[str, dict[str, object]] = {lane: {"state": "NOT_RUN"} for lane in LANES}
+        self.last_cycle_state = "STARTING"
         startup = self.monotonic()
         self.next_due: dict[str, float] = {
             lane: startup + STARTUP_OFFSETS_SECONDS[lane] for lane in LANES
@@ -205,6 +205,7 @@ class UnattendedScheduler:
             "last_successful_nfl_scan": self.last_success["nfl"],
             "last_successful_nfl_refresh": self.last_nfl_refresh,
             "nfl_provider_state": self.nfl_provider_state,
+            "lanes": self.lane_health,
             "last_successful_cfb_scan": self.last_success["cfb"],
             "last_successful_mlb_scan": self.last_success["mlb"],
             "last_successful_reconciliation": self.last_success["reconciliation"],
@@ -214,6 +215,7 @@ class UnattendedScheduler:
     def run_cycle(self) -> dict[str, object]:
         self.state_dir.mkdir(parents=True, exist_ok=True)
         successful = 0
+        due_count = 0
         errors: list[str] = []
         now = self.monotonic()
         commands = self.commands()
@@ -225,6 +227,7 @@ class UnattendedScheduler:
                 if lane in SPORTS_LANES
                 else RECONCILIATION_INTERVAL_SECONDS
             )
+            due_count += 1
             try:
                 completed = self.runner(
                     command,
@@ -241,36 +244,33 @@ class UnattendedScheduler:
                 if completed.stdout:
                     print(f"[{lane}] {completed.stdout.strip()}", flush=True)
                 decoded_output = None
-                if lane == "nfl":
+                if lane in SPORTS_LANES:
                     try:
                         decoded_output = json.loads(completed.stdout)
-                    except (TypeError, json.JSONDecodeError):
-                        decoded_output = None
-                    if isinstance(decoded_output, dict):
-                        self.nfl_provider_state = {
-                            "scan_mode": decoded_output.get("scan_mode"),
-                            "refreshed_at": decoded_output.get("refreshed_at"),
-                            "refresh_complete": decoded_output.get("refresh_complete"),
-                            "pmus_cooldown": decoded_output.get("pmus_cooldown"),
-                            "kalshi": decoded_output.get("venues", {}).get("KALSHI"),
-                        }
+                    except (TypeError, json.JSONDecodeError) as exc:
+                        raise RuntimeError("invalid JSON scan output") from exc
+                    if not isinstance(decoded_output, dict):
+                        raise RuntimeError("scan output must be a JSON object")
+                if lane == "nfl" and isinstance(decoded_output, dict):
+                    self.nfl_provider_state = {
+                        "scan_mode": decoded_output.get("scan_mode"),
+                        "refreshed_at": decoded_output.get("refreshed_at"),
+                        "refresh_complete": decoded_output.get("refresh_complete"),
+                        "pmus_cooldown": decoded_output.get("pmus_cooldown"),
+                        "kalshi": decoded_output.get("venues", {}).get("KALSHI"),
+                        "market_data_complete": decoded_output.get(
+                            "market_data_complete",
+                            decoded_output.get("slate", {}).get("market_data_complete"),
+                        ),
+                    }
                 if lane in SPORTS_LANES:
                     try:
                         export_completed_scan(lane, completed.stdout, self.state_dir)
                     except Exception as exc:
-                        print(
-                            f"[WARN] {lane} public feed export failed: {type(exc).__name__}",
-                            file=sys.stderr,
-                            flush=True,
-                        )
+                        print(f"[WARN] {lane} public feed export failed: {type(exc).__name__}", file=sys.stderr, flush=True)
                         if lane == "cfb":
-                            raise RuntimeError(
-                                "CFB scan output failed public-feed validation"
-                            ) from exc
-                if lane in {"nfl", "mlb"} and _reported_market_data_incomplete(
-                    completed.stdout
-                ):
-                    raise RuntimeError("market_data_complete is false")
+                            raise RuntimeError("CFB scan output failed public-feed validation") from exc
+                partial = lane in {"nfl", "mlb"} and _reported_market_data_incomplete(completed.stdout)
                 self.last_success[lane] = self.clock()
                 if lane == "nfl":
                     self.last_nfl_refresh = (
@@ -279,9 +279,15 @@ class UnattendedScheduler:
                         else None
                     ) or self.last_success[lane]
                 successful += 1
+                self.lane_health[lane] = {
+                    "state": "DEGRADED" if partial else "RUNNING",
+                    "last_successful_scan": self.last_success[lane],
+                    **(self._coverage_diagnostics(decoded_output) if partial else {}),
+                }
             except Exception as exc:  # Each lane must not prevent later lanes.
                 message = f"{lane}: {type(exc).__name__}: {exc}"
                 errors.append(message)
+                self.lane_health[lane] = {"state": "FAILED", "error": message, "last_successful_scan": self.last_success[lane]}
                 print(f"[WARN] {message}", file=sys.stderr, flush=True)
 
         self.recent_errors.extend(errors)
@@ -292,17 +298,38 @@ class UnattendedScheduler:
             and self.nfl_provider_state["pmus_cooldown"].get("state")
             in {"COOLDOWN", "CORRUPT_COOLDOWN"}
         )
+        partial_lanes = any(value.get("state") == "DEGRADED" for value in self.lane_health.values())
         state = (
             "FAILED"
-            if errors and successful == 0
+            if errors and successful == 0 and due_count > 0
             else "DEGRADED"
-            if errors or pmus_degraded
+            if errors or pmus_degraded or partial_lanes
             else "RUNNING"
         )
+        if due_count == 0:
+            state = self.last_cycle_state
+        self.last_cycle_state = state
         health = self._health(state, heartbeat)
         atomic_write_json(self.health_path, health)
-        print(f"[health] state={state} successful_lanes={successful}/{len(commands)}", flush=True)
+        if due_count:
+            print(f"[health] state={state} successful_lanes={successful}/{due_count} due_lanes={due_count}", flush=True)
+        else:
+            print(f"[health] state={state} no_scans_due; prior lane health preserved", flush=True)
         return health
+
+    @staticmethod
+    def _coverage_diagnostics(payload: object) -> dict[str, object]:
+        if not isinstance(payload, dict):
+            return {"market_data_complete": False}
+        slate = payload.get("slate") if isinstance(payload.get("slate"), dict) else payload
+        venues = payload.get("venues") if isinstance(payload.get("venues"), dict) else {}
+        diagnostics: dict[str, object] = {
+            "market_data_complete": False,
+            "providers": venues,
+            "market_coverage": slate.get("market_coverage", slate.get("coverage")),
+            "freshness": slate.get("freshness", payload.get("refreshed_at")),
+        }
+        return diagnostics
 
     def run_forever(self, interval_seconds: int) -> None:
         lock = SingletonLock(self.lock_path)

@@ -88,7 +88,8 @@ Before reloading `com.swarmedge.parallax-sports`:
 6. verify `state = running`
 7. verify the running program path points at the target venv
 8. verify `PARALLAX_RELEASE_SHA` matches the target SHA
-9. verify natural unattended behavior without forcing provider scans or BUYs
+9. verify a fresh heartbeat, a valid scan output, and no critical errors. `RUNNING` and `DEGRADED` are acceptable when the active process, SHA, and heartbeat are correct; documented partial provider coverage is a successful scan and must not trigger rollback by itself. `FAILED`, malformed scan output, failed acquisition/processing, or stale heartbeat is a rollback condition.
+10. preserve accurate last-success timestamps: partial scans advance them; failed scans do not.
 
 Do not remove the previous known-good release until the new release is proven stable.
 
@@ -100,3 +101,7 @@ Do not remove the previous known-good release until the new release is proven st
 - runtime state lives outside immutable release directories
 - alert failures must not crash sports scans
 - production changes must preserve rollback
+
+## Scanner correction cutover and automatic rollback
+
+Stage the target under `releases/<full-sha>` and render a candidate plist before deployment. Keep the current plist byte-for-byte in a timestamped backup and record the currently loaded launchd job definition. The production cutover, when separately authorized, must install the candidate plist, bootstrap/reload `com.swarmedge.parallax-sports`, then poll health for at most 90 seconds. Accept only when the launchd process is active, its program path and `release_sha` match the target, heartbeat age is at most 30 seconds, scan output validates, and `recent_errors` contains no critical error. `RUNNING` or `DEGRADED` passes; partial coverage diagnostics remain visible and do not fail acceptance. On timeout or any failed predicate, restore the saved plist and reload the previous job automatically, then verify its process and SHA. Do not change or reload the separate customer publisher. This procedure does not authorize a production cutover.
