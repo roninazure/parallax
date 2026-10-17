@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T23:59:34.660798+00:00",
+  "generated_at": "2026-10-17T00:59:33.955603+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -14,6 +14,17 @@
       "venue": "POLYMARKET"
     },
     {
+      "contract_side": "YES",
+      "edge_pp": 24.8807169,
+      "market_id": "1225085",
+      "matchup": "Kentucky at Oklahoma",
+      "model_probability": 0.5688071689879158,
+      "price": 0.32,
+      "sport": "CFB",
+      "start_time": "2026-10-17T23:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
       "contract_side": "NO",
       "edge_pp": 21.46009632,
       "market_id": "1225090",
@@ -25,23 +36,23 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 19.74673023,
-      "market_id": "1181848",
-      "matchup": "Washington at Purdue",
-      "model_probability": 0.6024673023055346,
-      "price": 0.405,
+      "contract_side": "NO",
+      "edge_pp": 15.84592698,
+      "market_id": "1225068",
+      "matchup": "Alabama at Tennessee",
+      "model_probability": 0.4184592698401154,
+      "price": 0.26,
       "sport": "CFB",
-      "start_time": "2026-10-17T00:00:00+00:00",
+      "start_time": "2026-10-17T19:30:00+00:00",
       "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-16T23:59:21.238209+00:00",
+  "source_feed_generated_at": "2026-10-17T00:59:17.227660+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 4
   }
 }
