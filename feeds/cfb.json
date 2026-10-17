@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17T04:00:39.304537+00:00",
+  "generated_at": "2026-10-17T05:00:55.108482+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -15,11 +15,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 24.8807169,
+      "edge_pp": 25.3807169,
       "market_id": "1225085",
       "matchup": "Kentucky at Oklahoma",
       "model_probability": 0.5688071689879158,
-      "price": 0.32,
+      "price": 0.315,
       "sport": "CFB",
       "start_time": "2026-10-17T23:30:00+00:00",
       "venue": "POLYMARKET"
@@ -49,7 +49,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-17T04:00:36.510389+00:00",
+  "source_feed_generated_at": "2026-10-17T05:00:40.695899+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
