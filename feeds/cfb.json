@@ -1,16 +1,27 @@
 {
-  "generated_at": "2026-10-17T19:05:23.874886+00:00",
+  "generated_at": "2026-10-17T20:05:22.284109+00:00",
   "lane": "CFB",
   "plays": [
     {
-      "contract_side": "YES",
-      "edge_pp": 26.45267208,
-      "market_id": "1229862",
-      "matchup": "Penn State at Michigan",
-      "model_probability": 0.6045267208035262,
-      "price": 0.34,
+      "contract_side": "NO",
+      "edge_pp": 33.87241315,
+      "market_id": "1225097",
+      "matchup": "Utah at Colorado",
+      "model_probability": 0.47872413148657633,
+      "price": 0.14,
       "sport": "CFB",
-      "start_time": "2026-10-17T19:30:00+00:00",
+      "start_time": "2026-10-18T02:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 25.69887025,
+      "market_id": "1369731",
+      "matchup": "Nebraska at Oregon",
+      "model_probability": 0.5619887024548837,
+      "price": 0.305,
+      "sport": "CFB",
+      "start_time": "2026-10-18T03:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -25,17 +36,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 21.83868982,
-      "market_id": "1225066",
-      "matchup": "Missouri at Ole Miss",
-      "model_probability": 0.5933868982240541,
-      "price": 0.375,
-      "sport": "CFB",
-      "start_time": "2026-10-17T19:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
       "contract_side": "NO",
       "edge_pp": 20.96009632,
       "market_id": "1225090",
@@ -47,20 +47,20 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 15.84592698,
-      "market_id": "1225068",
-      "matchup": "Alabama at Tennessee",
-      "model_probability": 0.4184592698401154,
-      "price": 0.26,
+      "contract_side": "YES",
+      "edge_pp": 15.933349,
+      "market_id": "1358888",
+      "matchup": "Wisconsin at UCLA",
+      "model_probability": 0.6343334899522916,
+      "price": 0.475,
       "sport": "CFB",
-      "start_time": "2026-10-17T19:30:00+00:00",
+      "start_time": "2026-10-17T23:30:00+00:00",
       "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-17T19:05:02.757652+00:00",
+  "source_feed_generated_at": "2026-10-17T20:05:06.956556+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
