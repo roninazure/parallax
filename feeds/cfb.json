@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-10-17T20:05:22.284109+00:00",
+  "generated_at": "2026-10-17T21:06:27.189297+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 33.87241315,
+      "edge_pp": 33.37241315,
       "market_id": "1225097",
       "matchup": "Utah at Colorado",
       "model_probability": 0.47872413148657633,
-      "price": 0.14,
+      "price": 0.145,
       "sport": "CFB",
       "start_time": "2026-10-18T02:15:00+00:00",
       "venue": "POLYMARKET"
@@ -48,11 +48,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 15.933349,
+      "edge_pp": 15.433349,
       "market_id": "1358888",
       "matchup": "Wisconsin at UCLA",
       "model_probability": 0.6343334899522916,
-      "price": 0.475,
+      "price": 0.48,
       "sport": "CFB",
       "start_time": "2026-10-17T23:30:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-17T20:05:06.956556+00:00",
+  "source_feed_generated_at": "2026-10-17T21:05:41.185272+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
