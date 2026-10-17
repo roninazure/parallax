@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-10-17T18:32:50.689437+00:00",
+  "generated_at": "2026-10-17T18:35:01.605031+00:00",
   "lane": "NFL",
   "plays": [
     {
-      "contract_side": "YES",
-      "edge_pp": 43.09870714,
-      "market_id": "KXNFLGAME-26OCT18CARPHI-PHI",
-      "matchup": "CAR at PHI",
-      "model_probability": 0.8209870713930228,
-      "price": 0.39,
+      "contract_side": "NO",
+      "edge_pp": 18.19510616,
+      "market_id": "1198922",
+      "matchup": "DAL at GB",
+      "model_probability": 0.699451061606963,
+      "price": 0.5175,
       "sport": "NFL",
-      "start_time": "2026-10-18T17:00:00+00:00",
-      "venue": "KALSHI"
+      "start_time": "2026-10-19T00:20:00+00:00",
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
@@ -25,20 +25,20 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 18.19510616,
-      "market_id": "1198922",
-      "matchup": "DAL at GB",
-      "model_probability": 0.699451061606963,
-      "price": 0.5175,
+      "contract_side": "YES",
+      "edge_pp": 43.09870714,
+      "market_id": "KXNFLGAME-26OCT18CARPHI-PHI",
+      "matchup": "CAR at PHI",
+      "model_probability": 0.8209870713930228,
+      "price": 0.39,
       "sport": "NFL",
-      "start_time": "2026-10-19T00:20:00+00:00",
-      "venue": "POLYMARKET"
+      "start_time": "2026-10-18T17:00:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-17T18:32:03.428409+00:00",
+  "source_feed_generated_at": "2026-10-17T18:34:59.375728+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
