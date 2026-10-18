@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-10-18T10:09:19.816425+00:00",
+  "generated_at": "2026-10-18T10:18:17.082342+00:00",
   "lane": "NFL",
   "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 42.59870714,
-      "market_id": "1198904",
-      "matchup": "CAR at PHI",
-      "model_probability": 0.8209870713930228,
-      "price": 0.395,
-      "sport": "NFL",
-      "start_time": "2026-10-18T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "YES",
       "edge_pp": 12.01432843,
@@ -45,11 +34,22 @@
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 42.59870714,
+      "market_id": "1198904",
+      "matchup": "CAR at PHI",
+      "model_probability": 0.8209870713930228,
+      "price": 0.395,
+      "sport": "NFL",
+      "start_time": "2026-10-18T17:00:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T10:09:16.769277+00:00",
+  "source_feed_generated_at": "2026-10-18T10:18:16.349255+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
