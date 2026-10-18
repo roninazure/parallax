@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T04:14:47.307950+00:00",
+  "generated_at": "2026-10-18T04:15:50.876505+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -45,25 +45,14 @@
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 7.60908748,
-      "market_id": "1358485",
-      "matchup": "CLE at TEN",
-      "model_probability": 0.6060908748464128,
-      "price": 0.53,
-      "sport": "NFL",
-      "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T04:14:39.429271+00:00",
+  "source_feed_generated_at": "2026-10-18T04:15:50.646975+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 4
   }
 }
