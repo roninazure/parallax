@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-10-18T15:54:13.800779+00:00",
+  "generated_at": "2026-10-18T15:57:45.010806+00:00",
   "lane": "NFL",
   "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 42.34870714,
-      "market_id": "1198904",
-      "matchup": "CAR at PHI",
-      "model_probability": 0.8209870713930228,
-      "price": 0.3975,
-      "sport": "NFL",
-      "start_time": "2026-10-18T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "YES",
       "edge_pp": 11.51432843,
@@ -37,6 +26,17 @@
     },
     {
       "contract_side": "YES",
+      "edge_pp": 9.22947814,
+      "market_id": "1358481",
+      "matchup": "PIT at NO",
+      "model_probability": 0.6547947814302022,
+      "price": 0.5625,
+      "sport": "NFL",
+      "start_time": "2026-10-25T13:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
       "edge_pp": 21.46216245,
       "market_id": "1358483",
       "matchup": "MIA at NYJ",
@@ -45,14 +45,36 @@
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 8.54604087,
+      "market_id": "1358486",
+      "matchup": "TB at CAR",
+      "model_probability": 0.5354604086636361,
+      "price": 0.45,
+      "sport": "NFL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 42.34870714,
+      "market_id": "1198904",
+      "matchup": "CAR at PHI",
+      "model_probability": 0.8209870713930228,
+      "price": 0.3975,
+      "sport": "NFL",
+      "start_time": "2026-10-18T17:00:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T15:54:04.840847+00:00",
+  "source_feed_generated_at": "2026-10-18T15:57:44.141286+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 6
   }
 }
