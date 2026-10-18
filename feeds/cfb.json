@@ -1,58 +1,13 @@
 {
-  "generated_at": "2026-10-18T02:07:49.212713+00:00",
+  "generated_at": "2026-10-18T03:08:01.704746+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 33.87241315,
-      "market_id": "1225097",
-      "matchup": "Utah at Colorado",
-      "model_probability": 0.47872413148657633,
-      "price": 0.14,
-      "sport": "CFB",
-      "start_time": "2026-10-18T02:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 33.38170494,
-      "market_id": "1234068",
-      "matchup": "New Mexico at Hawai'i",
-      "model_probability": 0.48881704944329507,
-      "price": 0.155,
-      "sport": "CFB",
-      "start_time": "2026-10-18T02:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 25.69887025,
-      "market_id": "1369731",
-      "matchup": "Nebraska at Oregon",
-      "model_probability": 0.5619887024548837,
-      "price": 0.305,
-      "sport": "CFB",
-      "start_time": "2026-10-18T03:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 25.52171148,
-      "market_id": "1225098",
-      "matchup": "Wake Forest at California",
-      "model_probability": 0.47521711476503314,
-      "price": 0.22,
-      "sport": "CFB",
-      "start_time": "2026-10-18T02:30:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T02:07:28.323616+00:00",
+  "source_feed_generated_at": "2026-10-18T03:07:38.556801+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 0
   }
 }
