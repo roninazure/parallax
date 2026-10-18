@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-10-18T16:35:48.335806+00:00",
+  "generated_at": "2026-10-18T16:38:13.107225+00:00",
   "lane": "NFL",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 41.84870714,
+      "edge_pp": 41.59870714,
       "market_id": "1198904",
       "matchup": "CAR at PHI",
       "model_probability": 0.8209870713930228,
-      "price": 0.4025,
+      "price": 0.405,
       "sport": "NFL",
       "start_time": "2026-10-18T17:00:00+00:00",
       "venue": "POLYMARKET"
@@ -49,7 +49,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T16:35:19.833169+00:00",
+  "source_feed_generated_at": "2026-10-18T16:38:12.683009+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
