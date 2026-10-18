@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T22:08:03.727726+00:00",
+  "generated_at": "2026-10-18T22:09:07.187727+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -34,25 +34,14 @@
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 7.90851754,
-      "market_id": "KXNFLGAME-26OCT25TBCAR-TB",
-      "matchup": "TB at CAR",
-      "model_probability": 0.49908517544557873,
-      "price": 0.42,
-      "sport": "NFL",
-      "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T22:07:43.292659+00:00",
+  "source_feed_generated_at": "2026-10-18T22:09:05.369301+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 3
   }
 }
