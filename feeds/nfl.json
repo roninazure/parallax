@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T22:36:56.659489+00:00",
+  "generated_at": "2026-10-18T22:39:21.988933+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,15 +14,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 10.19758649,
-      "market_id": "KXNFLGAME-26OCT25PITNO-PIT",
-      "matchup": "PIT at NO",
-      "model_probability": 0.6519758648891281,
-      "price": 0.55,
+      "contract_side": "NO",
+      "edge_pp": 8.7479229,
+      "market_id": "1358484",
+      "matchup": "CIN at BAL",
+      "model_probability": 0.6874792289964197,
+      "price": 0.6,
       "sport": "NFL",
-      "start_time": "2026-10-25T13:30:00+00:00",
-      "venue": "KALSHI"
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -38,7 +38,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T22:36:27.543278+00:00",
+  "source_feed_generated_at": "2026-10-18T22:39:19.268882+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
