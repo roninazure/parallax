@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T12:55:05.557052+00:00",
+  "generated_at": "2026-10-18T12:57:25.563198+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -45,25 +45,14 @@
       "sport": "NFL",
       "start_time": "2026-10-25T13:30:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 21.71216245,
-      "market_id": "1358483",
-      "matchup": "MIA at NYJ",
-      "model_probability": 0.5646216245269461,
-      "price": 0.3475,
-      "sport": "NFL",
-      "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T12:54:42.766199+00:00",
+  "source_feed_generated_at": "2026-10-18T12:57:07.748888+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 4
   }
 }
