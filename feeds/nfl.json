@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-10-18T19:52:18.535408+00:00",
+  "generated_at": "2026-10-18T19:54:42.936009+00:00",
   "lane": "NFL",
   "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 11.26432843,
-      "market_id": "1198920",
-      "matchup": "BUF at LV",
-      "model_probability": 0.7951432843096617,
-      "price": 0.6825,
-      "sport": "NFL",
-      "start_time": "2026-10-18T20:25:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "YES",
       "edge_pp": 19.94510616,
@@ -25,34 +14,56 @@
       "venue": "KALSHI"
     },
     {
+      "contract_side": "YES",
+      "edge_pp": 10.47947814,
+      "market_id": "KXNFLGAME-26OCT25PITNO-PIT",
+      "matchup": "PIT at NO",
+      "model_probability": 0.6547947814302022,
+      "price": 0.55,
+      "sport": "NFL",
+      "start_time": "2026-10-25T13:30:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
       "contract_side": "NO",
-      "edge_pp": 7.87452902,
+      "edge_pp": 9.62452902,
       "market_id": "1358484",
       "matchup": "CIN at BAL",
       "model_probability": 0.7037452901909351,
-      "price": 0.625,
+      "price": 0.6075,
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
-      "edge_pp": 24.21216245,
+      "edge_pp": 23.96216245,
       "market_id": "1358483",
       "matchup": "MIA at NYJ",
       "model_probability": 0.5646216245269461,
-      "price": 0.3225,
+      "price": 0.325,
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 11.26432843,
+      "market_id": "1198920",
+      "matchup": "BUF at LV",
+      "model_probability": 0.7951432843096617,
+      "price": 0.6825,
+      "sport": "NFL",
+      "start_time": "2026-10-18T20:25:00+00:00",
       "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-18T19:51:40.898509+00:00",
+  "source_feed_generated_at": "2026-10-18T19:54:40.338564+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 5
   }
 }
