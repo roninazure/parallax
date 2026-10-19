@@ -1,39 +1,17 @@
 {
-  "generated_at": "2026-10-19T12:49:31.601174+00:00",
+  "generated_at": "2026-10-19T12:51:48.410908+00:00",
   "lane": "NFL",
   "plays": [
     {
-      "contract_side": "YES",
-      "edge_pp": 8.23317408,
-      "market_id": "1288608",
-      "matchup": "NE at CHI",
-      "model_probability": 0.4798317407711673,
-      "price": 0.3975,
-      "sport": "NFL",
-      "start_time": "2026-10-23T00:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 7.94758649,
-      "market_id": "1358481",
-      "matchup": "PIT at NO",
-      "model_probability": 0.6519758648891281,
-      "price": 0.5725,
-      "sport": "NFL",
-      "start_time": "2026-10-25T13:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 9.60733304,
-      "market_id": "KXNFLGAME-26OCT25INDMIN-MIN",
+      "contract_side": "NO",
+      "edge_pp": 9.35733304,
+      "market_id": "1358482",
       "matchup": "IND at MIN",
       "model_probability": 0.7960733303729158,
-      "price": 0.7,
+      "price": 0.7025,
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
@@ -67,11 +45,33 @@
       "sport": "NFL",
       "start_time": "2026-10-25T20:05:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 37.32354797,
+      "market_id": "KXNFLGAME-26OCT26DALPHI-DAL",
+      "matchup": "DAL at PHI",
+      "model_probability": 0.7232354796538691,
+      "price": 0.35,
+      "sport": "NFL",
+      "start_time": "2026-10-27T00:15:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 8.23317408,
+      "market_id": "1288608",
+      "matchup": "NE at CHI",
+      "model_probability": 0.4798317407711673,
+      "price": 0.3975,
+      "sport": "NFL",
+      "start_time": "2026-10-23T00:15:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-19T12:48:30.450831+00:00",
+  "source_feed_generated_at": "2026-10-19T12:51:47.794025+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
