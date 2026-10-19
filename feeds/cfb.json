@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-10-19T12:48:23.491233+00:00",
+  "generated_at": "2026-10-19T13:49:40.873286+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 12.84850999,
+      "edge_pp": 14.34850999,
       "market_id": "1331016",
       "matchup": "NC State at Stanford",
       "model_probability": 0.4184850999180071,
-      "price": 0.29,
+      "price": 0.275,
       "sport": "CFB",
       "start_time": "2026-10-24T02:30:00+00:00",
       "venue": "POLYMARKET"
@@ -16,7 +16,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-19T12:48:00.431190+00:00",
+  "source_feed_generated_at": "2026-10-19T13:49:39.033258+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
