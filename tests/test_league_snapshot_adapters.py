@@ -40,6 +40,30 @@ def test_nba_only_final_regular_season_and_home_away_identity():
         ("NBA", "BOS", "NYK", "BOS")]
 
 
+
+def test_nba_cup_group_knockouts_are_regular_championship_is_not():
+    # BDL labels NBA Cup games via ist_stage starting in 2025. The
+    # Championship is the only Cup game outside NBA regular-season records.
+    source = {"data": [
+        nba_game(id=201, ist_stage="East Group A"),
+        nba_game(id=202, ist_stage="West Quarterfinal"),
+        nba_game(id=203, ist_stage="East Semifinal"),
+        nba_game(id=204, ist_stage="Championship"),
+        nba_game(id=205, ist_stage="Championship", season_type="ist"),
+        nba_game(id=206, ist_stage=None),
+    ]}
+    result = nba_from_balldontlie(source, regular_season_query_verified=True)
+    assert [game.game_id for game in result] == [
+        "bdl:201", "bdl:202", "bdl:203", "bdl:206"
+    ]
+
+
+def test_nba_cup_still_requires_verified_regular_query():
+    source = {"data": [nba_game(id=301, ist_stage="East Group B")]}
+    with pytest.raises(ValueError, match="query not verified"):
+        nba_from_balldontlie(source)
+
+
 def test_nhl_regular_final_includes_extra_time_results():
     rows = nhl_from_club_schedule({"games": [nhl_game(),
         nhl_game(id=2025020002,gameType=3), nhl_game(id=2025020003,gameState="LIVE")]})
