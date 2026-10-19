@@ -56,7 +56,13 @@ def nba_from_balldontlie(payload: Mapping[str, Any], *, regular_season_query_ver
     games = []
     for row in _rows(payload, "data"):
         season_type = str(row.get("season_type") or "regular").lower()
-        if season_type != "regular" or row.get("postseason") is True or row.get("ist_stage"):
+        # NBA Cup group, quarterfinal and semifinal games ARE regular-season
+        # games.  Only the Cup Championship is outside regular-season records.
+        # The originating request must have season_type=regular; never ingest
+        # separately fetched season_type=ist snapshots as regular-season games.
+        cup_stage = str(row.get("ist_stage") or "").strip().lower()
+        if (season_type != "regular" or row.get("postseason") is True
+                or cup_stage == "championship"):
             continue
         if str(row.get("status_state") or row.get("status") or "").lower() not in {"final", "final/ot"}:
             continue
