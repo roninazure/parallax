@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T22:00:07.115773+00:00",
+  "generated_at": "2026-10-19T23:03:54.614935+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -12,14 +12,25 @@
       "sport": "CFB",
       "start_time": "2026-10-24T02:30:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 9.56487565,
+      "market_id": "1331011",
+      "matchup": "Army at Tulsa",
+      "model_probability": 0.5806487565185172,
+      "price": 0.485,
+      "sport": "CFB",
+      "start_time": "2026-10-24T00:30:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-19T21:59:57.462228+00:00",
+  "source_feed_generated_at": "2026-10-19T23:03:21.355893+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 1
+    "buy": 2
   }
 }
