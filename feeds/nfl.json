@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-10-19T10:58:55.273000+00:00",
+  "generated_at": "2026-10-19T10:59:58.802554+00:00",
   "lane": "NFL",
   "plays": [
+    {
+      "contract_side": "YES",
+      "edge_pp": 7.98317408,
+      "market_id": "1288608",
+      "matchup": "NE at CHI",
+      "model_probability": 0.4798317407711673,
+      "price": 0.4,
+      "sport": "NFL",
+      "start_time": "2026-10-23T00:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "YES",
       "edge_pp": 7.94758649,
@@ -67,22 +78,11 @@
       "sport": "NFL",
       "start_time": "2026-10-25T20:05:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 7.98317408,
-      "market_id": "KXNFLGAME-26OCT22NECHI-NE",
-      "matchup": "NE at CHI",
-      "model_probability": 0.4798317407711673,
-      "price": 0.4,
-      "sport": "NFL",
-      "start_time": "2026-10-23T00:15:00+00:00",
-      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-19T10:58:52.560334+00:00",
+  "source_feed_generated_at": "2026-10-19T10:59:55.218027+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
