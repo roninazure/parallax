@@ -40,7 +40,9 @@ def validate_page(payload: object, season: int) -> tuple[list[dict], int | None]
             raise ValueError("Season mismatch in provider response")
         if row.get("postseason") is True:
             raise ValueError("Postseason result in regular-season query")
-    cursor = meta.get("next_cursor")
+    if "next_cursor" not in meta:
+        raise ValueError("Missing pagination completion indicator")
+    cursor = meta["next_cursor"]
     if cursor is not None and (type(cursor) is not int or cursor < 1):
         raise ValueError("Invalid pagination cursor")
     return rows, cursor
