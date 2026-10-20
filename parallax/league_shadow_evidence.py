@@ -32,8 +32,8 @@ _PMUS_NBA_RULE = re.compile(
     r"(?P<home_code>[A-Z]{2,4}) (?P<home_name>[A-Za-z ]+?) "
     r"professional basketball game originally scheduled for "
     r"(?P<date>[A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4}) at "
-    r"(?P<time>[0-9]{1,2}:[0-9]{2}[AP]M) ET\\. "
-    r"Overtime is included if played\\.", re.ASCII
+    r"(?P<time>[0-9]{1,2}:[0-9]{2}[AP]M) ET\. "
+    r"Overtime is included if played\.", re.ASCII
 )
 # Verified NBA venue alias in the 2026-10-26 Golden State @ Denver contract.
 # Do not extrapolate unverified NBA aliases or NHL settlement semantics.
