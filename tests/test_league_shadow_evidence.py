@@ -107,6 +107,7 @@ def test_existing_pmus_normalization_structured_selected_team():
     {"gameStartTime": "2026-10-20"},
     {"ticker": "KXNBAGAME-26OCT20BOSNYK-LAL"},
     {"ticker": "UNVERIFIED-26OCT20BOSNYK-BOS"},
+    {"yes_sub_title": "NYK"},
     {"rules_primary": "Regulation only — 3-way"},
 ])
 def test_invalid_contract_or_identity_fails_closed(change):
@@ -136,3 +137,8 @@ def test_ambiguous_pmus_sides_rejected():
     raw["marketSides"] = sides
     ambiguous = replace(market, original_metadata={"market": raw})
     assert shadow_evidence(ambiguous, fixture(), forecast(), now=NOW) is None
+    sides[1]["long"] = False
+    sides[1]["team"] = {"abbreviation": "CHI"}
+    raw["marketSides"] = sides
+    wrong_opponent = replace(market, original_metadata={"market": raw})
+    assert shadow_evidence(wrong_opponent, fixture(), forecast(), now=NOW) is None
