@@ -1,7 +1,9 @@
 """Offline integration tests with sanitized *real* Kalshi NBA/NHL rule fields.
 
 Kalshi metadata/rules came from user-inspected October 19, 2026 public
-markets. Game kickoff and synthetic book are TEST INPUTS, not live facts.
+markets. Kickoff times match independently published NBA/NHL schedules;
+market order book and expiration are synthetic. Fixture IDs in this test are
+NOT yet reconciled to the BALLDONTLIE provider IDs used by the Elo snapshot.
 Polymarket US fixture is synthetic/unverified. No provider calls or BUYs.
 """
 from dataclasses import replace
