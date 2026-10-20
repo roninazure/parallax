@@ -67,10 +67,17 @@ def verify_metadata(kalshi_market: dict, kalshi_event: dict,
 
 def main() -> None:
     market = kalshi_json(f"{KALSHI_ROOT}/markets/{TICKER}").get("market")
+    if (not isinstance(market, dict) or market.get("ticker") != TICKER
+            or market.get("event_ticker") != KALSHI_EVENT):
+        raise SystemExit("STOP: Kalshi market identity mismatch")
     event = kalshi_json(f"{KALSHI_ROOT}/events/{KALSHI_EVENT}").get("event")
+    if (not isinstance(event, dict)
+            or event.get("event_ticker") != KALSHI_EVENT
+            or event.get("series_ticker") != KALSHI_SERIES):
+        raise SystemExit("STOP: Kalshi event/series identity mismatch")
     series = kalshi_json(f"{KALSHI_ROOT}/series/{KALSHI_SERIES}").get("series")
-    if not all(isinstance(obj, dict) for obj in (market, event, series)):
-        raise SystemExit("STOP: Kalshi fee metadata response missing")
+    if not isinstance(series, dict) or series.get("ticker") != KALSHI_SERIES:
+        raise SystemExit("STOP: Kalshi series identity mismatch")
     client = PolymarketUSPublicClient(max_requests_per_minute=1)
     try:
         rows = client.markets_page(
