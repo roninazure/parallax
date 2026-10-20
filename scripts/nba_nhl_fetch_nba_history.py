@@ -118,7 +118,7 @@ def main() -> int:
             ids = {g["id"] for g in games}
             if len(ids) != len(games) or seen_ids.intersection(ids):
                 raise ValueError("Duplicate game ID within/across pages")
-            if next_cursor == cursor or (next_cursor is not None and next_cursor in seen_cursors):
+            if next_cursor is not None and (next_cursor == cursor or next_cursor in seen_cursors):
                 raise ValueError("Repeated pagination cursor")
         except (ValueError, KeyError, TypeError) as exc:
             print(f"STOP: invalid {source} page {page_number}: {exc}")
