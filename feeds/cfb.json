@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-10-19T23:03:54.614935+00:00",
+  "generated_at": "2026-10-20T00:03:02.753115+00:00",
   "lane": "CFB",
   "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 34.81329253,
+      "market_id": "1358895",
+      "matchup": "Boise State at Washington State",
+      "model_probability": 0.528132925256802,
+      "price": 0.18,
+      "sport": "CFB",
+      "start_time": "2026-10-24T22:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "NO",
       "edge_pp": 13.34850999,
@@ -15,11 +26,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 9.56487565,
+      "edge_pp": 10.06487565,
       "market_id": "1331011",
       "matchup": "Army at Tulsa",
       "model_probability": 0.5806487565185172,
-      "price": 0.485,
+      "price": 0.48,
       "sport": "CFB",
       "start_time": "2026-10-24T00:30:00+00:00",
       "venue": "POLYMARKET"
@@ -27,10 +38,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-19T23:03:21.355893+00:00",
+  "source_feed_generated_at": "2026-10-20T00:02:54.132254+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 2
+    "buy": 3
   }
 }
