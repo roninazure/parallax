@@ -171,6 +171,14 @@ def main() -> None:
         "research_only": True,
         "buy_authorized": False,
         "fee_calculation": "UNAVAILABLE_EXPIRED_REVIEW",
+        "fee_schedule_context": {
+            "pmus_standard_taker_theta_reference": 0.0695,
+            "pmus_schedule_effective_et": "2026-10-19 13:00",
+            "pmus_schedule_url": "https://docs.polymarket.us/fees",
+            "pmus_account_rebate_tier": "UNKNOWN",
+            "kalshi_nba_event_series_fee_metadata": "NOT_FETCHED",
+            "net_economics_certified": False,
+        },
         "forecast_quality": MODEL_STATUS,
         "fixture": {
             "game_id": BDL_ID, "sport": "NBA", "season": 2026,
