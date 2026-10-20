@@ -198,7 +198,6 @@ def test_nba_provider_query_must_be_verified():
     {"postponed": True},
     {"season_type": "playoffs"},
     {"ist_stage": "Championship"},
-    {"home_team": {"abbreviation": "BOS"}},
     {"visitor_team": {"abbreviation": ""}},
 ])
 def test_nba_provider_bad_identity_or_status_fails_closed(changes):
@@ -208,6 +207,22 @@ def test_nba_provider_bad_identity_or_status_fails_closed(changes):
             game, regular_season_query_verified=True,
             venue_home_name="Denver", venue_away_name="Golden State",
         )
+
+
+def test_provider_game_team_disagreement_is_rejected_at_market_mapping():
+    # A different valid home-team code is not intrinsically malformed.
+    # The correct FAIL-CLOSED gate is independent Kalshi market matching.
+    wrong_game = dict(NBA_BDL_GAME, home_team={"abbreviation": "BOS"})
+    fx = nba_fixture_from_balldontlie(
+        wrong_game, regular_season_query_verified=True,
+        venue_home_name="Denver", venue_away_name="Golden State",
+    )
+    prediction = predict_future(
+        [], sport=fx.sport, game_date=fx.kickoff.astimezone(_ET).date(),
+        home_team=fx.home_team, away_team=fx.away_team,
+        game_id=fx.game_id, season=fx.season,
+    )
+    assert shadow_evidence(kalshi(), fx, prediction, now=NOW) is None
 
 
 @pytest.mark.parametrize("sport", ["NBA", "NHL"])
