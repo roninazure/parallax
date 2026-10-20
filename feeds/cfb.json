@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-10-20T22:33:25.232149+00:00",
+  "generated_at": "2026-10-20T23:34:55.549643+00:00",
   "lane": "CFB",
   "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 36.84010237,
-      "market_id": "1269994",
-      "matchup": "Middle Tennessee at Florida International",
-      "model_probability": 0.5934010236935879,
-      "price": 0.225,
-      "sport": "CFB",
-      "start_time": "2026-10-20T23:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "NO",
       "edge_pp": 34.81329253,
@@ -25,14 +14,14 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 18.7352683,
-      "market_id": "1269995",
-      "matchup": "Missouri State at Delaware",
-      "model_probability": 0.5923526829899838,
-      "price": 0.405,
+      "contract_side": "NO",
+      "edge_pp": 24.97084491,
+      "market_id": "1308031",
+      "matchup": "James Madison at App State",
+      "model_probability": 0.47470844910079435,
+      "price": 0.225,
       "sport": "CFB",
-      "start_time": "2026-10-20T23:00:00+00:00",
+      "start_time": "2026-10-22T23:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -45,14 +34,36 @@
       "sport": "CFB",
       "start_time": "2026-10-24T02:30:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 10.56487565,
+      "market_id": "1331011",
+      "matchup": "Army at Tulsa",
+      "model_probability": 0.5806487565185172,
+      "price": 0.475,
+      "sport": "CFB",
+      "start_time": "2026-10-24T00:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 6.52903759,
+      "market_id": "1395827",
+      "matchup": "Tennessee at South Carolina",
+      "model_probability": 0.5302903758943651,
+      "price": 0.465,
+      "sport": "CFB",
+      "start_time": "2026-10-24T19:30:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-20T22:32:48.271825+00:00",
+  "source_feed_generated_at": "2026-10-20T23:34:40.280295+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 5
   }
 }
