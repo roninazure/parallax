@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-10-20T21:33:37.446231+00:00",
+  "generated_at": "2026-10-20T22:33:25.232149+00:00",
   "lane": "CFB",
   "plays": [
+    {
+      "contract_side": "YES",
+      "edge_pp": 36.84010237,
+      "market_id": "1269994",
+      "matchup": "Middle Tennessee at Florida International",
+      "model_probability": 0.5934010236935879,
+      "price": 0.225,
+      "sport": "CFB",
+      "start_time": "2026-10-20T23:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "NO",
       "edge_pp": 34.81329253,
@@ -15,11 +26,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 16.2352683,
+      "edge_pp": 18.7352683,
       "market_id": "1269995",
       "matchup": "Missouri State at Delaware",
       "model_probability": 0.5923526829899838,
-      "price": 0.43,
+      "price": 0.405,
       "sport": "CFB",
       "start_time": "2026-10-20T23:00:00+00:00",
       "venue": "POLYMARKET"
@@ -34,22 +45,11 @@
       "sport": "CFB",
       "start_time": "2026-10-24T02:30:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 10.56487565,
-      "market_id": "1331011",
-      "matchup": "Army at Tulsa",
-      "model_probability": 0.5806487565185172,
-      "price": 0.475,
-      "sport": "CFB",
-      "start_time": "2026-10-24T00:30:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-20T21:32:48.151031+00:00",
+  "source_feed_generated_at": "2026-10-20T22:32:48.271825+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
