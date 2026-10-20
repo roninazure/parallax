@@ -60,13 +60,22 @@ def _selected_yes(market: NormalizedMarket, raw: dict, fixture: ShadowFixture) -
             return None
         # No title substring guessing. The final ticker token must be a team.
         selected = _team(ticker.rsplit("-", 1)[-1])
+        explicit_label = _team(raw.get("yes_sub_title"))
+        if explicit_label in participants and explicit_label != selected:
+            return None
         return selected if selected in participants else None
     if market.venue == Venue.POLYMARKET:
         sides = raw.get("marketSides")
         if not isinstance(sides, list) or len(sides) != 2:
             return None
-        yes = [s for s in sides if isinstance(s, dict) and s.get("long") is True]
-        if len(yes) != 1 or not isinstance(yes[0].get("team"), dict):
+        if not all(isinstance(s, dict) and type(s.get("long")) is bool
+                   and isinstance(s.get("team"), dict) for s in sides):
+            return None
+        teams = {_team(s["team"].get("abbreviation")) for s in sides}
+        if teams != participants:
+            return None
+        yes = [s for s in sides if s["long"] is True]
+        if len(yes) != 1:
             return None
         selected = _team(yes[0]["team"].get("abbreviation"))
         return selected if selected in participants else None
