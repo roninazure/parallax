@@ -59,6 +59,27 @@ def test_resume_uses_cache_without_new_provider_calls(tmp_path, monkeypatch):
     assert list(tmp_path.glob("page-*.json")) and len(list(tmp_path.glob("page-*.json"))) == 2
 
 
+
+def test_single_short_terminal_page_with_omitted_cursor(tmp_path, monkeypatch):
+    calls = []
+
+    def fake_open(request, timeout):
+        calls.append(request.full_url)
+        return io.BytesIO(json.dumps({
+            "data": [sample(9)], "meta": {"per_page": 100}
+        }).encode())
+
+    monkeypatch.setattr(dl, "urlopen", fake_open)
+    monkeypatch.setattr(dl, "getpass", lambda prompt: "test-secret")
+    monkeypatch.setattr(sys, "argv", ["history", "--season", "2025",
+                                      "--max-pages", "1", "--output-dir", str(tmp_path)])
+    assert dl.main() == 0
+    assert len(calls) == 1
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    assert manifest["complete_pagination"] is True
+    assert manifest["unique_games"] == 1
+
+
 def test_stops_at_page_ceiling_without_claiming_complete(tmp_path, monkeypatch):
     monkeypatch.setattr(dl, "urlopen", lambda *a, **k: io.BytesIO(
         json.dumps(payload([sample(1)], 999)).encode()))
