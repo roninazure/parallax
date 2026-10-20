@@ -28,8 +28,8 @@ _KALSHI_WINNER_RULE = re.compile(
 
 _PMUS_NBA_RULE = re.compile(
     r"^This market will settle to the winner of the "
-    r"(?P<away_code>[A-Z]{2,4}) (?P<away_name>[A-Za-z ]+?) vs "
-    r"(?P<home_code>[A-Z]{2,4}) (?P<home_name>[A-Za-z ]+?) "
+    r"(?P<away_code>[A-Z]{2,4}) (?P<away_name>[A-Za-z0-9 ]+?) vs "
+    r"(?P<home_code>[A-Z]{2,4}) (?P<home_name>[A-Za-z0-9 ]+?) "
     r"professional basketball game originally scheduled for "
     r"(?P<date>[A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4}) at "
     r"(?P<time>[0-9]{1,2}:[0-9]{2}[AP]M) ET\. "
