@@ -37,7 +37,7 @@ _PMUS_NBA_RULE = re.compile(
 )
 # Verified NBA venue alias in the 2026-10-26 Golden State @ Denver contract.
 # Do not extrapolate unverified NBA aliases or NHL settlement semantics.
-_PMUS_NBA_CODES = {"GSW": "GS"}
+_PMUS_NBA_CODES = {"GSW": "GS", "NYK": "NY", "SAS": "SA"}
 
 
 def _pmus_nba_code(canonical: str) -> str:
