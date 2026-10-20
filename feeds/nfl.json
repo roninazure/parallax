@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-10-20T15:29:47.826608+00:00",
+  "generated_at": "2026-10-20T15:30:51.363631+00:00",
   "lane": "NFL",
   "plays": [
     {
-      "contract_side": "YES",
-      "edge_pp": 8.23317408,
-      "market_id": "1288608",
-      "matchup": "NE at CHI",
-      "model_probability": 0.4798317407711673,
-      "price": 0.3975,
+      "contract_side": "NO",
+      "edge_pp": 38.57354797,
+      "market_id": "1387745",
+      "matchup": "DAL at PHI",
+      "model_probability": 0.7232354796538691,
+      "price": 0.3375,
       "sport": "NFL",
-      "start_time": "2026-10-23T00:15:00+00:00",
+      "start_time": "2026-10-27T00:15:00+00:00",
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 11.7479229,
-      "market_id": "KXNFLGAME-26OCT25CINBAL-BAL",
+      "contract_side": "NO",
+      "edge_pp": 11.2479229,
+      "market_id": "1358484",
       "matchup": "CIN at BAL",
       "model_probability": 0.6874792289964197,
-      "price": 0.57,
+      "price": 0.575,
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -48,6 +48,17 @@
     },
     {
       "contract_side": "YES",
+      "edge_pp": 8.23317408,
+      "market_id": "1288608",
+      "matchup": "NE at CHI",
+      "model_probability": 0.4798317407711673,
+      "price": 0.3975,
+      "sport": "NFL",
+      "start_time": "2026-10-23T00:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
       "edge_pp": 10.90851754,
       "market_id": "1358486",
       "matchup": "TB at CAR",
@@ -56,22 +67,11 @@
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 38.57354797,
-      "market_id": "1387745",
-      "matchup": "DAL at PHI",
-      "model_probability": 0.7232354796538691,
-      "price": 0.3375,
-      "sport": "NFL",
-      "start_time": "2026-10-27T00:15:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-20T15:29:31.901289+00:00",
+  "source_feed_generated_at": "2026-10-20T15:30:49.382671+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
