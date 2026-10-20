@@ -6,7 +6,8 @@ feed, alerts, or order operations. Unverified venue shapes fail closed.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
+import re
 from zoneinfo import ZoneInfo
 
 from .engine import qualify
@@ -16,7 +17,13 @@ from .normalization import rules_digest
 
 _ET = ZoneInfo("America/New_York")
 _MODEL_VERSION = "nba-nhl-elo-experimental-v0"
-_ALLOWED = {"NBA": "KXNBAGAME-", "NHL": "KXNHLGAME-"}
+_ALLOWED = {"NBA": "KXNBAGAME", "NHL": "KXNHLGAME"}
+_KALSHI_WINNER_RULE = re.compile(
+    r"If (?P<winner>.+?) wins the (?P<first>.+?) vs (?P<second>.+?) "
+    r"(?P<league>Pro Basketball|NHL) game originally scheduled for "
+    r"(?P<date>[A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4}), "
+    r"then the market resolves to Yes\\.", re.ASCII
+)
 
 
 @dataclass(frozen=True)
@@ -27,13 +34,17 @@ class ShadowFixture:
     kickoff: datetime  # Authoritative, timezone-aware actual tipoff / puck drop
     home_team: str      # Canonical abbreviation, not display name
     away_team: str
+    venue_home_name: str = ""  # Explicit short team name from independently verified fixture alias
+    venue_away_name: str = ""
 
     def __post_init__(self) -> None:
         if (self.sport not in _ALLOWED or not self.game_id
                 or not self.home_team or not self.away_team
                 or self.home_team == self.away_team
                 or self.kickoff.tzinfo is None
-                or self.kickoff.utcoffset() is None):
+                or self.kickoff.utcoffset() is None
+                or bool(self.venue_home_name) != bool(self.venue_away_name)
+                or (self.venue_home_name and _name(self.venue_home_name) == _name(self.venue_away_name))):
             raise ValueError("Invalid or ambiguous shadow fixture")
 
 
@@ -51,19 +62,66 @@ def _team(value: object) -> str:
     return str(value).strip().upper() if isinstance(value, str) else ""
 
 
+def _name(value: object) -> str:
+    return " ".join(value.split()).casefold() if isinstance(value, str) else ""
+
+
+def _kalshi_yes(market: NormalizedMarket, raw: dict, fixture: ShadowFixture) -> str | None:
+    """Verified 2026 KXNBAGAME/KXNHLGAME shape, no invented metadata.
+
+    Match fixture date against ET original scheduled date in ticker AND rule.
+    occurrence_datetime is NOT a scheduled game start time.
+    """
+    if not fixture.venue_home_name or not fixture.venue_away_name:
+        return None  # Never guess alias/name mappings from titles
+    ticker = raw.get("ticker")
+    event = raw.get("event_ticker")
+    if not isinstance(ticker, str) or not isinstance(event, str):
+        return None
+    tokens = ticker.split("-")
+    if (len(tokens) != 3 or tokens[0] != _ALLOWED[fixture.sport]
+            or event != "-".join(tokens[:2])
+            or ticker != market.venue_market_id):
+        return None
+    local_day = fixture.kickoff.astimezone(_ET).date()
+    date_code = local_day.strftime("%y%b%d").upper()
+    pair = tokens[1]
+    if pair not in {
+        date_code + fixture.away_team + fixture.home_team,
+        date_code + fixture.home_team + fixture.away_team,
+    }:
+        return None
+    selected = tokens[2]
+    names = {fixture.home_team: fixture.venue_home_name,
+             fixture.away_team: fixture.venue_away_name}
+    if selected not in names:
+        return None
+    selected_name = names[selected]
+    if (_name(raw.get("title")) != _name(selected_name + " wins")
+            or _name(raw.get("yes_sub_title")) != _name(selected_name)):
+        return None
+    primary = raw.get("rules_primary")
+    match = _KALSHI_WINNER_RULE.fullmatch(primary) if isinstance(primary, str) else None
+    if not match:
+        return None
+    rule = match.groupdict()
+    expected_league = "Pro Basketball" if fixture.sport == "NBA" else "NHL"
+    if (rule["league"] != expected_league
+            or _name(rule["winner"]) != _name(selected_name)
+            or {_name(rule["first"]), _name(rule["second"])}
+            != {_name(fixture.venue_home_name), _name(fixture.venue_away_name)}):
+        return None
+    try:
+        original_day = datetime.strptime(rule["date"], "%b %d, %Y").date()
+    except ValueError:
+        return None
+    return selected if original_day == local_day else None
+
+
 def _selected_yes(market: NormalizedMarket, raw: dict, fixture: ShadowFixture) -> str | None:
     participants = {fixture.home_team, fixture.away_team}
     if market.venue == Venue.KALSHI:
-        ticker = raw.get("ticker")
-        if (not isinstance(ticker, str) or ticker != market.venue_market_id
-                or not ticker.upper().startswith(_ALLOWED[fixture.sport])):
-            return None
-        # No title substring guessing. The final ticker token must be a team.
-        selected = _team(ticker.rsplit("-", 1)[-1])
-        explicit_label = _team(raw.get("yes_sub_title"))
-        if explicit_label in participants and explicit_label != selected:
-            return None
-        return selected if selected in participants else None
+        return _kalshi_yes(market, raw, fixture)
     if market.venue == Venue.POLYMARKET:
         sides = raw.get("marketSides")
         if not isinstance(sides, list) or len(sides) != 2:
@@ -98,16 +156,21 @@ def shadow_evidence(
     raw = market.original_metadata.get("market")
     if not isinstance(raw, dict):
         return None
-    if (_team(raw.get("league")) != fixture.sport
-            or str(raw.get("marketType") or "").strip().lower()
-            not in {"moneyline", "full_game_winner"}
-            or _team(raw.get("homeTeam")) != fixture.home_team
-            or _team(raw.get("awayTeam")) != fixture.away_team
-            or _instant(raw.get("gameStartTime")) != fixture.kickoff.astimezone(UTC)):
-        return None
-    # Without explicit NHL overtime/shootout settlement semantics, STOP.
-    expected_scope = "full_game_including_ot_so" if fixture.sport == "NHL" else "full_game"
-    if str(raw.get("settlement_scope") or "").strip().lower() != expected_scope:
+    if market.venue == Venue.POLYMARKET:
+        # PMUS shape is still synthetic/unverified; conservatively require all
+        # original explicit metadata until real samples can establish semantics.
+        if (_team(raw.get("league")) != fixture.sport
+                or str(raw.get("marketType") or "").strip().lower()
+                not in {"moneyline", "full_game_winner"}
+                or _team(raw.get("homeTeam")) != fixture.home_team
+                or _team(raw.get("awayTeam")) != fixture.away_team
+                or _instant(raw.get("gameStartTime")) != fixture.kickoff.astimezone(UTC)):
+            return None
+        expected_scope = ("full_game_including_ot_so"
+                          if fixture.sport == "NHL" else "full_game")
+        if str(raw.get("settlement_scope") or "").strip().lower() != expected_scope:
+            return None
+    elif market.venue != Venue.KALSHI:
         return None
     if not market.resolution_rules.strip():
         return None
