@@ -11,6 +11,7 @@ import json
 from datetime import UTC, datetime
 from getpass import getpass
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -198,9 +199,7 @@ def main() -> None:
             cfg, fixture = item["config"], item["fixture"]
             forecast = predict_future(
                 games, sport="NBA",
-                game_date=fixture.kickoff.astimezone(
-                    __import__("zoneinfo").ZoneInfo("America/New_York")
-                ).date(),
+                game_date=fixture.kickoff.astimezone(ZoneInfo("America/New_York")).date(),
                 home_team=fixture.home_team, away_team=fixture.away_team,
                 game_id=fixture.game_id, season=fixture.season,
             )
