@@ -12,8 +12,10 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from parallax.league_elo_experimental import Forecast, MODEL_STATUS
-from parallax.league_shadow_evidence import ShadowFixture, evaluate_shadow, shadow_evidence
+from parallax.league_elo_experimental import Forecast, MODEL_STATUS, predict_future
+from parallax.league_shadow_evidence import (
+    ShadowFixture, evaluate_shadow, shadow_evidence, nba_fixture_from_balldontlie,
+)
 from parallax.models import Action, Side, Venue
 from parallax.normalization import normalize_kalshi, normalize_pmus
 
@@ -27,6 +29,21 @@ TIPS = {
     "NBA": datetime(2026, 10, 27, 2, 0, tzinfo=UTC),
     "NHL": datetime(2026, 10, 27, 0, 30, tzinfo=UTC),
 }
+
+# BALLDONTLIE Oct 26, 2026 fixture identity verified via one bounded query.
+# Team objects retain only fields required by the offline adapter.
+NBA_BDL_GAME = {
+    "id": 21717970,
+    "season": 2026,
+    "date": "2026-10-26",
+    "status_state": "scheduled",
+    "postseason": False,
+    "start_time_utc": None,
+    "datetime": "2026-10-27T02:00:00.000Z",
+    "home_team": {"abbreviation": "DEN"},
+    "visitor_team": {"abbreviation": "GSW"},
+}
+
 
 MARKETS = {
     "NBA": {
@@ -72,7 +89,7 @@ MARKETS = {
 
 def fixture(sport="NBA", **changes):
     if sport == "NBA":
-        kwargs = dict(sport=sport, game_id="nba.com:0022600127",
+        kwargs = dict(sport=sport, game_id="bdl:21717970",
                       season=2026, kickoff=TIPS[sport],
                       home_team="DEN", away_team="GSW",
                       venue_home_name="Denver", venue_away_name="Golden State")
@@ -132,6 +149,65 @@ def pmus():
         "event_id": "nba:42", "active": True, "closed": False,
         "accepting_orders": True, "raw": raw,
     }, {}, NOW.isoformat())
+
+
+def test_real_nba_provider_id_to_model_to_kalshi_evidence():
+    fx = nba_fixture_from_balldontlie(
+        NBA_BDL_GAME, regular_season_query_verified=True,
+        venue_home_name="Denver", venue_away_name="Golden State",
+    )
+    assert fx.game_id == "bdl:21717970"
+    assert fx.season == 2026
+    assert fx.kickoff == TIPS["NBA"]
+    assert (fx.home_team, fx.away_team) == ("DEN", "GSW")
+    # The existing model is uncalibrated. Empty history tests ONLY identity
+    # binding, not predicted accuracy or economic edge.
+    prediction = predict_future(
+        [], sport=fx.sport, game_date=fx.kickoff.astimezone(_ET).date(),
+        home_team=fx.home_team, away_team=fx.away_team,
+        game_id=fx.game_id, season=fx.season,
+    )
+    evidence = shadow_evidence(kalshi(), fx, prediction, now=NOW)
+    assert evidence is not None
+    assert evidence.review_reference == "shadow:NBA:bdl:21717970"
+    assert not evidence.validation_reference
+    assert evaluate_shadow(kalshi(), fx, prediction, side=Side.YES,
+                           now=NOW).suggested_action != Action.BUY
+    assert shadow_evidence(kalshi(), fx,
+                           replace(prediction, game_id="future"), now=NOW) is None
+
+
+def test_nba_provider_query_must_be_verified():
+    with pytest.raises(ValueError, match="Verified NBA regular-season query"):
+        nba_fixture_from_balldontlie(
+            NBA_BDL_GAME, venue_home_name="Denver",
+            venue_away_name="Golden State",
+        )
+
+
+@pytest.mark.parametrize("changes", [
+    {"id": None},
+    {"season": "2026"},
+    {"date": "2026-10-27"},
+    {"datetime": "2026-10-27T00:00:00.000Z"},
+    {"datetime": None},
+    {"datetime": "2026-10-27T02:00:00"},
+    {"status_state": "final"},
+    {"status_state": "postponed"},
+    {"postseason": True},
+    {"postponed": True},
+    {"season_type": "playoffs"},
+    {"ist_stage": "Championship"},
+    {"home_team": {"abbreviation": "BOS"}},
+    {"visitor_team": {"abbreviation": ""}},
+])
+def test_nba_provider_bad_identity_or_status_fails_closed(changes):
+    game = dict(NBA_BDL_GAME, **changes)
+    with pytest.raises(ValueError):
+        nba_fixture_from_balldontlie(
+            game, regular_season_query_verified=True,
+            venue_home_name="Denver", venue_away_name="Golden State",
+        )
 
 
 @pytest.mark.parametrize("sport", ["NBA", "NHL"])
