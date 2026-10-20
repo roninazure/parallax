@@ -26,6 +26,25 @@ _KALSHI_WINNER_RULE = re.compile(
     r"then the market resolves to Yes\.", re.ASCII
 )
 
+_PMUS_NBA_RULE = re.compile(
+    r"^This market will settle to the winner of "
+    r"(?P<away_code>[A-Z]{2,4}) (?P<away_name>[A-Za-z ]+?) vs "
+    r"(?P<home_code>[A-Z]{2,4}) (?P<home_name>[A-Za-z ]+?) "
+    r"professional basketball game originally scheduled for "
+    r"(?P<date>[A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4}) at "
+    r"(?P<time>[0-9]{1,2}:[0-9]{2}[AP]M) ET\\. "
+    r"Overtime is included if played\\.", re.ASCII
+)
+# Verified NBA venue alias in the 2026-10-26 Golden State @ Denver contract.
+# Do not extrapolate unverified NBA aliases or NHL settlement semantics.
+_PMUS_NBA_CODES = {"GSW": "GS"}
+
+
+def _pmus_nba_code(canonical: str) -> str:
+    return _PMUS_NBA_CODES.get(canonical, canonical)
+
+
+
 
 @dataclass(frozen=True)
 class ShadowFixture:
@@ -170,20 +189,77 @@ def _selected_yes(market: NormalizedMarket, raw: dict, fixture: ShadowFixture) -
     if market.venue == Venue.KALSHI:
         return _kalshi_yes(market, raw, fixture)
     if market.venue == Venue.POLYMARKET:
+        # Only the genuine 2026 PMUS NBA moneyline structure is verified.
+        # Validate actual team ordering, identity, scheduled ET kickoff,
+        # overtime-inclusive rules and the side chosen by long=True.
+        if fixture.sport != "NBA" or raw.get("marketType") != "moneyline":
+            return None
+        if (raw.get("slug") != market.slug
+                or str(raw.get("id")) != market.venue_market_id
+                or raw.get("status") != "MARKET_STATUS_OPEN"
+                or _instant(raw.get("gameStartTime")) != fixture.kickoff.astimezone(UTC)):
+            return None
+        home_code = _pmus_nba_code(fixture.home_team)
+        away_code = _pmus_nba_code(fixture.away_team)
+        local_day = fixture.kickoff.astimezone(_ET).date()
+        expected_slug = f"aec-nba-{away_code.lower()}-{home_code.lower()}-{local_day.isoformat()}"
+        if market.slug != expected_slug:
+            return None
+
         sides = raw.get("marketSides")
         if not isinstance(sides, list) or len(sides) != 2:
             return None
-        if not all(isinstance(s, dict) and type(s.get("long")) is bool
-                   and isinstance(s.get("team"), dict) for s in sides):
+        ordered: dict[str, dict] = {}
+        for side in sides:
+            if (not isinstance(side, dict)
+                    or type(side.get("long")) is not bool
+                    or not isinstance(side.get("team"), dict)):
+                return None
+            team = side["team"]
+            ordering = team.get("ordering")
+            if (ordering not in ("home", "away")
+                    or ordering in ordered
+                    or _team(team.get("league")) != "NBA"):
+                return None
+            expected_code = home_code if ordering == "home" else away_code
+            # Outcome orientation must come from actual 'long' flags, not
+            # inferred from the away/home team order.
+            if (_team(team.get("abbreviation")) != expected_code
+                    or not _name(team.get("name"))
+                    or not _name(side.get("description"))
+                    or _name(side.get("description")) != _name(team.get("name"))):
+                return None
+            ordered[ordering] = side
+        if set(ordered) != {"home", "away"}:
             return None
-        teams = {_team(s["team"].get("abbreviation")) for s in sides}
-        if teams != participants:
-            return None
-        yes = [s for s in sides if s["long"] is True]
+        yes = [side for side in sides if side["long"] is True]
         if len(yes) != 1:
             return None
-        selected = _team(yes[0]["team"].get("abbreviation"))
-        return selected if selected in participants else None
+        for side in sides:
+            outcome = "YES" if side["long"] else "NO"
+            if _name(market.outcomes.get(outcome)) != _name(side["description"]):
+                return None
+
+        rules = raw.get("description")
+        match = _PMUS_NBA_RULE.match(rules) if isinstance(rules, str) else None
+        if not match or rules != market.resolution_rules:
+            return None
+        identity = match.groupdict()
+        if (_team(identity["home_code"]) != home_code
+                or _team(identity["away_code"]) != away_code
+                or _name(identity["home_name"]) != _name(ordered["home"]["team"]["name"])
+                or _name(identity["away_name"]) != _name(ordered["away"]["team"]["name"])):
+            return None
+        try:
+            original = datetime.strptime(
+                f'{identity["date"]} {identity["time"]}', "%b %d, %Y %I:%M%p"
+            ).replace(tzinfo=_ET)
+        except ValueError:
+            return None
+        if original.astimezone(UTC) != fixture.kickoff.astimezone(UTC):
+            return None
+        selected_order = yes[0]["team"]["ordering"]
+        return fixture.home_team if selected_order == "home" else fixture.away_team
     return None
 
 
@@ -203,21 +279,7 @@ def shadow_evidence(
     raw = market.original_metadata.get("market")
     if not isinstance(raw, dict):
         return None
-    if market.venue == Venue.POLYMARKET:
-        # PMUS shape is still synthetic/unverified; conservatively require all
-        # original explicit metadata until real samples can establish semantics.
-        if (_team(raw.get("league")) != fixture.sport
-                or str(raw.get("marketType") or "").strip().lower()
-                not in {"moneyline", "full_game_winner"}
-                or _team(raw.get("homeTeam")) != fixture.home_team
-                or _team(raw.get("awayTeam")) != fixture.away_team
-                or _instant(raw.get("gameStartTime")) != fixture.kickoff.astimezone(UTC)):
-            return None
-        expected_scope = ("full_game_including_ot_so"
-                          if fixture.sport == "NHL" else "full_game")
-        if str(raw.get("settlement_scope") or "").strip().lower() != expected_scope:
-            return None
-    elif market.venue != Venue.KALSHI:
+    if market.venue not in (Venue.KALSHI, Venue.POLYMARKET):
         return None
     if not market.resolution_rules.strip():
         return None
