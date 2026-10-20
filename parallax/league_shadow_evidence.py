@@ -6,8 +6,9 @@ feed, alerts, or order operations. Unverified venue shapes fail closed.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 import re
+from typing import Mapping
 from zoneinfo import ZoneInfo
 
 from .engine import qualify
@@ -64,6 +65,52 @@ def _team(value: object) -> str:
 
 def _name(value: object) -> str:
     return " ".join(value.split()).casefold() if isinstance(value, str) else ""
+
+
+def nba_fixture_from_balldontlie(
+    game: Mapping[str, object], *,
+    venue_home_name: str, venue_away_name: str,
+    regular_season_query_verified: bool = False,
+) -> ShadowFixture:
+    """Offline binding to one source-verified, *scheduled* NBA regular game.
+
+    No fetches, aliases inferred from markets, or fallback to occurrence_datetime.
+    Caller must have independently verified the originating regular-season
+    query and supplied the verified short venue aliases for both teams.
+    """
+    if not regular_season_query_verified or not isinstance(game, Mapping):
+        raise ValueError("Verified NBA regular-season query required")
+    game_id, season = game.get("id"), game.get("season")
+    if (type(game_id) is not int or game_id <= 0
+            or type(season) is not int or not 2000 <= season <= 2200
+            or game.get("postseason") is not False
+            or game.get("postponed") is True
+            or str(game.get("status_state") or "").lower() != "scheduled"
+            or str(game.get("season_type") or "regular").lower() != "regular"
+            or str(game.get("ist_stage") or "").lower() == "championship"):
+        raise ValueError("NBA game is not an eligible scheduled regular fixture")
+    home, away = game.get("home_team"), game.get("visitor_team")
+    if not isinstance(home, Mapping) or not isinstance(away, Mapping):
+        raise ValueError("NBA fixture requires both source team records")
+    h, a = _team(home.get("abbreviation")), _team(away.get("abbreviation"))
+    if not re.fullmatch(r"[A-Z]{2,4}", h) or not re.fullmatch(r"[A-Z]{2,4}", a):
+        raise ValueError("NBA fixture has invalid team codes")
+    start, raw_day = _instant(game.get("datetime")), game.get("date")
+    if start is None or not isinstance(raw_day, str):
+        raise ValueError("NBA fixture missing timezone-aware start and date")
+    try:
+        scheduled_day = date.fromisoformat(raw_day)
+    except ValueError as exc:
+        raise ValueError("NBA fixture date invalid") from exc
+    if start.astimezone(_ET).date() != scheduled_day:
+        raise ValueError("NBA local game date contradicts UTC tipoff")
+    if not _name(venue_home_name) or not _name(venue_away_name):
+        raise ValueError("Explicit, separately verified venue team aliases required")
+    return ShadowFixture(
+        sport="NBA", game_id=f"bdl:{game_id}", season=season,
+        kickoff=start, home_team=h, away_team=a,
+        venue_home_name=venue_home_name, venue_away_name=venue_away_name,
+    )
 
 
 def _kalshi_yes(market: NormalizedMarket, raw: dict, fixture: ShadowFixture) -> str | None:
