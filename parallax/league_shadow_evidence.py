@@ -22,7 +22,7 @@ _KALSHI_WINNER_RULE = re.compile(
     r"If (?P<winner>.+?) wins the (?P<first>.+?) vs (?P<second>.+?) "
     r"(?P<league>Pro Basketball|NHL) game originally scheduled for "
     r"(?P<date>[A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4}), "
-    r"then the market resolves to Yes\\.", re.ASCII
+    r"then the market resolves to Yes\.", re.ASCII
 )
 
 
