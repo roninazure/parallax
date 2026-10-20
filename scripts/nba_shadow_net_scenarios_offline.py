@@ -51,7 +51,7 @@ def checked_rates(snapshot: dict, audit: dict) -> dict[str, float]:
 def one_fill_scenario(quote: dict, *, venue: str, rate: float) -> dict:
     ask = Decimal(str(quote["ask"]))
     fair = ask + Decimal(str(quote["experimental_nominal_edge"]))
-    depth = Decimal(str(quote["available_at_ask"]))
+    depth = Decimal(str(quote["top_of_book_ask_contracts"]))
     budget_count = int((STAKE / ask).to_integral_value(rounding=ROUND_FLOOR))
     available_count = int(depth.to_integral_value(rounding=ROUND_FLOOR))
     count = min(budget_count, available_count)
