@@ -189,7 +189,7 @@ def test_nba_provider_query_must_be_verified():
     {"id": None},
     {"season": "2026"},
     {"date": "2026-10-27"},
-    {"datetime": "2026-10-27T00:00:00.000Z"},
+    {"datetime": "2026-10-26T02:00:00.000Z"},  # Oct 25 ET conflicts with Oct 26 date
     {"datetime": None},
     {"datetime": "2026-10-27T02:00:00"},
     {"status_state": "final"},
