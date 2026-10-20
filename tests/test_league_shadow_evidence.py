@@ -1,6 +1,8 @@
-"""Offline integration tests: existing venue normalization -> Evidence -> qualify.
+"""Offline integration tests with sanitized *real* Kalshi NBA/NHL rule fields.
 
-Every market fixture here is SYNTHETIC. No provider calls or BUY authority.
+Kalshi metadata/rules came from user-inspected October 19, 2026 public
+markets. Game kickoff and synthetic book are TEST INPUTS, not live facts.
+Polymarket US fixture is synthetic/unverified. No provider calls or BUYs.
 """
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
@@ -13,39 +15,81 @@ from parallax.models import Action, Side, Venue
 from parallax.normalization import normalize_kalshi, normalize_pmus
 
 NOW = datetime(2026, 10, 19, 17, 0, tzinfo=UTC)
-TIP = datetime(2026, 10, 20, 23, 0, tzinfo=UTC)
+TIP = datetime(2026, 10, 26, 23, 0, tzinfo=UTC)  # synthetic official fixture time
+
+MARKETS = {
+    "NBA": {
+        "ticker": "KXNBAGAME-26OCT26GSWDEN-GSW",
+        "event_ticker": "KXNBAGAME-26OCT26GSWDEN",
+        "title": "Golden State wins",
+        "yes_sub_title": "Golden State",
+        "no_sub_title": "Golden State",
+        "rules_primary": (
+            "If Golden State wins the Golden State vs Denver Pro Basketball "
+            "game originally scheduled for Oct 26, 2026, then the market resolves to Yes."
+        ),
+        "rules_secondary": (
+            "If the game is postponed but begins within 48 hours of its originally "
+            "scheduled start time, the market will remain open and resolve based "
+            "on the official final result. If the game is cancelled or not started "
+            "within 48 hours of its originally scheduled start, all markets will "
+            "resolve to a fair price."
+        ),
+        "occurrence_datetime": "2026-10-27T05:00:00Z",
+    },
+    "NHL": {
+        "ticker": "KXNHLGAME-26OCT26TORCGY-TOR",
+        "event_ticker": "KXNHLGAME-26OCT26TORCGY",
+        "title": "Toronto wins",
+        "yes_sub_title": "Toronto",
+        "no_sub_title": "Toronto",
+        "rules_primary": (
+            "If Toronto wins the Toronto vs Calgary NHL game originally "
+            "scheduled for Oct 26, 2026, then the market resolves to Yes."
+        ),
+        "rules_secondary": (
+            "If the game is postponed but begins within 48 hours of its originally "
+            "scheduled start time, the market will remain open and resolve based "
+            "on the official final result. If the game is cancelled or not started "
+            "within 48 hours of its originally scheduled start, all markets will "
+            "resolve to a fair price."
+        ),
+        "occurrence_datetime": "2026-10-27T03:30:00Z",
+    },
+}
 
 
-def fixture(sport="NBA"):
-    return ShadowFixture(sport, "game:42", 2026, TIP, "NYK", "BOS")
+def fixture(sport="NBA", **changes):
+    if sport == "NBA":
+        kwargs = dict(sport=sport, game_id="game:42", season=2026, kickoff=TIP,
+                      home_team="DEN", away_team="GSW",
+                      venue_home_name="Denver", venue_away_name="Golden State")
+    else:
+        kwargs = dict(sport=sport, game_id="game:42", season=2026, kickoff=TIP,
+                      home_team="CGY", away_team="TOR",
+                      venue_home_name="Calgary", venue_away_name="Toronto")
+    kwargs.update(changes)
+    return ShadowFixture(**kwargs)
 
 
-def forecast(sport="NBA", home_probability=0.10):
-    return Forecast(
-        sport=sport, game_id="game:42", season=2026,
-        game_date=TIP.date(), home_team="NYK", away_team="BOS",
+def forecast(sport="NBA", home_probability=.10, **changes):
+    fx = fixture(sport)
+    kwargs = dict(
+        sport=sport, game_id=fx.game_id, season=fx.season,
+        game_date=TIP.date(), home_team=fx.home_team, away_team=fx.away_team,
         home_win_probability=home_probability, home_won=None,
         model_status=MODEL_STATUS,
     )
+    kwargs.update(changes)
+    return Forecast(**kwargs)
 
 
 def kalshi(sport="NBA", **changes):
     raw = {
-        "ticker": f"KX{sport}GAME-26OCT20BOSNYK-BOS",
-        "event_ticker": f"KX{sport}GAME-26OCT20BOSNYK",
-        "title": "Full-game winner",
-        "yes_sub_title": "BOS",
-        "no_sub_title": "NYK",
+        **MARKETS[sport],
         "status": "active",
-        "league": sport,
-        "marketType": "moneyline",
-        "homeTeam": "NYK",
-        "awayTeam": "BOS",
-        "gameStartTime": TIP.isoformat(),
-        "settlement_scope": ("full_game_including_ot_so" if sport == "NHL" else "full_game"),
-        "rules_primary": "Winner of full game including overtime and shootout",
-        "price_level_structure": "linear_cent",
         "market_type": "binary",
+        "price_level_structure": "linear_cent",
         "notional_value_dollars": "1",
         "expected_expiration_time": (TIP + timedelta(hours=3)).isoformat(),
     }
@@ -57,76 +101,99 @@ def kalshi(sport="NBA", **changes):
 
 def pmus():
     raw = {
+        # SYNTHETIC: actual PMUS mapping has not been verified.
         "league": "NBA", "marketType": "moneyline",
-        "homeTeam": "NYK", "awayTeam": "BOS",
+        "homeTeam": "DEN", "awayTeam": "GSW",
         "gameStartTime": TIP.isoformat(), "settlement_scope": "full_game",
         "description": "Full-game winner including overtime",
         "marketSides": [
-            {"long": True, "description": "Boston Celtics",
-             "team": {"abbreviation": "BOS", "ordering": "away"}},
-            {"long": False, "description": "New York Knicks",
-             "team": {"abbreviation": "NYK", "ordering": "home"}},
+            {"long": True, "description": "Golden State Warriors",
+             "team": {"abbreviation": "GSW", "ordering": "away"}},
+            {"long": False, "description": "Denver Nuggets",
+             "team": {"abbreviation": "DEN", "ordering": "home"}},
         ],
     }
     return normalize_pmus({
-        "id": "pmus:game:42", "slug": "nba-bos-nyk", "question": "Boston wins?",
+        "id": "pmus:game:42", "slug": "nba-gsw-den", "question": "Golden State wins?",
         "event_id": "nba:42", "active": True, "closed": False,
         "accepting_orders": True, "raw": raw,
     }, {}, NOW.isoformat())
 
 
-def test_existing_kalshi_normalization_orientation_and_buy_block():
-    market = kalshi()
-    evidence = shadow_evidence(market, fixture(), forecast(), now=NOW)
-    assert evidence is not None
-    assert evidence.fair_probability == pytest.approx(.90)
-    assert evidence.validation_reference == ""
-    assert evidence.validation_status == "UNVALIDATED"
-    assert evidence.market_id == market.venue_market_id
+@pytest.mark.parametrize("sport", ["NBA", "NHL"])
+def test_actual_kalshi_contract_metadata_maps_to_existing_evidence(sport):
+    market = kalshi(sport)
+    assert market.venue == Venue.KALSHI
+    for invented_field in ("league", "homeTeam", "awayTeam",
+                           "gameStartTime", "settlement_scope", "marketType"):
+        assert invented_field not in market.original_metadata["market"]
+    e = shadow_evidence(market, fixture(sport), forecast(sport), now=NOW)
+    assert e is not None
+    assert e.fair_probability == pytest.approx(.90)
+    assert e.market_id == market.venue_market_id
+    assert not e.validation_reference
+    assert e.validation_status == "UNVALIDATED"
     for side in (Side.YES, Side.NO):
-        play = evaluate_shadow(market, fixture(), forecast(), side=side, now=NOW)
+        play = evaluate_shadow(market, fixture(sport), forecast(sport),
+                               side=side, now=NOW)
         assert play is not None
         assert play.suggested_action != Action.BUY
         assert "confidence" in play.verdict.failed_gates
 
 
-def test_existing_pmus_normalization_structured_selected_team():
-    market = pmus()
-    assert market.venue == Venue.POLYMARKET
-    evidence = shadow_evidence(market, fixture(), forecast(), now=NOW)
-    assert evidence is not None
-    assert evidence.fair_probability == pytest.approx(.90)
-    assert evaluate_shadow(market, fixture(), forecast(), side=Side.YES, now=NOW).suggested_action != Action.BUY
+def test_occurrence_datetime_is_not_the_game_kickoff():
+    market = kalshi(occurrence_datetime="2026-11-01T00:00:00Z")
+    assert shadow_evidence(market, fixture(), forecast(), now=NOW) is not None
 
 
-@pytest.mark.parametrize("change", [
-    {"marketType": "spread"}, {"league": "NFL"},
-    {"homeTeam": "BKN"}, {"awayTeam": "CHI"},
-    {"settlement_scope": "regulation"},
-    {"gameStartTime": "2026-10-21T23:00:00+00:00"},
-    {"gameStartTime": "2026-10-20"},
-    {"ticker": "KXNBAGAME-26OCT20BOSNYK-LAL"},
-    {"ticker": "UNVERIFIED-26OCT20BOSNYK-BOS"},
-    {"yes_sub_title": "NYK"},
-    {"rules_primary": "Regulation only — 3-way"},
+@pytest.mark.parametrize("changes", [
+    {"ticker": "KXNBAGAME-26OCT26GSWDEN-LAL"},
+    {"ticker": "KXNHLGAME-26OCT26GSWDEN-GSW"},
+    {"ticker": "KXNBAGAME-26OCT27GSWDEN-GSW"},
+    {"ticker": "KXNBAGAME-26OCT26GSWLAL-GSW"},
+    {"ticker": "KXNBAGAME-26OCT26GSWDEN-GSW-JUNK"},
+    {"event_ticker": "KXNBAGAME-26OCT27GSWDEN"},
+    {"title": "Denver wins"},
+    {"yes_sub_title": "Denver"},
+    {"rules_primary": "Regulation only — Golden State wins"},
+    {"rules_primary": "If Golden State wins the Golden State vs Denver NHL game originally scheduled for Oct 26, 2026, then the market resolves to Yes."},
+    {"rules_primary": "If Golden State wins the Golden State vs LA Pro Basketball game originally scheduled for Oct 26, 2026, then the market resolves to Yes."},
+    {"rules_primary": "If Golden State wins the Golden State vs Denver Pro Basketball game originally scheduled for Oct 27, 2026, then the market resolves to Yes."},
+    {"rules_primary": ""},
+    {"status": "closed"},
 ])
-def test_invalid_contract_or_identity_fails_closed(change):
-    assert shadow_evidence(kalshi(**change), fixture(), forecast(), now=NOW) is None
+def test_kalshi_identity_or_rules_conflict_fails_closed(changes):
+    assert shadow_evidence(kalshi(**changes), fixture(), forecast(), now=NOW) is None
 
 
-def test_nhl_requires_ot_shootout_scope_and_distinct_sport():
-    assert shadow_evidence(kalshi("NHL"), fixture("NHL"), forecast("NHL"), now=NOW) is not None
-    assert shadow_evidence(kalshi("NHL", settlement_scope="full_game"),
-                           fixture("NHL"), forecast("NHL"), now=NOW) is None
-    assert shadow_evidence(kalshi("NHL"), fixture("NBA"), forecast("NBA"), now=NOW) is None
+def test_synthetic_pmus_orientation_is_still_uncertified():
+    market = pmus()
+    e = shadow_evidence(market, fixture(), forecast(), now=NOW)
+    assert e is not None
+    assert e.fair_probability == pytest.approx(.90)
+    assert evaluate_shadow(market, fixture(), forecast(), side=Side.YES,
+                           now=NOW).suggested_action != Action.BUY
+
+
+def test_wrong_fixture_or_missing_verified_alias_fails_closed():
+    market = kalshi()
+    assert shadow_evidence(market, fixture(home_team="LAL"), forecast(), now=NOW) is None
+    assert shadow_evidence(market, fixture(kickoff=TIP + timedelta(days=1)),
+                           forecast(), now=NOW) is None
+    assert shadow_evidence(market, fixture(venue_home_name="Denver Nuggets"),
+                           forecast(), now=NOW) is None
+    assert shadow_evidence(market, fixture(venue_home_name="",
+                                          venue_away_name=""), forecast(), now=NOW) is None
+    with pytest.raises(ValueError):
+        fixture(venue_home_name="Denver", venue_away_name="Denver")
 
 
 def test_pregame_and_unresolved_forecast_required():
     market = kalshi()
     assert shadow_evidence(market, fixture(), forecast(), now=TIP) is None
     assert shadow_evidence(market, fixture(), replace(forecast(), home_won=True), now=NOW) is None
-    assert shadow_evidence(market, fixture(), replace(forecast(), game_id="another"), now=NOW) is None
-    assert shadow_evidence(market, fixture(), replace(forecast(), model_status="CALIBRATED"), now=NOW) is None
+    assert shadow_evidence(market, fixture(), forecast(game_id="another"), now=NOW) is None
+    assert shadow_evidence(market, fixture(), forecast(model_status="CALIBRATED"), now=NOW) is None
 
 
 def test_ambiguous_pmus_sides_rejected():
@@ -135,10 +202,10 @@ def test_ambiguous_pmus_sides_rejected():
     sides = [dict(x) for x in raw["marketSides"]]
     sides[1]["long"] = True
     raw["marketSides"] = sides
-    ambiguous = replace(market, original_metadata={"market": raw})
-    assert shadow_evidence(ambiguous, fixture(), forecast(), now=NOW) is None
+    assert shadow_evidence(replace(market, original_metadata={"market": raw}),
+                           fixture(), forecast(), now=NOW) is None
     sides[1]["long"] = False
     sides[1]["team"] = {"abbreviation": "CHI"}
     raw["marketSides"] = sides
-    wrong_opponent = replace(market, original_metadata={"market": raw})
-    assert shadow_evidence(wrong_opponent, fixture(), forecast(), now=NOW) is None
+    assert shadow_evidence(replace(market, original_metadata={"market": raw}),
+                           fixture(), forecast(), now=NOW) is None
