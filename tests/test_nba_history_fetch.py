@@ -17,8 +17,13 @@ def payload(rows, cursor):
 
 
 def test_rejects_malformed_data_and_missing_pagination():
-    with pytest.raises(ValueError, match="Missing pagination"):
-        dl.validate_page({"data": [sample(1)], "meta": {}}, 2025)
+    # A short terminal page can omit next_cursor entirely.
+    rows, cursor = dl.validate_page({"data": [sample(1)], "meta": {"per_page": 100}}, 2025)
+    assert [g["id"] for g in rows] == [1]
+    assert cursor is None
+    # A full page without a cursor is ambiguous and must fail closed.
+    with pytest.raises(ValueError, match="Full page missing pagination"):
+        dl.validate_page({"data": [sample(i) for i in range(100)], "meta": {}}, 2025)
     with pytest.raises(ValueError, match="Season mismatch"):
         dl.validate_page(payload([sample(1, season=2024)], None), 2025)
     with pytest.raises(ValueError, match="Postseason"):
@@ -28,7 +33,7 @@ def test_rejects_malformed_data_and_missing_pagination():
 def test_resume_uses_cache_without_new_provider_calls(tmp_path, monkeypatch):
     responses = [
         payload([sample(1), sample(2)], 789),
-        payload([sample(3)], None),
+        {"data": [sample(3)], "meta": {"per_page": 100}},
     ]
     requested = []
 
