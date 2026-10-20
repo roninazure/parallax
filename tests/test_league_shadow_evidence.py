@@ -6,6 +6,7 @@ Polymarket US fixture is synthetic/unverified. No provider calls or BUYs.
 """
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -15,7 +16,15 @@ from parallax.models import Action, Side, Venue
 from parallax.normalization import normalize_kalshi, normalize_pmus
 
 NOW = datetime(2026, 10, 19, 17, 0, tzinfo=UTC)
-TIP = datetime(2026, 10, 26, 23, 0, tzinfo=UTC)  # synthetic official fixture time
+_ET = ZoneInfo("America/New_York")
+# Independently verified matchup/start, NOT inferred from Kalshi occurrence_datetime.
+# NBA: https://www.nba.com/team/1610612744/schedule (Oct 26 @ DEN, 10 PM ET)
+# NHL: https://www.nhl.com/schedule/2026-10-23 (Oct 26 TOR @ CGY, 8:30 PM ET)
+# These are sourced TEST fixtures, not a licensed automated production feed.
+TIPS = {
+    "NBA": datetime(2026, 10, 27, 2, 0, tzinfo=UTC),
+    "NHL": datetime(2026, 10, 27, 0, 30, tzinfo=UTC),
+}
 
 MARKETS = {
     "NBA": {
@@ -61,11 +70,13 @@ MARKETS = {
 
 def fixture(sport="NBA", **changes):
     if sport == "NBA":
-        kwargs = dict(sport=sport, game_id="game:42", season=2026, kickoff=TIP,
+        kwargs = dict(sport=sport, game_id="nba.com:0022600127",
+                      season=2026, kickoff=TIPS[sport],
                       home_team="DEN", away_team="GSW",
                       venue_home_name="Denver", venue_away_name="Golden State")
     else:
-        kwargs = dict(sport=sport, game_id="game:42", season=2026, kickoff=TIP,
+        kwargs = dict(sport=sport, game_id="nhl-schedule:2026-10-26:TOR@CGY",
+                      season=2026, kickoff=TIPS[sport],
                       home_team="CGY", away_team="TOR",
                       venue_home_name="Calgary", venue_away_name="Toronto")
     kwargs.update(changes)
@@ -76,7 +87,8 @@ def forecast(sport="NBA", home_probability=.10, **changes):
     fx = fixture(sport)
     kwargs = dict(
         sport=sport, game_id=fx.game_id, season=fx.season,
-        game_date=TIP.date(), home_team=fx.home_team, away_team=fx.away_team,
+        game_date=fx.kickoff.astimezone(_ET).date(),
+        home_team=fx.home_team, away_team=fx.away_team,
         home_win_probability=home_probability, home_won=None,
         model_status=MODEL_STATUS,
     )
@@ -91,7 +103,7 @@ def kalshi(sport="NBA", **changes):
         "market_type": "binary",
         "price_level_structure": "linear_cent",
         "notional_value_dollars": "1",
-        "expected_expiration_time": (TIP + timedelta(hours=3)).isoformat(),
+        "expected_expiration_time": (TIPS[sport] + timedelta(hours=3)).isoformat(),
     }
     raw.update(changes)
     book = {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
@@ -104,7 +116,7 @@ def pmus():
         # SYNTHETIC: actual PMUS mapping has not been verified.
         "league": "NBA", "marketType": "moneyline",
         "homeTeam": "DEN", "awayTeam": "GSW",
-        "gameStartTime": TIP.isoformat(), "settlement_scope": "full_game",
+        "gameStartTime": TIPS["NBA"].isoformat(), "settlement_scope": "full_game",
         "description": "Full-game winner including overtime",
         "marketSides": [
             {"long": True, "description": "Golden State Warriors",
@@ -141,7 +153,20 @@ def test_actual_kalshi_contract_metadata_maps_to_existing_evidence(sport):
         assert "confidence" in play.verdict.failed_gates
 
 
-def test_occurrence_datetime_is_not_the_game_kickoff():
+def test_actual_fixture_times_and_eastern_game_date_are_not_venue_expirations():
+    assert TIPS["NBA"].astimezone(_ET).isoformat() == "2026-10-26T22:00:00-04:00"
+    assert TIPS["NHL"].astimezone(_ET).isoformat() == "2026-10-26T20:30:00-04:00"
+    assert TIPS["NBA"] != TIPS["NHL"]
+    for sport in ("NBA", "NHL"):
+        fx = fixture(sport)
+        pred = forecast(sport)
+        assert pred.game_date.isoformat() == "2026-10-26"
+        assert fx.kickoff == TIPS[sport]
+        # Kalshi occurrence_datetime is later than tipoff: never use it as kickoff.
+        occurrence = datetime.fromisoformat(
+            MARKETS[sport]["occurrence_datetime"].replace("Z", "+00:00"))
+        assert occurrence > fx.kickoff
+        assert shadow_evidence(kalshi(sport), fx, pred, now=NOW) is not None
     market = kalshi(occurrence_datetime="2026-11-01T00:00:00Z")
     assert shadow_evidence(market, fixture(), forecast(), now=NOW) is not None
 
@@ -178,7 +203,7 @@ def test_synthetic_pmus_orientation_is_still_uncertified():
 def test_wrong_fixture_or_missing_verified_alias_fails_closed():
     market = kalshi()
     assert shadow_evidence(market, fixture(home_team="LAL"), forecast(), now=NOW) is None
-    assert shadow_evidence(market, fixture(kickoff=TIP + timedelta(days=1)),
+    assert shadow_evidence(market, fixture(kickoff=TIPS["NBA"] + timedelta(days=1)),
                            forecast(), now=NOW) is None
     assert shadow_evidence(market, fixture(venue_home_name="Denver Nuggets"),
                            forecast(), now=NOW) is None
@@ -190,7 +215,7 @@ def test_wrong_fixture_or_missing_verified_alias_fails_closed():
 
 def test_pregame_and_unresolved_forecast_required():
     market = kalshi()
-    assert shadow_evidence(market, fixture(), forecast(), now=TIP) is None
+    assert shadow_evidence(market, fixture(), forecast(), now=TIPS["NBA"]) is None
     assert shadow_evidence(market, fixture(), replace(forecast(), home_won=True), now=NOW) is None
     assert shadow_evidence(market, fixture(), forecast(game_id="another"), now=NOW) is None
     assert shadow_evidence(market, fixture(), forecast(model_status="CALIBRATED"), now=NOW) is None
