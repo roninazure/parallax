@@ -1,10 +1,8 @@
-"""Offline integration tests with sanitized *real* Kalshi NBA/NHL rule fields.
+"""Offline integration tests with sanitized observed Kalshi/PMUS market fields.
 
-Kalshi metadata/rules came from user-inspected October 19, 2026 public
-markets. Kickoff times match independently published NBA/NHL schedules;
-market order book and expiration are synthetic. Fixture IDs in this test are
-NOT yet reconciled to the BALLDONTLIE provider IDs used by the Elo snapshot.
-Polymarket US fixture is synthetic/unverified. No provider calls or BUYs.
+Observed metadata is limited to user-inspected October 2026 contracts.
+NBA kickoff/BDL game ID are independently verified. Order books here are
+synthetic test data; no provider requests, feed publishing or BUYs.
 """
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
@@ -130,24 +128,43 @@ def kalshi(sport="NBA", **changes):
     return normalize_kalshi(raw, book, NOW.isoformat())
 
 
-def pmus():
+PMUS_NBA_DESCRIPTION = (
+    "This market will settle to the winner of the GS Warriors vs DEN Nuggets "
+    "professional basketball game originally scheduled for Oct 26, 2026 at "
+    "10:00PM ET. Overtime is included if played. If the game is delayed, "
+    "postponed, suspended, or otherwise rescheduled and is not rescheduled "
+    "to start within two calendar days of the originally scheduled date "
+    "and time, the market will settle to the last fair market price. "
+    "Outcome sourced from the relevant governing body."
+)
+
+
+def pmus(**changes):
+    """Offline clone of inspected Oct 26 PMUS NBA market ID 1386496.
+
+    The discovery payload verified code gs (not GSW) and source ordering.
+    No live book or network requests in this test helper.
+    """
     raw = {
-        # SYNTHETIC: actual PMUS mapping has not been verified.
-        "league": "NBA", "marketType": "moneyline",
-        "homeTeam": "DEN", "awayTeam": "GSW",
-        "gameStartTime": TIPS["NBA"].isoformat(), "settlement_scope": "full_game",
-        "description": "Full-game winner including overtime",
+        "id": 1386496, "slug": "aec-nba-gs-den-2026-10-26",
+        "marketType": "moneyline", "status": "MARKET_STATUS_OPEN",
+        "gameStartTime": TIPS["NBA"].isoformat(),
+        "description": PMUS_NBA_DESCRIPTION,
         "marketSides": [
-            {"long": True, "description": "Golden State Warriors",
-             "team": {"abbreviation": "GSW", "ordering": "away"}},
-            {"long": False, "description": "Denver Nuggets",
-             "team": {"abbreviation": "DEN", "ordering": "home"}},
+            {"long": True, "description": "Warriors",
+             "team": {"abbreviation": "gs", "name": "Warriors",
+                      "league": "nba", "ordering": "away"}},
+            {"long": False, "description": "Nuggets",
+             "team": {"abbreviation": "den", "name": "Nuggets",
+                      "league": "nba", "ordering": "home"}},
         ],
     }
+    raw.update(changes)
     return normalize_pmus({
-        "id": "pmus:game:42", "slug": "nba-gsw-den", "question": "Golden State wins?",
-        "event_id": "nba:42", "active": True, "closed": False,
-        "accepting_orders": True, "raw": raw,
+        "id": "1386496", "slug": "aec-nba-gs-den-2026-10-26",
+        "question": "Who will win: GS Warriors vs DEN Nuggets?",
+        "event_id": "nba:gs-den:2026-10-26", "active": True,
+        "closed": False, "accepting_orders": True, "raw": raw,
     }, {}, NOW.isoformat())
 
 
@@ -284,13 +301,54 @@ def test_kalshi_identity_or_rules_conflict_fails_closed(changes):
     assert shadow_evidence(kalshi(**changes), fixture(), forecast(), now=NOW) is None
 
 
-def test_synthetic_pmus_orientation_is_still_uncertified():
+def test_observed_pmus_nba_moneyline_maps_to_experimental_evidence():
     market = pmus()
     e = shadow_evidence(market, fixture(), forecast(), now=NOW)
     assert e is not None
+    assert e.market_id == "1386496"
     assert e.fair_probability == pytest.approx(.90)
-    assert evaluate_shadow(market, fixture(), forecast(), side=Side.YES,
-                           now=NOW).suggested_action != Action.BUY
+    assert e.validation_status == "UNVALIDATED"
+    assert e.validation_reference == ""
+    for side in (Side.YES, Side.NO):
+        play = evaluate_shadow(market, fixture(), forecast(), side=side, now=NOW)
+        assert play is not None
+        assert play.suggested_action != Action.BUY
+
+
+@pytest.mark.parametrize("changes", [
+    {"marketType": "futures"},
+    {"id": 123},
+    {"slug": "aec-nba-gs-lal-2026-10-26"},
+    {"status": "MARKET_STATUS_CLOSED"},
+    {"gameStartTime": None},
+    {"gameStartTime": "2026-10-27T03:00:00+00:00"},
+    {"description": PMUS_NBA_DESCRIPTION.replace("Oct 26", "Oct 27")},
+    {"description": PMUS_NBA_DESCRIPTION.replace("10:00PM", "9:00PM")},
+    {"description": PMUS_NBA_DESCRIPTION.replace("Overtime is included if played.", "Regulation only.")},
+    {"description": PMUS_NBA_DESCRIPTION.replace("GS Warriors", "GS Valkyries")},
+])
+def test_observed_pmus_nba_contract_conflicts_fail_closed(changes):
+    assert shadow_evidence(pmus(**changes), fixture(), forecast(), now=NOW) is None
+
+
+@pytest.mark.parametrize("team_change", [
+    {"abbreviation": "gsw"},
+    {"league": "wnba"},
+    {"ordering": "home"},
+    {"name": "Valkyries"},
+])
+def test_pmus_wrong_away_team_identity_fails_closed(team_change):
+    market = pmus()
+    raw = dict(market.original_metadata["market"])
+    sides = [dict(s) for s in raw["marketSides"]]
+    sides[0]["team"] = dict(sides[0]["team"], **team_change)
+    raw["marketSides"] = sides
+    assert shadow_evidence(replace(market, original_metadata={"market": raw}),
+                           fixture(), forecast(), now=NOW) is None
+
+
+def test_pmus_nhl_remains_unverified_and_blocked():
+    assert shadow_evidence(pmus(), fixture("NHL"), forecast("NHL"), now=NOW) is None
 
 
 def test_wrong_fixture_or_missing_verified_alias_fails_closed():
