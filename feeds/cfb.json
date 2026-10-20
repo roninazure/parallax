@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T14:23:50.704957+00:00",
+  "generated_at": "2026-10-20T15:24:12.945634+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -15,22 +15,22 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 17.2352683,
+      "edge_pp": 16.2352683,
       "market_id": "1269995",
       "matchup": "Missouri State at Delaware",
       "model_probability": 0.5923526829899838,
-      "price": 0.42,
+      "price": 0.43,
       "sport": "CFB",
       "start_time": "2026-10-20T23:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
-      "edge_pp": 12.84850999,
+      "edge_pp": 12.34850999,
       "market_id": "1331016",
       "matchup": "NC State at Stanford",
       "model_probability": 0.4184850999180071,
-      "price": 0.29,
+      "price": 0.295,
       "sport": "CFB",
       "start_time": "2026-10-24T02:30:00+00:00",
       "venue": "POLYMARKET"
@@ -45,25 +45,14 @@
       "sport": "CFB",
       "start_time": "2026-10-24T00:30:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 6.52903759,
-      "market_id": "1395827",
-      "matchup": "Tennessee at South Carolina",
-      "model_probability": 0.5302903758943651,
-      "price": 0.465,
-      "sport": "CFB",
-      "start_time": "2026-10-24T19:30:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-20T14:23:37.990493+00:00",
+  "source_feed_generated_at": "2026-10-20T15:23:55.552763+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 4
   }
 }
