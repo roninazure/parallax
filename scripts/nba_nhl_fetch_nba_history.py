@@ -40,8 +40,13 @@ def validate_page(payload: object, season: int) -> tuple[list[dict], int | None]
             raise ValueError("Season mismatch in provider response")
         if row.get("postseason") is True:
             raise ValueError("Postseason result in regular-season query")
+    # BALLDONTLIE may omit next_cursor on the terminal page instead of
+    # returning JSON null. Accept omission ONLY for a short page, to avoid
+    # silently truncating a full page with missing pagination metadata.
     if "next_cursor" not in meta:
-        raise ValueError("Missing pagination completion indicator")
+        if len(rows) == PER_PAGE:
+            raise ValueError("Full page missing pagination cursor; completeness uncertain")
+        return rows, None
     cursor = meta["next_cursor"]
     if cursor is not None and (type(cursor) is not int or cursor < 1):
         raise ValueError("Invalid pagination cursor")
