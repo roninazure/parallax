@@ -2,6 +2,7 @@
 from copy import deepcopy
 from datetime import UTC, datetime
 from types import SimpleNamespace
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -63,7 +64,7 @@ def fixture(cfg, game_id):
 def forecast(fx, home_probability):
     return Forecast(
         sport="NBA", game_id=fx.game_id, season=2026,
-        game_date=fx.kickoff.date(),
+        game_date=fx.kickoff.astimezone(ZoneInfo("America/New_York")).date(),
         home_team=fx.home_team, away_team=fx.away_team,
         home_win_probability=home_probability,
         home_won=None, model_status=MODEL_STATUS,
