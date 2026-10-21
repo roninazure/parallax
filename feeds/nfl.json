@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-10-21T01:16:19.061247+00:00",
+  "generated_at": "2026-10-21T01:17:22.707038+00:00",
   "lane": "NFL",
   "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 37.82354797,
+      "market_id": "1387745",
+      "matchup": "DAL at PHI",
+      "model_probability": 0.7232354796538691,
+      "price": 0.345,
+      "sport": "NFL",
+      "start_time": "2026-10-27T00:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "NO",
       "edge_pp": 11.4979229,
@@ -37,28 +48,6 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 11.40851754,
-      "market_id": "1358486",
-      "matchup": "TB at CAR",
-      "model_probability": 0.49908517544557873,
-      "price": 0.385,
-      "sport": "NFL",
-      "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 37.82354797,
-      "market_id": "1387745",
-      "matchup": "DAL at PHI",
-      "model_probability": 0.7232354796538691,
-      "price": 0.345,
-      "sport": "NFL",
-      "start_time": "2026-10-27T00:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
       "edge_pp": 7.73317408,
       "market_id": "1288608",
       "matchup": "NE at CHI",
@@ -67,11 +56,22 @@
       "sport": "NFL",
       "start_time": "2026-10-23T00:15:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 11.40851754,
+      "market_id": "1358486",
+      "matchup": "TB at CAR",
+      "model_probability": 0.49908517544557873,
+      "price": 0.385,
+      "sport": "NFL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-21T01:16:18.924669+00:00",
+  "source_feed_generated_at": "2026-10-21T01:17:21.580507+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
