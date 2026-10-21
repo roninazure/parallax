@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T06:41:55.991342+00:00",
+  "generated_at": "2026-10-21T07:41:18.107197+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -48,11 +48,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 7.02903759,
+      "edge_pp": 6.52903759,
       "market_id": "1395827",
       "matchup": "Tennessee at South Carolina",
       "model_probability": 0.5302903758943651,
-      "price": 0.46,
+      "price": 0.465,
       "sport": "CFB",
       "start_time": "2026-10-24T19:30:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-21T06:41:13.198405+00:00",
+  "source_feed_generated_at": "2026-10-21T07:40:50.170070+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
