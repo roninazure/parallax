@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22T19:21:12.808674+00:00",
+  "generated_at": "2026-10-22T19:24:35.159552+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -48,11 +48,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 9.40851754,
+      "edge_pp": 8.65851754,
       "market_id": "1358486",
       "matchup": "TB at CAR",
       "model_probability": 0.49908517544557873,
-      "price": 0.405,
+      "price": 0.4125,
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "POLYMARKET"
@@ -82,7 +82,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-22T19:21:01.035469+00:00",
+  "source_feed_generated_at": "2026-10-22T19:24:29.614319+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
