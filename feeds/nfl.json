@@ -1,29 +1,7 @@
 {
-  "generated_at": "2026-10-22T06:05:18.447289+00:00",
+  "generated_at": "2026-10-22T06:06:22.038024+00:00",
   "lane": "NFL",
   "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 18.61951629,
-      "market_id": "1458580",
-      "matchup": "CAR at GB",
-      "model_probability": 0.7836951628619138,
-      "price": 0.5975,
-      "sport": "NFL",
-      "start_time": "2026-10-30T00:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 19.7479229,
-      "market_id": "KXNFLGAME-26OCT25CINBAL-BAL",
-      "matchup": "CIN at BAL",
-      "model_probability": 0.6874792289964197,
-      "price": 0.49,
-      "sport": "NFL",
-      "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "KALSHI"
-    },
     {
       "contract_side": "NO",
       "edge_pp": 7.85733304,
@@ -48,11 +26,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 8.09048249,
+      "edge_pp": 8.34048249,
       "market_id": "1358487",
       "matchup": "SF at ATL",
       "model_probability": 0.6684048248762824,
-      "price": 0.5875,
+      "price": 0.585,
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "POLYMARKET"
@@ -78,14 +56,25 @@
       "sport": "NFL",
       "start_time": "2026-10-27T00:15:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 18.36951629,
+      "market_id": "1458580",
+      "matchup": "CAR at GB",
+      "model_probability": 0.7836951628619138,
+      "price": 0.6,
+      "sport": "NFL",
+      "start_time": "2026-10-30T00:15:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-22T06:05:17.619714+00:00",
+  "source_feed_generated_at": "2026-10-22T06:06:07.405747+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 7
+    "buy": 6
   }
 }
