@@ -1,13 +1,58 @@
 {
-  "generated_at": "2026-10-22T10:57:55.542004+00:00",
+  "generated_at": "2026-10-22T12:00:30.782528+00:00",
   "lane": "CFB",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 34.81329253,
+      "market_id": "1358895",
+      "matchup": "Boise State at Washington State",
+      "model_probability": 0.528132925256802,
+      "price": 0.18,
+      "sport": "CFB",
+      "start_time": "2026-10-24T22:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 26.47084491,
+      "market_id": "1308031",
+      "matchup": "James Madison at App State",
+      "model_probability": 0.47470844910079435,
+      "price": 0.21,
+      "sport": "CFB",
+      "start_time": "2026-10-22T23:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 11.34850999,
+      "market_id": "1331016",
+      "matchup": "NC State at Stanford",
+      "model_probability": 0.4184850999180071,
+      "price": 0.305,
+      "sport": "CFB",
+      "start_time": "2026-10-24T02:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 7.52903759,
+      "market_id": "1395827",
+      "matchup": "Tennessee at South Carolina",
+      "model_probability": 0.5302903758943651,
+      "price": 0.455,
+      "sport": "CFB",
+      "start_time": "2026-10-24T19:30:00+00:00",
+      "venue": "POLYMARKET"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-22T10:57:33.810666+00:00",
+  "source_feed_generated_at": "2026-10-22T12:00:28.805376+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 4
   }
 }
