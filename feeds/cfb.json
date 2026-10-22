@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22T16:07:18.806162+00:00",
+  "generated_at": "2026-10-22T17:07:01.655481+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -15,11 +15,11 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 25.97084491,
+      "edge_pp": 26.47084491,
       "market_id": "1308031",
       "matchup": "James Madison at App State",
       "model_probability": 0.47470844910079435,
-      "price": 0.215,
+      "price": 0.21,
       "sport": "CFB",
       "start_time": "2026-10-22T23:00:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-22T16:06:14.703264+00:00",
+  "source_feed_generated_at": "2026-10-22T17:06:28.166917+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
