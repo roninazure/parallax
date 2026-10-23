@@ -342,6 +342,71 @@ def evaluate_fixture(fixture: ShadowFixture, event: dict, history: list[FinalGam
     }
 
 
+
+def past_screenings(directory: Path, *, now: datetime) -> dict[str, datetime]:
+    """Read archived pregame screening timestamps without extra API requests.
+
+    Archive corruption fails closed rather than accidentally rescreening the
+    same two fixtures forever. The newest 1,000 files bound I/O each run;
+    records outside seven days do not affect the current weekly slate.
+    """
+    if not directory.is_dir():
+        return {}
+    snapshots = sorted(directory.glob("nhl-shadow-*.json"))[-1000:]
+    recent: dict[str, datetime] = {}
+    cutoff = now - timedelta(days=7)
+    for path in snapshots:
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(doc, dict) or doc.get("mode") != "RESEARCH_ONLY":
+                raise ValueError("Invalid research snapshot schema")
+            captured = datetime.fromisoformat(doc["captured_at_utc"])
+            if captured.utcoffset() is None or captured > now + timedelta(minutes=5):
+                raise ValueError("Invalid research snapshot timestamp")
+            captured = captured.astimezone(UTC)
+            if captured < cutoff:
+                continue
+            screened = doc.get("screened")
+            rejected = doc.get("rejected")
+            if not isinstance(screened, list) or not isinstance(rejected, list):
+                raise ValueError("Missing screening records")
+            for record in screened + rejected:
+                ticker = record.get("event_ticker") if isinstance(record, dict) else None
+                if not isinstance(ticker, str) or not ticker.startswith(SERIES + "-"):
+                    raise ValueError("Invalid screening event ticker")
+                old = recent.get(ticker)
+                if old is None or captured > old:
+                    recent[ticker] = captured
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            raise ResearchRunSkipped(
+                f"research snapshot malformed; fail closed: {path.name}"
+            ) from exc
+    return recent
+
+
+def rotate_slate(
+    matches: list[tuple[datetime, str, ShadowFixture]],
+    previous: dict[str, datetime],
+    *,
+    limit: int,
+) -> list[tuple[datetime, str, ShadowFixture]]:
+    """Unseen imminent fixtures first; otherwise oldest screening first.
+
+    Eligibility is still established exclusively by independent official
+    fixture identity and returned live Kalshi event. This is scheduling only.
+    """
+    if not 1 <= limit <= MAX_GAMES:
+        raise ValueError("Research screen limit out of bounds")
+    return sorted(
+        matches,
+        key=lambda row: (
+            row[1] in previous,                    # never screened first
+            row[0] if row[1] not in previous else previous[row[1]],
+            row[0],                                # deterministic tie breaker
+            row[1],
+        )
+    )[:limit]
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--max-games", type=int, default=4)
@@ -361,8 +426,10 @@ def main() -> None:
     # Keep every unlisted fixture visible in the report; don't invent matches.
     unmatched = sorted(set(fixtures) - set(events))
     history = load_history(HISTORY)
+    previous = past_screenings(RESEARCH_OUTPUT, now=now)
+    selected = rotate_slate(matches, previous, limit=args.max_games)
     results, rejected = [], []
-    for _, ticker, fixture in matches[:args.max_games]:
+    for _, ticker, fixture in selected:
         try:
             results.append(evaluate_fixture(fixture, events[ticker], history))
         except (ValueError, KeyError, TypeError) as exc:
@@ -383,6 +450,9 @@ def main() -> None:
         "kalshi_event_count": len(events),
         "kalshi_pages": pages,
         "matched_candidates": len(matches),
+        "previously_screened_candidates": sum(ticker in previous for _, ticker, _ in matches),
+        "selection_policy": "unseen_earliest_then_oldest_screened",
+        "selected_event_tickers": [ticker for _, ticker, _ in selected],
         "unmatched_tickers": unmatched,
         "screened_count": len(results) + len(rejected),
         "screen_limit": args.max_games,
