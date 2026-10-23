@@ -118,6 +118,7 @@ def test_official_full_game_winner_and_prospective_metrics(tmp_path):
     assert row["publication_authorized"] is False
     assert row["buy_authorized"] is False
     assert rec.summary(rows)["n"] == 1
+    assert rec.summary(rows)["ece_10"] == pytest.approx(0.257922)
 
 
 @pytest.mark.parametrize("change", [
@@ -170,6 +171,8 @@ def test_offline_reconciliation_creates_one_immutable_ledger(tmp_path, monkeypat
     first = runner.run(scoreboard_json=payload, now=AFTER)
     assert first["new_finals"] == 1
     assert first["scoreboard_gets"] == 0
+    assert first["forward_metrics"]["n"] == 1
+    assert first["forward_metrics"]["ece_10"] == pytest.approx(0.257922)
     ledger = runner.LEDGER / "nhl-2026020166.json"
     assert json.loads(ledger.read_text())["winner"] == "MTL"
     second = runner.run(scoreboard_json=payload, now=AFTER)
@@ -260,3 +263,18 @@ def test_separate_reconciliation_daemon_template_is_non_root_daily():
     ]
     assert p["WorkingDirectory"].endswith("/parallax-research/parallax-shadow")
     assert "parallax-sports" not in p["Label"]
+
+
+
+def test_tampered_stored_brier_score_is_rejected(tmp_path, monkeypatch):
+    config(monkeypatch, tmp_path)
+    snapshot(runner.ARCHIVE)
+    board = tmp_path / "scoreboard.json"
+    board.write_text(json.dumps(scoreboard()), encoding="utf-8")
+    runner.run(scoreboard_json=board, now=AFTER)
+    path = runner.LEDGER / "nhl-2026020166.json"
+    row = json.loads(path.read_text())
+    row["brier"] = 0.000001
+    path.write_text(json.dumps(row), encoding="utf-8")
+    with pytest.raises(rec.ReconciliationError, match="Corrupt"):
+        runner.run(scoreboard_json=board, now=AFTER)
