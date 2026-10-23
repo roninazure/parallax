@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T13:34:15.342220+00:00",
+  "generated_at": "2026-10-23T14:35:30.621308+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -22,17 +22,6 @@
       "price": 0.3,
       "sport": "CFB",
       "start_time": "2026-10-24T02:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 11.45515328,
-      "market_id": "1341099",
-      "matchup": "LSU at Auburn",
-      "model_probability": 0.40455153281340384,
-      "price": 0.29,
-      "sport": "CFB",
-      "start_time": "2026-10-24T16:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -60,10 +49,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-23T13:33:38.088753+00:00",
+  "source_feed_generated_at": "2026-10-23T14:34:54.070268+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 4
   }
 }
