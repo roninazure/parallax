@@ -23,6 +23,7 @@ The research checkout remains separate from the running NFL/CFB/MLB, intelligenc
 
 ## Remaining limitations
 
+- This is a **two-game-per-hour pilot**, not full-slate coverage. Oldest-first selection may repeatedly sample the same fixtures; add fair slate rotation / deduplication before claiming complete game coverage.
 - Historical Elo uses 2022–2025 seasons only; no 2026–27 completed results incorporated.
 - Snapshots are prospective evidence for later forward-validation. **No automatic final-result reconciliation or validated holdout scoring exists yet.**
 - No audited 2026 NHL fees, calibration, customer-feed publishing, ntfy alerts or orders.
