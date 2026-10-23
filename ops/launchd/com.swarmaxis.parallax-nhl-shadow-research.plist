@@ -6,6 +6,9 @@
   <key>Label</key>
   <string>com.swarmaxis.parallax-nhl-shadow-research</string>
 
+  <key>UserName</key>
+  <string>scottsteele</string>
+
   <key>ProgramArguments</key>
   <array>
     <string>/Users/scottsteele/parallax-research/venv312/bin/python</string>
