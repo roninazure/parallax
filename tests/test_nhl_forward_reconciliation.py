@@ -20,7 +20,7 @@ EVENT = "KXNHLGAME-26OCT23MTLCHI"
 
 def snapshot(directory: Path, *, captured=CAPTURE, p=0.257922,
              game_id=GAME_ID, matchup="MTL@CHI", start=START,
-             name="nhl-shadow-20261023T184655000000Z.json"):
+             event=EVENT, name="nhl-shadow-20261023T184655000000Z.json"):
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / name
     doc = {
@@ -33,7 +33,7 @@ def snapshot(directory: Path, *, captured=CAPTURE, p=0.257922,
         "screened": [{
             "game_id": game_id,
             "matchup": matchup,
-            "event_ticker": EVENT,
+            "event_ticker": event,
             "start_utc": start.isoformat(),
             "raw_elo_home_probability": p,
             "positions": [{"action": "WATCH"}, {"action": "PASS"},
@@ -83,7 +83,7 @@ def test_invalid_pregame_archive_rejected(tmp_path, new_value):
 
 def test_identity_conflict_across_two_snapshots_fails_closed(tmp_path):
     snapshot(tmp_path)
-    snapshot(tmp_path, matchup="TOR@CGY",
+    snapshot(tmp_path, event="KXNHLGAME-26OCT23CHIMTL",
              name="nhl-shadow-20261023T192655000000Z.json")
     with pytest.raises(rec.ReconciliationError, match="Conflicting"):
         rec.archived_forecasts(tmp_path, now=AFTER)
@@ -219,3 +219,24 @@ def test_no_matured_games_costs_no_provider_calls(tmp_path, monkeypatch):
     result = runner.run(live=True, now=START + timedelta(hours=1))
     assert result["scoreboard_gets"] == 0
     assert not runner.BUDGET_FILE.exists()
+
+
+
+def test_market_identity_mismatch_rejected(tmp_path):
+    snapshot(tmp_path, event="KXNHLGAME-26OCT23TORCGY")
+    with pytest.raises(rec.ReconciliationError, match="Market ticker contradicts"):
+        rec.archived_forecasts(tmp_path, now=AFTER)
+
+
+def test_corrupted_ledger_stops_reconciliation(tmp_path, monkeypatch):
+    config(monkeypatch, tmp_path)
+    snapshot(runner.ARCHIVE)
+    payload = tmp_path / "scoreboard.json"
+    payload.write_text(json.dumps(scoreboard()), encoding="utf-8")
+    runner.run(scoreboard_json=payload, now=AFTER)
+    path = runner.LEDGER / "nhl-2026020166.json"
+    broken = json.loads(path.read_text())
+    broken["winner"] = "CHI"
+    path.write_text(json.dumps(broken), encoding="utf-8")
+    with pytest.raises(rec.ReconciliationError, match="Corrupt"):
+        runner.run(scoreboard_json=payload, now=AFTER)
