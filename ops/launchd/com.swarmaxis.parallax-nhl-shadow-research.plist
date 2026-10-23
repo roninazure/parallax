@@ -17,6 +17,7 @@
     <string>--max-games</string>
     <string>2</string>
     <string>--write-research-snapshot</string>
+    <string>--summary-only</string>
   </array>
 
   <key>WorkingDirectory</key>
@@ -33,7 +34,7 @@
   <key>RunAtLoad</key>
   <true/>
   <key>StartInterval</key>
-  <integer>3600</integer>
+  <integer>7200</integer>
   <key>KeepAlive</key>
   <false/>
 
