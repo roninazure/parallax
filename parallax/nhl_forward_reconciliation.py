@@ -329,6 +329,8 @@ def read_reconciled_ids(directory: Path) -> set[str]:
             ):
                 raise ReconciliationError("Corrupt or unauthorized reconciliation ledger")
             result.add(gid)
+        except ReconciliationError:
+            raise
         except (OSError, ValueError, KeyError, TypeError) as exc:
             raise ReconciliationError("Cannot trust existing reconciliation ledger") from exc
     return result
