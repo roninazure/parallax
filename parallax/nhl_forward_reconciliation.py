@@ -118,10 +118,9 @@ def archived_forecasts(directory: Path, *, now: datetime) -> dict[str, FrozenFor
                     raise ReconciliationError("Invalid/future-leaking pregame forecast")
                 away_code, home_code = matchup.split("@")
                 ticker_date = start.astimezone(ET).strftime("%y%b%d").upper()
-                if event not in {
-                    f"KXNHLGAME-{ticker_date}{away_code}{home_code}",
-                    f"KXNHLGAME-{ticker_date}{home_code}{away_code}",
-                }:
+                # Observed 2026 KXNHLGAME events encode away then home.
+                # Reversing teams is not a valid reconciliation identity.
+                if event != f"KXNHLGAME-{ticker_date}{away_code}{home_code}":
                     raise ReconciliationError("Market ticker contradicts NHL game identity")
                 old_identity = identity.get(game_id)
                 new_identity = (matchup, event, start)
