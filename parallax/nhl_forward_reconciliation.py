@@ -116,6 +116,13 @@ def archived_forecasts(directory: Path, *, now: datetime) -> dict[str, FrozenFor
                     )
                 ):
                     raise ReconciliationError("Invalid/future-leaking pregame forecast")
+                away_code, home_code = matchup.split("@")
+                ticker_date = start.astimezone(ET).strftime("%y%b%d").upper()
+                if event not in {
+                    f"KXNHLGAME-{ticker_date}{away_code}{home_code}",
+                    f"KXNHLGAME-{ticker_date}{home_code}{away_code}",
+                }:
+                    raise ReconciliationError("Market ticker contradicts NHL game identity")
                 old_identity = identity.get(game_id)
                 new_identity = (matchup, event, start)
                 if old_identity is not None and old_identity != new_identity:
@@ -283,6 +290,20 @@ def read_reconciled_ids(directory: Path) -> set[str]:
                 raise ReconciliationError("Ledger filename/game identity mismatch")
             if gid in result:
                 raise ReconciliationError("Duplicate ledger entry")
+            p = obj.get("home_probability")
+            h = obj.get("home_won")
+            matchup = obj.get("matchup")
+            if (
+                type(p) not in (int, float) or not math.isfinite(p)
+                or not 0 < p < 1
+                or type(h) is not bool
+                or not isinstance(matchup, str) or matchup.count("@") != 1
+                or obj.get("winner") != matchup.split("@")[int(not h)]
+                or obj.get("buy_authorized") is not False
+                or obj.get("publication_authorized") is not False
+                or obj.get("model_status") != "EXPERIMENTAL_NOT_CERTIFIED"
+            ):
+                raise ReconciliationError("Corrupt or unauthorized reconciliation ledger")
             result.add(gid)
         except (OSError, ValueError, KeyError, TypeError) as exc:
             raise ReconciliationError("Cannot trust existing reconciliation ledger") from exc
