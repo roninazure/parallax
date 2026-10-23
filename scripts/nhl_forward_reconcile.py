@@ -58,6 +58,8 @@ def claim_single_daily_read(now: datetime) -> dict:
                 raise ReconciliationError("Provider cooldown active")
             if previous.get("utc_day") == now.date().isoformat():
                 raise ReconciliationError("Daily official NHL scoreboard read already spent")
+        except ReconciliationError:
+            raise  # An exhausted daily budget or cooldown is not corruption.
         except (OSError, ValueError, TypeError, OverflowError) as exc:
             raise ReconciliationError("Reconciliation budget corrupt; fail closed") from exc
     else:
