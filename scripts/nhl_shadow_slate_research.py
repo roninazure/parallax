@@ -416,6 +416,7 @@ def main() -> None:
     if not 1 <= args.max_games <= MAX_GAMES:
         parser.error(f"--max-games must be between 1 and {MAX_GAMES}")
     now = datetime.now(UTC)
+    previous = past_screenings(RESEARCH_OUTPUT, now=now)
     schedule = fetch_json(f"{NHL}/schedule/{now.astimezone(ET).date()}")
     fixtures = nhl_fixtures(schedule, now)
     events, pages = kalshi_events()
@@ -426,7 +427,6 @@ def main() -> None:
     # Keep every unlisted fixture visible in the report; don't invent matches.
     unmatched = sorted(set(fixtures) - set(events))
     history = load_history(HISTORY)
-    previous = past_screenings(RESEARCH_OUTPUT, now=now)
     selected = rotate_slate(matches, previous, limit=args.max_games)
     results, rejected = [], []
     for _, ticker, fixture in selected:
