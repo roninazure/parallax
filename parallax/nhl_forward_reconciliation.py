@@ -315,9 +315,33 @@ def read_reconciled_ids(directory: Path) -> set[str]:
                 or obj.get("buy_authorized") is not False
                 or obj.get("publication_authorized") is not False
                 or obj.get("model_status") != "EXPERIMENTAL_NOT_CERTIFIED"
+                or type(obj.get("home_score")) is not int
+                or type(obj.get("away_score")) is not int
+                or (obj["home_score"] > obj["away_score"]) != h
+                or type(obj.get("brier")) not in (float, int)
+                or type(obj.get("log_loss")) not in (float, int)
+                or not math.isfinite(obj["brier"])
+                or not math.isfinite(obj["log_loss"])
+                or abs(obj["brier"] - (p - int(h)) ** 2) > 1e-9
+                or abs(obj["log_loss"] + math.log(p if h else 1 - p)) > 1e-9
+                or instant(obj.get("forecast_captured_utc"))
+                   >= instant(obj.get("official_start_utc"))
             ):
                 raise ReconciliationError("Corrupt or unauthorized reconciliation ledger")
             result.add(gid)
         except (OSError, ValueError, KeyError, TypeError) as exc:
             raise ReconciliationError("Cannot trust existing reconciliation ledger") from exc
     return result
+
+
+
+def accumulated_summary(directory: Path) -> dict[str, float | int | None]:
+    """Prospective-only performance; no historical evaluation or certification."""
+    ids = read_reconciled_ids(directory)
+    rows = [
+        json.loads((directory / f"nhl-{gid.removeprefix('nhl:')}.json").read_text(
+            encoding="utf-8"
+        ))
+        for gid in sorted(ids)
+    ]
+    return summary(rows)
