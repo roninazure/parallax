@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T01:18:18.551821+00:00",
+  "generated_at": "2026-10-23T02:20:19.694875+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -37,6 +37,17 @@
     },
     {
       "contract_side": "YES",
+      "edge_pp": 10.06487565,
+      "market_id": "1331011",
+      "matchup": "Army at Tulsa",
+      "model_probability": 0.5806487565185172,
+      "price": 0.48,
+      "sport": "CFB",
+      "start_time": "2026-10-24T00:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
       "edge_pp": 6.52903759,
       "market_id": "1395827",
       "matchup": "Tennessee at South Carolina",
@@ -49,10 +60,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-23T01:17:57.529424+00:00",
+  "source_feed_generated_at": "2026-10-23T02:19:22.172850+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 5
   }
 }
