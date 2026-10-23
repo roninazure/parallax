@@ -3,7 +3,7 @@
 **NOT INSTALLED BY THIS COMMIT. DO NOT INSTALL ON THE PRODUCTION SWARMEDGE SERVICE PATH.**
 The research checkout remains separate from the running NFL/CFB/MLB, intelligence and customer publisher releases.
 
-- LaunchAgent label: `com.swarmaxis.parallax-nhl-shadow-research`
+- System LaunchDaemon label: `com.swarmaxis.parallax-nhl-shadow-research`
 - Job template: `ops/launchd/com.swarmaxis.parallax-nhl-shadow-research.plist`
 - Runner: `scripts.nhl_shadow_slate_research` (research-only)
 - Every 3,600 seconds; at most two fixture candidates, eight public GETs; no retries.
@@ -17,8 +17,8 @@ The research checkout remains separate from the running NFL/CFB/MLB, intelligenc
    `PYTHONPATH=. ~/parallax-research/venv312/bin/python -m pytest -q tests/test_nhl_shadow_slate_research.py tests/test_nhl_shadow_unattended.py tests/test_league_shadow_evidence.py`
 
 2. Run one bounded `--max-games 2 --write-research-snapshot` trial and inspect an archived JSON with capture time, pregame model, side economics and gates.
-3. Inspect paths and confirm the macOS user session will stay active. LaunchAgents may not run when the GUI user logs out. For boot-without-login acceptance, separately design and verify a system LaunchDaemon rather than assuming this Agent qualifies.
-4. Only after explicit operational approval, copy the plist into ~/Library/LaunchAgents and bootstrap the unique label. No production service definition should change.
+3. Inspect all absolute paths. The proposed system LaunchDaemon specifies UserName=scottsteele so the job can start after boot without a GUI login. Verify FileVault/unlock behavior, permissions, and actual reboot behavior separately before claiming full unattended recovery.
+4. Only after explicit operational approval, install this as a root-owned system plist in /Library/LaunchDaemons with mode 0644, and bootstrap its unique system label. The worker runs as scottsteele, not root. No existing production service definition should change.
 5. Monitor log size/rotation, daily request budget, and errors in the shadow-only archive.
 
 ## Remaining limitations
