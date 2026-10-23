@@ -150,15 +150,25 @@ def scoreboard_date(forecast: FrozenForecast) -> str:
 
 def pending_date(
     forecasts: dict[str, FrozenForecast], reconciled_ids: set[str],
-    *, now: datetime,
+    *, now: datetime, last_attempts: dict[str, datetime] | None = None,
 ) -> str | None:
-    """Earliest matured, unreconciled ET game date; at most one request/run."""
-    dates = [
+    """Unseen matured ET date first, otherwise least recently queried.
+
+    A postponed/absent final must not monopolize the single daily GET.
+    This selects at most one date and never calls a network provider.
+    """
+    dates = {
         scoreboard_date(f)
         for gid, f in forecasts.items()
         if gid not in reconciled_ids and now >= f.start_utc + MIN_AFTER_START
-    ]
-    return min(dates) if dates else None
+    }
+    if not dates:
+        return None
+    checked = last_attempts or {}
+    never_seen = sorted(d for d in dates if d not in checked)
+    if never_seen:
+        return never_seen[0]
+    return min(dates, key=lambda d: (checked[d], d))
 
 
 def official_final(
