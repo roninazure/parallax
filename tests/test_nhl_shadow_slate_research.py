@@ -71,19 +71,6 @@ def test_malformed_listing_fails_closed():
 
 
 def test_kalshi_pagination_requires_complete_results(monkeypatch):
-    calls = []
-
-    def fetch(url):
-        calls.append(url)
-        return {
-            "events": [{
-                "series_ticker": "KXNHLGAME",
-                "event_ticker": f"KXNHLGAME-26OCT2{i}",
-                "markets": [],
-            }],
-            "cursor": "more",
-        }
-
     i = 0
     def f(url):
         nonlocal i
