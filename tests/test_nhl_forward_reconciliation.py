@@ -84,7 +84,9 @@ def test_invalid_pregame_archive_rejected(tmp_path, new_value):
 
 def test_identity_conflict_across_two_snapshots_fails_closed(tmp_path):
     snapshot(tmp_path)
-    snapshot(tmp_path, event="KXNHLGAME-26OCT23CHIMTL",
+    # Each record is internally consistent; the same NHL ID cannot change
+    # home/away identity across immutable pregame snapshots.
+    snapshot(tmp_path, matchup="CHI@MTL", event="KXNHLGAME-26OCT23CHIMTL",
              name="nhl-shadow-20261023T192655000000Z.json")
     with pytest.raises(rec.ReconciliationError, match="Conflicting"):
         rec.archived_forecasts(tmp_path, now=AFTER)
