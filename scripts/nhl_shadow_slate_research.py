@@ -35,6 +35,17 @@ RESEARCH_OUTPUT = Path.home() / "parallax-research/nhl/forward"
 MAX_GAMES = 8
 MAX_EVENT_PAGES = 3
 
+# Verified against the 2026-10-23 MTL@CHI Kalshi event and the official NHL
+# schedule. Do not generalize accent removal to every team/contract identity.
+_VERIFIED_KALSHI_PLACE_ALIASES = {
+    ("MTL", "Montréal"): "Montreal",
+}
+
+
+def kalshi_place_name(code: str, official_place: str) -> str:
+    """Resolve only explicitly observed NHL -> Kalshi place-name differences."""
+    return _VERIFIED_KALSHI_PLACE_ALIASES.get((code, official_place), official_place)
+
 
 def fetch_json(url: str) -> dict:
     """One public request. No retries or credentials."""
@@ -89,7 +100,8 @@ def nhl_fixtures(schedule: dict, now: datetime) -> dict[str, ShadowFixture]:
                 for code in (a, h)
             ):
                 raise ValueError("Invalid official NHL team code")
-            an, hn = source_name(away), source_name(home)
+            an = kalshi_place_name(a, source_name(away))
+            hn = kalshi_place_name(h, source_name(home))
             if not an or not hn or an.casefold() == hn.casefold():
                 raise ValueError("NHL official venue place name missing or ambiguous")
             local_day = start.astimezone(ET).date()
