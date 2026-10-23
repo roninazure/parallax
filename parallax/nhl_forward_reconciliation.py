@@ -267,12 +267,25 @@ def reconcile_day(
 
 def summary(rows: list[dict[str, Any]]) -> dict[str, float | int | None]:
     if not rows:
-        return {"n": 0, "brier": None, "log_loss": None, "home_win_rate": None}
+        return {
+            "n": 0, "brier": None, "log_loss": None,
+            "home_win_rate": None, "ece_10": None,
+        }
+    buckets: list[list[dict[str, Any]]] = [[] for _ in range(10)]
+    for row in rows:
+        buckets[min(9, int(10 * row["home_probability"]))].append(row)
+    ece = sum(
+        len(bucket) / len(rows) * abs(
+            sum(int(r["home_won"]) for r in bucket) / len(bucket)
+            - sum(r["home_probability"] for r in bucket) / len(bucket)
+        ) for bucket in buckets if bucket
+    )
     return {
         "n": len(rows),
         "brier": round(sum(r["brier"] for r in rows) / len(rows), 8),
         "log_loss": round(sum(r["log_loss"] for r in rows) / len(rows), 8),
         "home_win_rate": round(sum(int(r["home_won"]) for r in rows) / len(rows), 8),
+        "ece_10": round(ece, 8),
     }
 
 
