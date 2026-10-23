@@ -17,6 +17,7 @@ def test_launchd_job_is_isolated_and_hourly():
         plist = plistlib.load(stream)
 
     assert plist["Label"] == "com.swarmaxis.parallax-nhl-shadow-research"
+    assert plist["UserName"] == "scottsteele"  # Non-root system LaunchDaemon
     assert plist["StartInterval"] == 3600
     assert plist["RunAtLoad"] is True
     assert plist["KeepAlive"] is False
