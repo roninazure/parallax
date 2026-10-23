@@ -219,7 +219,7 @@ def evaluate_fixture(fixture: ShadowFixture, event: dict, history: list[FinalGam
                 "action": play.suggested_action.value,
                 "ask": ask,
                 "available_at_ask": size,
-                "gross_edge_pp": play.edge_percent,
+                "gross_edge_pp": play.edge_points,
                 "failed_gates": list(play.verdict.failed_gates),
                 "fee_status": market.mechanics.fee_status,
             })
