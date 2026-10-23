@@ -280,3 +280,83 @@ def test_tampered_stored_brier_score_is_rejected(tmp_path, monkeypatch):
     path.write_text(json.dumps(row), encoding="utf-8")
     with pytest.raises(rec.ReconciliationError, match="Corrupt"):
         runner.run(scoreboard_json=board, now=AFTER)
+
+
+
+def test_matured_scoreboard_dates_rotate_without_extra_requests(
+    tmp_path, monkeypatch,
+):
+    """Absent final on one game date must not starve another game date."""
+    config(monkeypatch, tmp_path)
+    snapshot(runner.ARCHIVE)
+    snapshot(
+        runner.ARCHIVE,
+        game_id="nhl:2026020168", matchup="ANA@PHI",
+        event="KXNHLGAME-26OCT24ANAPHI",
+        start=datetime(2026, 10, 24, 17, tzinfo=UTC),
+        name="nhl-shadow-20261023T184656000000Z.json",
+    )
+    urls = []
+    def unresolved(url):
+        urls.append(url)
+        return {"currentDate": url.rsplit("/", 1)[1], "games": []}
+    monkeypatch.setattr(runner, "fetch_json", unresolved)
+
+    first_day = datetime(2026, 10, 27, 14, tzinfo=UTC)
+    second_day = first_day + timedelta(days=1)
+    first = runner.run(live=True, now=first_day)
+    second = runner.run(live=True, now=second_day)
+    assert first["scoreboard_date_et"] == "2026-10-23"
+    assert second["scoreboard_date_et"] == "2026-10-24"
+    assert len(urls) == 2  # precisely one NHL GET per distinct UTC day
+    assert urls == [
+        "https://api-web.nhle.com/v1/score/2026-10-23",
+        "https://api-web.nhle.com/v1/score/2026-10-24",
+    ]
+    budget = json.loads(runner.BUDGET_FILE.read_text())
+    assert set(budget["date_last_attempt_utc"]) == {
+        "2026-10-23", "2026-10-24",
+    }
+    assert not runner.LEDGER.exists()
+
+
+def test_untrusted_daily_date_history_fails_before_any_network_call(
+    tmp_path, monkeypatch,
+):
+    config(monkeypatch, tmp_path)
+    snapshot(runner.ARCHIVE)
+    runner.BUDGET_FILE.write_text(json.dumps({
+        "utc_day": "2026-10-25",
+        "reads_today": 1,
+        "date_last_attempt_utc": {"2026-10-24": "not-a-timestamp"},
+    }))
+    monkeypatch.setattr(
+        runner, "fetch_json",
+        lambda url: pytest.fail("No provider call on corrupted budget"),
+    )
+    with pytest.raises(rec.ReconciliationError, match="budget corrupt"):
+        runner.run(
+            live=True, now=datetime(2026, 10, 27, 14, tzinfo=UTC),
+        )
+
+
+def test_earliest_never_checked_vs_oldest_retry(tmp_path):
+    snapshot(tmp_path)
+    snapshot(
+        tmp_path, game_id="nhl:2026020168", matchup="ANA@PHI",
+        event="KXNHLGAME-26OCT24ANAPHI",
+        start=datetime(2026, 10, 24, 17, tzinfo=UTC),
+        name="nhl-shadow-20261023T184656000000Z.json",
+    )
+    frozen = rec.archived_forecasts(
+        tmp_path, now=datetime(2026, 10, 27, 14, tzinfo=UTC),
+    )
+    now = datetime(2026, 10, 27, 14, tzinfo=UTC)
+    previously = {"2026-10-23": now - timedelta(hours=2)}
+    assert rec.pending_date(frozen, set(), now=now, last_attempts=previously) == (
+        "2026-10-24"
+    )
+    previously["2026-10-24"] = now - timedelta(hours=1)
+    assert rec.pending_date(frozen, set(), now=now, last_attempts=previously) == (
+        "2026-10-23"
+    )
