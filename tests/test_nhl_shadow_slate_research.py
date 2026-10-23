@@ -109,3 +109,63 @@ def test_market_pair_must_be_exact_before_any_book_calls(monkeypatch):
     }
     with pytest.raises(ValueError, match="Market pair"):
         scan.evaluate_fixture(fixture, event, [])
+
+
+def test_live_result_serialization_uses_edge_points(monkeypatch):
+    """Regression: a real ParallaxPlay exposes edge_points, not edge_percent."""
+    from types import SimpleNamespace
+    from parallax.models import Action, ParallaxPlay
+
+    assert "edge_points" in ParallaxPlay.__dataclass_fields__
+    assert "edge_percent" not in ParallaxPlay.__dataclass_fields__
+
+    fixture = scan.nhl_fixtures(
+        {"gameWeek": [{"games": [official_game()]}]},
+        datetime(2026, 10, 22, tzinfo=UTC),
+    )["KXNHLGAME-26OCT26TORCGY"]
+    ticker = "KXNHLGAME-26OCT26TORCGY"
+    event = {
+        "event_ticker": ticker,
+        "series_ticker": "KXNHLGAME",
+        "markets": [
+            {"ticker": f"{ticker}-CGY", "event_ticker": ticker},
+            {"ticker": f"{ticker}-TOR", "event_ticker": ticker},
+        ],
+    }
+    market = SimpleNamespace(
+        yes_ask=0.46, no_ask=0.58,
+        executable_depth={
+            "YES": ((0.46, 12.0),),
+            "NO": ((0.58, 9.0),),
+        },
+        mechanics=SimpleNamespace(fee_status="UNVERIFIED"),
+    )
+    monkeypatch.setattr(scan, "fetch_json", lambda url: {})
+    monkeypatch.setattr(scan, "normalize_kalshi", lambda *a, **kw: market)
+    monkeypatch.setattr(scan, "attach_fees", lambda m, now: m)
+    monkeypatch.setattr(
+        scan, "predict_future",
+        lambda *a, **kw: SimpleNamespace(home_win_probability=0.58),
+    )
+    monkeypatch.setattr(
+        scan, "evaluate_shadow",
+        lambda *a, **kw: SimpleNamespace(
+            suggested_action=Action.WATCH,
+            edge_points=12.21,
+            verdict=SimpleNamespace(failed_gates=("confidence", "fees_unknown")),
+        ),
+    )
+
+    class FixedDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 10, 22, tzinfo=UTC)
+
+    monkeypatch.setattr(scan, "datetime", FixedDatetime)
+    report = scan.evaluate_fixture(fixture, event, [])
+    assert len(report["positions"]) == 4
+    assert all(row["gross_edge_pp"] == 12.21 for row in report["positions"])
+    assert {row["action"] for row in report["positions"]} == {"WATCH"}
+    assert all("fees_unknown" in row["failed_gates"] for row in report["positions"])
+    assert report["positions"][0]["outcome"] == "CGY"
+    assert report["positions"][1]["outcome"] == "TOR"
