@@ -18,7 +18,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from parallax.nhl_forward_reconciliation import (
-    ReconciliationError, archived_forecasts, pending_date,
+    ReconciliationError, accumulated_summary, archived_forecasts, pending_date,
     read_reconciled_ids, reconcile_day, summary,
 )
 from scripts.nhl_shadow_slate_research import NHL, fetch_json
@@ -88,7 +88,11 @@ def run(*, scoreboard_json: Path | None = None, live: bool = False,
         completed = read_reconciled_ids(LEDGER)
         game_date = pending_date(frozen, completed, now=current)
         if game_date is None:
-            return {"status": "NOTHING_MATURED", "scoreboard_gets": 0, "new_finals": 0}
+            return {
+                "status": "NOTHING_MATURED",
+                "scoreboard_gets": 0, "new_finals": 0,
+                "forward_metrics": accumulated_summary(LEDGER),
+            }
         if scoreboard_json is not None:
             score = json.loads(scoreboard_json.read_text(encoding="utf-8"))
             reads = 0
@@ -126,6 +130,7 @@ def run(*, scoreboard_json: Path | None = None, live: bool = False,
             "new_finals": len(rows),
             "awaiting_final": awaiting,
             "new_final_metrics": summary(rows),
+            "forward_metrics": accumulated_summary(LEDGER),
             "buy_authorized": False,
             "publish_authorized": False,
             "orders_authorized": False,
