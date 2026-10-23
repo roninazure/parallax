@@ -11,12 +11,17 @@ Kalshi settlement rules and independent NHL fixture/place-name identity.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
+import fcntl
 import hashlib
 import json
+import os
 import re
+import tempfile
+import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -34,6 +39,98 @@ HISTORY = Path.home() / "parallax-research/nhl/historical"
 RESEARCH_OUTPUT = Path.home() / "parallax-research/nhl/forward"
 MAX_GAMES = 8
 MAX_EVENT_PAGES = 3
+GUARD_DIR = Path.home() / "parallax-research/nhl"
+MIN_SECONDS_BETWEEN_RUNS = 6900  # Two-hour job; blocks reboots and manual replays
+MAX_RUNS_PER_UTC_DAY = 12
+COOLDOWN_HOURS_ON_DENIAL = 24
+
+
+class ResearchRunSkipped(RuntimeError):
+    """Intentional provider-budget or concurrent-run skip; no API request."""
+
+
+def _read_guard_state(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(state, dict):
+            raise ValueError("state is not an object")
+        return state
+    except (OSError, ValueError) as exc:
+        raise ResearchRunSkipped("unreadable request-budget state; fail closed") from exc
+
+
+def _write_guard_state(path: Path, state: dict) -> None:
+    """Atomic replacement; never silently reset a previously recorded budget."""
+    fd, temp_path = tempfile.mkstemp(prefix=".nhl-budget-", dir=path.parent)
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(state, stream, sort_keys=True)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temp_path, path)
+    finally:
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+
+@contextmanager
+def guarded_run(*, now: datetime | None = None):
+    """Single-instance, restart-persistent schedule and provider call cap.
+
+    The upper bound assumes --max-games 2 and MAX_EVENT_PAGES=3:
+    1 official NHL GET, up to 3 Kalshi event GETs, and 4 book GETs.
+    A run counts against the budget BEFORE any network activity starts.
+    """
+    GUARD_DIR.mkdir(parents=True, exist_ok=True)
+    lock_path = GUARD_DIR / ".nhl-shadow.lock"
+    state_path = GUARD_DIR / ".nhl-shadow-budget.json"
+    fd = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o600)
+    with os.fdopen(fd, "r+") as lock:
+        try:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise ResearchRunSkipped("another NHL research scan is running") from exc
+        current = (now or datetime.now(UTC)).astimezone(UTC)
+        state = _read_guard_state(state_path)
+        try:
+            cooldown = state.get("cooldown_until_utc")
+            if cooldown and current < datetime.fromisoformat(cooldown):
+                raise ResearchRunSkipped("provider cooldown active")
+            last = state.get("last_start_utc")
+            if last and (current - datetime.fromisoformat(last)).total_seconds() < MIN_SECONDS_BETWEEN_RUNS:
+                raise ResearchRunSkipped("minimum spacing between research scans")
+            count = (
+                int(state.get("runs_today", 0))
+                if state.get("utc_day") == current.date().isoformat()
+                else 0
+            )
+            if count >= MAX_RUNS_PER_UTC_DAY:
+                raise ResearchRunSkipped("daily research scan budget exhausted")
+        except (ValueError, TypeError, OverflowError) as exc:
+            raise ResearchRunSkipped("invalid request-budget state; fail closed") from exc
+        updated = {
+            "utc_day": current.date().isoformat(),
+            "runs_today": count + 1,
+            "last_start_utc": current.isoformat(),
+            "cooldown_until_utc": state.get("cooldown_until_utc"),
+        }
+        _write_guard_state(state_path, updated)
+        try:
+            yield
+        except urllib.error.HTTPError as exc:
+            if exc.code in (403, 429):
+                updated["cooldown_until_utc"] = (
+                    datetime.now(UTC) + timedelta(hours=COOLDOWN_HOURS_ON_DENIAL)
+                ).isoformat()
+                _write_guard_state(state_path, updated)
+            raise
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
 
 # Verified against the 2026-10-23 MTL@CHI Kalshi event and the official NHL
 # schedule. Do not generalize accent removal to every team/contract identity.
@@ -249,6 +346,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--max-games", type=int, default=4)
     parser.add_argument("--write-research-snapshot", action="store_true")
+    parser.add_argument("--summary-only", action="store_true", help="Avoid unbounded stdout JSON in launchd logs")
     args = parser.parse_args()
     if not 1 <= args.max_games <= MAX_GAMES:
         parser.error(f"--max-games must be between 1 and {MAX_GAMES}")
@@ -300,9 +398,21 @@ def main() -> None:
             json.dump(report, stream, indent=2, sort_keys=True)
             stream.write("\n")
         print("RESEARCH SNAPSHOT:", out)
-    print(json.dumps(report, indent=2, sort_keys=True))
-    print("NO ORDERS / NO PUBLICATION / NO ALERTS")
+    if args.summary_only:
+        print(
+            f"NHL SHADOW {report['captured_at_utc']}: "
+            f"fixtures={len(fixtures)}, matched={len(matches)}, "
+            f"screened={len(results)}, rejected={len(rejected)}; "
+            "BUY/ORDERS/PUBLISH/ALERTS DISABLED", flush=True
+        )
+    else:
+        print(json.dumps(report, indent=2, sort_keys=True))
+        print("NO ORDERS / NO PUBLICATION / NO ALERTS")
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        with guarded_run():
+            main()
+    except ResearchRunSkipped as exc:
+        print(f"NHL SHADOW SKIPPED: {exc}", flush=True)
