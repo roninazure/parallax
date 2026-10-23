@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T01:22:46.249249+00:00",
+  "generated_at": "2026-10-23T01:23:53.310874+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,15 +14,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
+      "contract_side": "NO",
       "edge_pp": 7.60733304,
-      "market_id": "KXNFLGAME-26OCT25INDMIN-MIN",
+      "market_id": "1358482",
       "matchup": "IND at MIN",
       "model_probability": 0.7960733303729158,
       "price": 0.72,
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
@@ -36,26 +36,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 7.84048249,
-      "market_id": "KXNFLGAME-26OCT25SFATL-ATL",
-      "matchup": "SF at ATL",
-      "model_probability": 0.6684048248762824,
-      "price": 0.59,
-      "sport": "NFL",
-      "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 8.90851754,
-      "market_id": "KXNFLGAME-26OCT25TBCAR-CAR",
+      "contract_side": "YES",
+      "edge_pp": 8.65851754,
+      "market_id": "1358486",
       "matchup": "TB at CAR",
       "model_probability": 0.49908517544557873,
-      "price": 0.41,
+      "price": 0.4125,
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -70,22 +59,22 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 17.86951629,
-      "market_id": "1458580",
+      "edge_pp": 18.36951629,
+      "market_id": "KXNFLGAME-26OCT29CARGB-CAR",
       "matchup": "CAR at GB",
       "model_probability": 0.7836951628619138,
-      "price": 0.605,
+      "price": 0.6,
       "sport": "NFL",
       "start_time": "2026-10-30T00:15:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-23T01:22:28.777068+00:00",
+  "source_feed_generated_at": "2026-10-23T01:23:14.431644+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 7
+    "buy": 6
   }
 }
