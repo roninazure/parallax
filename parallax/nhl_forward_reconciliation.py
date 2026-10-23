@@ -298,7 +298,7 @@ def read_reconciled_ids(directory: Path) -> set[str]:
                 or not 0 < p < 1
                 or type(h) is not bool
                 or not isinstance(matchup, str) or matchup.count("@") != 1
-                or obj.get("winner") != matchup.split("@")[int(not h)]
+                or obj.get("winner") != matchup.split("@")[int(h)]
                 or obj.get("buy_authorized") is not False
                 or obj.get("publication_authorized") is not False
                 or obj.get("model_status") != "EXPERIMENTAL_NOT_CERTIFIED"
