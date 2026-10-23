@@ -1,6 +1,7 @@
 """Offline validation of frozen NHL predictions vs independent final scores."""
 from datetime import UTC, datetime, timedelta
 import json
+import plistlib
 import math
 from pathlib import Path
 import urllib.error
@@ -240,3 +241,22 @@ def test_corrupted_ledger_stops_reconciliation(tmp_path, monkeypatch):
     path.write_text(json.dumps(broken), encoding="utf-8")
     with pytest.raises(rec.ReconciliationError, match="Corrupt"):
         runner.run(scoreboard_json=payload, now=AFTER)
+
+
+
+def test_separate_reconciliation_daemon_template_is_non_root_daily():
+    path = Path(__file__).resolve().parents[1] / (
+        "ops/launchd/com.swarmaxis.parallax-nhl-forward-reconcile.plist"
+    )
+    with path.open("rb") as stream:
+        p = plistlib.load(stream)
+    assert p["Label"] == "com.swarmaxis.parallax-nhl-forward-reconcile"
+    assert p["UserName"] == "scottsteele"
+    assert p["StartInterval"] == 86400
+    assert p["KeepAlive"] is False
+    assert p["ProgramArguments"] == [
+        "/Users/scottsteele/parallax-research/venv312/bin/python",
+        "-m", "scripts.nhl_forward_reconcile", "--live",
+    ]
+    assert p["WorkingDirectory"].endswith("/parallax-research/parallax-shadow")
+    assert "parallax-sports" not in p["Label"]
