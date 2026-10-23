@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.swarmaxis.parallax-nhl-forward-reconcile</string>
+
+  <key>UserName</key>
+  <string>scottsteele</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/scottsteele/parallax-research/venv312/bin/python</string>
+    <string>-m</string>
+    <string>scripts.nhl_forward_reconcile</string>
+    <string>--live</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/scottsteele/parallax-research/parallax-shadow</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONPATH</key>
+    <string>/Users/scottsteele/parallax-research/parallax-shadow</string>
+    <key>PYTHONDONTWRITEBYTECODE</key>
+    <string>1</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StartInterval</key>
+  <integer>86400</integer>
+  <key>KeepAlive</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/scottsteele/parallax-research/nhl/reconcile-daily.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/scottsteele/parallax-research/nhl/reconcile-daily.err</string>
+</dict>
+</plist>
