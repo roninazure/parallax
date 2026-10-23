@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-10-23T22:46:20.565478+00:00",
+  "generated_at": "2026-10-23T23:49:16.376702+00:00",
   "lane": "CFB",
   "plays": [
+    {
+      "contract_side": "YES",
+      "edge_pp": 14.30423192,
+      "market_id": "1395837",
+      "matchup": "Ole Miss at Texas",
+      "model_probability": 0.5580423192225259,
+      "price": 0.415,
+      "sport": "CFB",
+      "start_time": "2026-10-24T23:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "NO",
       "edge_pp": 13.84850999,
@@ -11,17 +22,6 @@
       "price": 0.28,
       "sport": "CFB",
       "start_time": "2026-10-24T02:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 13.19560328,
-      "market_id": "1331007",
-      "matchup": "Duke at Virginia",
-      "model_probability": 0.5819560328136356,
-      "price": 0.45,
-      "sport": "CFB",
-      "start_time": "2026-10-23T23:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -37,11 +37,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 8.56487565,
+      "edge_pp": 8.06487565,
       "market_id": "1331011",
       "matchup": "Army at Tulsa",
       "model_probability": 0.5806487565185172,
-      "price": 0.495,
+      "price": 0.5,
       "sport": "CFB",
       "start_time": "2026-10-24T00:30:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-23T22:46:19.122412+00:00",
+  "source_feed_generated_at": "2026-10-23T23:49:05.110415+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
