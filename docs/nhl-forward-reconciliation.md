@@ -15,6 +15,7 @@
 
 - Date-scoped NHL score endpoint supported by community-maintained API documentation. Verify actual JSON on the Mac mini after a game has finished, before activation.
 - Runner `scripts.nhl_forward_reconcile.py --live`: at most **one additional NHL GET per UTC day**, zero Kalshi/BDL/CFBD/ntfy calls, no retries, 24h cooldown on 403/429, persistent daily quota and a nonblocking lock.
+- If an earlier game is still nonfinal or absent, the scheduler prioritizes previously unqueried eligible **Eastern game dates**, then the least recently queried date. This prevents a postponed game from indefinitely blocking newer results while keeping one scoreboard GET per UTC day. The per-date request history is debited before network access and fails closed on corruption.
 - Existing research scanner remains capped at 12 daily NHL schedule GETs; combined documented pilot maximum would be **13 NHL GETs/day** if both jobs run. This is not an official NHL quota and excludes other applications on the host.
 - Test first with `--scoreboard-json` (offline, no provider calls). Do not install the separate daily job until offline tests, one real final-score verification, cross-process provider-limit review and explicit deployment acceptance.
 - The proposed LaunchDaemon template is `ops/launchd/com.swarmaxis.parallax-nhl-forward-reconcile.plist`, once daily (`StartInterval=86400`), non-root account, read-only score API.
