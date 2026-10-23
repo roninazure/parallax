@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.swarmaxis.parallax-nhl-shadow-research</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/scottsteele/parallax-research/venv312/bin/python</string>
+    <string>-m</string>
+    <string>scripts.nhl_shadow_slate_research</string>
+    <string>--max-games</string>
+    <string>2</string>
+    <string>--write-research-snapshot</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/scottsteele/parallax-research/parallax-shadow</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONPATH</key>
+    <string>/Users/scottsteele/parallax-research/parallax-shadow</string>
+    <key>PYTHONDONTWRITEBYTECODE</key>
+    <string>1</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StartInterval</key>
+  <integer>3600</integer>
+  <key>KeepAlive</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/scottsteele/parallax-research/nhl/shadow-hourly.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/scottsteele/parallax-research/nhl/shadow-hourly.err</string>
+</dict>
+</plist>
