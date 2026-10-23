@@ -1,4 +1,4 @@
-# PARALLAX NHL hourly shadow job — opt-in research only
+# PARALLAX NHL bounded shadow job — opt-in research only
 
 **NOT INSTALLED BY THIS COMMIT. DO NOT INSTALL ON THE PRODUCTION SWARMEDGE SERVICE PATH.**
 The research checkout remains separate from the running NFL/CFB/MLB, intelligence and customer publisher releases.
@@ -6,7 +6,7 @@ The research checkout remains separate from the running NFL/CFB/MLB, intelligenc
 - System LaunchDaemon label: `com.swarmaxis.parallax-nhl-shadow-research`
 - Job template: `ops/launchd/com.swarmaxis.parallax-nhl-shadow-research.plist`
 - Runner: `scripts.nhl_shadow_slate_research` (research-only)
-- Every 3,600 seconds; at most two fixture candidates, eight public GETs; no retries.
+- Every 7,200 seconds (2h); at most two fixture candidates, eight public GETs per scan; no retries.
 - Snapshots: `~/parallax-research/nhl/forward/nhl-shadow-*.json`
 - Logs: `~/parallax-research/nhl/shadow-hourly.{log,err}`
 
@@ -20,6 +20,16 @@ The research checkout remains separate from the running NFL/CFB/MLB, intelligenc
 3. Inspect all absolute paths. The proposed system LaunchDaemon specifies UserName=scottsteele so the job can start after boot without a GUI login. Verify FileVault/unlock behavior, permissions, and actual reboot behavior separately before claiming full unattended recovery.
 4. Only after explicit operational approval, install this as a root-owned system plist in /Library/LaunchDaemons with mode 0644, and bootstrap its unique system label. The worker runs as scottsteele, not root. No existing production service definition should change.
 5. Monitor log size/rotation, daily request budget, and errors in the shadow-only archive.
+
+## Enforced budget and dependency isolation
+
+- Single-instance nonblocking lock protects against overlapping runs.
+- Restart-persistent UTC-day budget: no more than 12 runs/day (at most 12 NHL schedule GETs and 84 Kalshi GETs/day from this pilot).
+- A minimum 6,900-second inter-run interval blocks boot/relaunch storms.
+- HTTP 403 or 429 triggers a 24-hour local cooldown; corrupted guard state fails closed.
+- Jobs log concise summaries; full observations are in create-only JSON snapshots.
+- Uses Python standard library, existing venv and historical SHA-verified local snapshots. No CFBD, BALLDONTLIE, ntfy or production publisher calls.
+- We have **not** established an official NHL schedule API quota or reuse license; keep the research pilot conservative and review commercial-use permissions before any customer distribution.
 
 ## Remaining limitations
 
