@@ -47,32 +47,69 @@ def _save_state(state: dict) -> None:
             os.unlink(tmp)
 
 
-def claim_single_daily_read(now: datetime) -> dict:
-    if BUDGET_FILE.exists():
-        try:
-            previous = json.loads(BUDGET_FILE.read_text(encoding="utf-8"))
-            if not isinstance(previous, dict):
-                raise ValueError("not an object")
-            cooldown = previous.get("cooldown_until_utc")
-            if cooldown and now < datetime.fromisoformat(cooldown):
-                raise ReconciliationError("Provider cooldown active")
-            if previous.get("utc_day") == now.date().isoformat():
-                raise ReconciliationError("Daily official NHL scoreboard read already spent")
-        except ReconciliationError:
-            raise  # An exhausted daily budget or cooldown is not corruption.
-        except (OSError, ValueError, TypeError, OverflowError) as exc:
-            raise ReconciliationError("Reconciliation budget corrupt; fail closed") from exc
-    else:
-        previous = {}
+def load_budget_state() -> dict:
+    """Parse the persistent date-rotation ledger; corrupt state fails closed."""
+    if not BUDGET_FILE.exists():
+        return {}
+    try:
+        state = json.loads(BUDGET_FILE.read_text(encoding="utf-8"))
+        if not isinstance(state, dict):
+            raise ValueError("not an object")
+        checks = state.get("date_last_attempt_utc", {})
+        if not isinstance(checks, dict) or len(checks) > 1000:
+            raise ValueError("invalid per-date check ledger")
+        for day, timestamp in checks.items():
+            if not isinstance(day, str) or len(day) != 10:
+                raise ValueError("invalid game date")
+            if datetime.strptime(day, "%Y-%m-%d").strftime("%Y-%m-%d") != day:
+                raise ValueError("non-normalized game date")
+            if not isinstance(timestamp, str):
+                raise ValueError("invalid checked timestamp")
+            moment = datetime.fromisoformat(timestamp)
+            if moment.utcoffset() is None:
+                raise ValueError("timezone missing")
+        cooldown = state.get("cooldown_until_utc")
+        if cooldown is not None:
+            if not isinstance(cooldown, str):
+                raise ValueError("invalid cooldown")
+            if datetime.fromisoformat(cooldown).utcoffset() is None:
+                raise ValueError("naive cooldown")
+        day = state.get("utc_day")
+        if day is not None:
+            if not isinstance(day, str) or len(day) != 10:
+                raise ValueError("invalid UTC day")
+            if datetime.strptime(day, "%Y-%m-%d").strftime("%Y-%m-%d") != day:
+                raise ValueError("bad UTC day")
+            if state.get("reads_today") != 1:
+                raise ValueError("invalid daily request budget")
+        return state
+    except (OSError, ValueError, TypeError, OverflowError) as exc:
+        raise ReconciliationError("Reconciliation budget corrupt; fail closed") from exc
+
+
+def claim_single_daily_read(now: datetime, *, game_date: str) -> dict:
+    previous = load_budget_state()
+    cooldown = previous.get("cooldown_until_utc")
+    if cooldown and now < datetime.fromisoformat(cooldown):
+        raise ReconciliationError("Provider cooldown active")
+    if previous.get("utc_day") == now.date().isoformat():
+        raise ReconciliationError("Daily official NHL scoreboard read already spent")
+
+    # The query date is durably recorded *before* the provider call so
+    # failures cannot repeatedly consume calls or starve newer game dates.
+    checks = dict(previous.get("date_last_attempt_utc", {}))
+    checks[game_date] = now.isoformat()
+    if len(checks) > 1000:
+        raise ReconciliationError("Date-check history at capacity; fail closed")
     updated = {
         "utc_day": now.date().isoformat(),
         "reads_today": 1,
         "last_claim_utc": now.isoformat(),
         "cooldown_until_utc": previous.get("cooldown_until_utc"),
+        "date_last_attempt_utc": checks,
     }
     _save_state(updated)
     return updated
-
 
 def run(*, scoreboard_json: Path | None = None, live: bool = False,
         now: datetime | None = None) -> dict:
@@ -88,7 +125,14 @@ def run(*, scoreboard_json: Path | None = None, live: bool = False,
             raise ReconciliationError("Reconciler already running") from exc
         frozen = archived_forecasts(ARCHIVE, now=current)
         completed = read_reconciled_ids(LEDGER)
-        game_date = pending_date(frozen, completed, now=current)
+        previous = load_budget_state() if live else {}
+        checked = {
+            day: datetime.fromisoformat(at).astimezone(UTC)
+            for day, at in previous.get("date_last_attempt_utc", {}).items()
+        }
+        game_date = pending_date(
+            frozen, completed, now=current, last_attempts=checked,
+        )
         if game_date is None:
             return {
                 "status": "NOTHING_MATURED",
@@ -99,7 +143,7 @@ def run(*, scoreboard_json: Path | None = None, live: bool = False,
             score = json.loads(scoreboard_json.read_text(encoding="utf-8"))
             reads = 0
         else:
-            state = claim_single_daily_read(current)
+            state = claim_single_daily_read(current, game_date=game_date)
             reads = 1
             try:
                 score = fetch_json(f"{NHL}/score/{game_date}")
