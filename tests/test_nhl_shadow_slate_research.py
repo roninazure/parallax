@@ -169,3 +169,62 @@ def test_live_result_serialization_uses_edge_points(monkeypatch):
     assert all("fees_unknown" in row["failed_gates"] for row in report["positions"])
     assert report["positions"][0]["outcome"] == "CGY"
     assert report["positions"][1]["outcome"] == "TOR"
+
+
+
+@pytest.mark.parametrize("winning_team,winning_place", [
+    ("CHI", "Chicago"),
+    ("MTL", "Montreal"),
+])
+def test_montreal_nhl_kalshi_contract_passes_exact_rule_identity(
+    winning_team, winning_place,
+):
+    """Observed Oct 23 venue uses 'Montreal'; official NHL says 'Montréal'."""
+    from types import SimpleNamespace
+    from parallax.league_shadow_evidence import _kalshi_yes
+
+    game = {
+        **official_game(
+            home="CHI", away="MTL",
+            place_home="Chicago", place_away="Montréal",
+        ),
+        "id": 2026020166,
+        "startTimeUTC": "2026-10-24T00:00:00Z",
+    }
+    fixture = scan.nhl_fixtures(
+        {"gameWeek": [{"games": [game]}]},
+        datetime(2026, 10, 22, tzinfo=UTC),
+    )["KXNHLGAME-26OCT23MTLCHI"]
+    assert fixture.venue_away_name == "Montreal"
+    assert fixture.venue_home_name == "Chicago"
+    ticker = f"KXNHLGAME-26OCT23MTLCHI-{winning_team}"
+    raw = {
+        "ticker": ticker,
+        "event_ticker": "KXNHLGAME-26OCT23MTLCHI",
+        "title": f"{winning_place} wins",
+        "yes_sub_title": winning_place,
+        "rules_primary": (
+            f"If {winning_place} wins the Montreal vs Chicago NHL game "
+            "originally scheduled for Oct 23, 2026, then the market resolves to Yes."
+        ),
+    }
+    assert _kalshi_yes(
+        SimpleNamespace(venue_market_id=ticker), raw, fixture,
+    ) == winning_team
+
+    # Preserve fail-closed semantics if settlement rules contradict the fixture.
+    contradictory = {
+        **raw, "rules_primary": raw["rules_primary"].replace(
+            "Montreal vs Chicago", "Montreal vs Boston"
+        )
+    }
+    assert _kalshi_yes(
+        SimpleNamespace(venue_market_id=ticker), contradictory, fixture,
+    ) is None
+
+
+def test_montreal_alias_is_not_general_accent_folding():
+    assert scan.kalshi_place_name("MTL", "Montréal") == "Montreal"
+    assert scan.kalshi_place_name("MTL", "Montréal Canadiens") == "Montréal Canadiens"
+    assert scan.kalshi_place_name("DET", "Montréal") == "Montréal"
+    assert scan.kalshi_place_name("MTL", "Montreal") == "Montreal"
