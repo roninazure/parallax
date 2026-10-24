@@ -98,6 +98,16 @@ def test_bdl_fixture_request_combines_three_dates_in_one_get(monkeypatch):
     assert set(fixtures) == {"KXNBAGAME-26OCT24MIACHA"}
 
 
+def test_bdl_rejects_out_of_range_games(monkeypatch):
+    wrong_date = game()
+    wrong_date["date"] = "2026-11-15"
+    monkeypatch.setattr(runner, "fetch_json", lambda url, *, key=None: {
+        "data": [wrong_date], "meta": {"next_cursor": None},
+    })
+    with pytest.raises(ValueError, match="out-of-range"):
+        runner.bdl_fixtures(key="test-only", now=NOW)
+
+
 def test_kalshi_events_honors_pages_and_rejects_truncated_listing(monkeypatch):
     seen = []
     def fake_fetch(url, *, key=None):
