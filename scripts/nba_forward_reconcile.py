@@ -187,7 +187,7 @@ def run(*, games_json: Path | None = None, regular_query_verified: bool = False,
             except urllib.error.HTTPError as exc:
                 if exc.code in (401, 403, 429):
                     state["cooldown_until_utc"] = (
-                        datetime.now(UTC) + timedelta(hours=COOLDOWN_HOURS)
+                        current + timedelta(hours=COOLDOWN_HOURS)
                     ).isoformat()
                     _save_budget(state)
                 raise
