@@ -26,7 +26,7 @@ def test_nba_scan_template_is_bounded_research_only_and_independent():
     assert config["WorkingDirectory"] == WORKTREE
     assert config["EnvironmentVariables"]["PYTHONPATH"] == WORKTREE
     assert config["StartInterval"] == 7200
-    assert config["RunAtLoad"] is True
+    assert config["RunAtLoad"] is False
     assert config["KeepAlive"] is False
     assert config["StandardOutPath"] == USER + "/nba/shadow-research.log"
     assert config["StandardErrorPath"] == USER + "/nba/shadow-research.err"
@@ -42,7 +42,7 @@ def test_nba_final_reconcile_template_is_independent_daily_and_read_only():
     assert config["WorkingDirectory"] == WORKTREE
     assert config["EnvironmentVariables"]["PYTHONPATH"] == WORKTREE
     assert config["StartInterval"] == 86400
-    assert config["RunAtLoad"] is True
+    assert config["RunAtLoad"] is False
     assert config["KeepAlive"] is False
     assert config["StandardOutPath"] == USER + "/nba/forward-reconcile.log"
     assert config["StandardErrorPath"] == USER + "/nba/forward-reconcile.err"
