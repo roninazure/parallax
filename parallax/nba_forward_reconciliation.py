@@ -271,6 +271,7 @@ def read_reconciled_ids(directory: Path) -> set[str]:
                         "buy_authorized", "publication_authorized", "orders_authorized"))
                     or type(doc.get("home_score")) is not int
                     or type(doc.get("away_score")) is not int
+                    or doc["home_score"] == doc["away_score"]
                     or (doc["home_score"] > doc["away_score"]) != won
                     or type(doc.get("brier")) not in (int, float)
                     or type(doc.get("log_loss")) not in (int, float)
