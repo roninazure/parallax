@@ -32,7 +32,7 @@
   </dict>
 
   <key>RunAtLoad</key>
-  <true/>
+  <false/>
   <key>StartInterval</key>
   <integer>7200</integer>
   <key>KeepAlive</key>
