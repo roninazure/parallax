@@ -175,10 +175,15 @@ def bdl_fixtures(*, key: str, now: datetime) -> tuple[dict[str, ShadowFixture], 
     params = [("seasons[]", str(season)), ("season_type", "regular"), ("per_page", "100")]
     params += [("dates[]", day) for day in dates]
     page = fetch_json(BDL_URL + "?" + urllib.parse.urlencode(params), key=key)
+    rows = page.get("data")
+    if not isinstance(rows, list) or any(
+        not isinstance(row, dict) or row.get("date") not in dates for row in rows
+    ):
+        raise ValueError("STOP: BDL returned malformed or out-of-range NBA fixtures")
     fixtures = nba_fixtures(
         page, now=now, season=season, regular_season_query_verified=True,
     )
-    return fixtures, len(page["data"])
+    return fixtures, len(rows)
 
 
 def kalshi_events() -> tuple[dict[str, dict], int]:
@@ -274,13 +279,13 @@ def run_once(*, key: str, max_games: int) -> dict:
         raise ValueError("NBA scanner max-games exceeds bounded pilot cap")
     now = datetime.now(UTC)
     previous = past_screenings(RESEARCH_OUTPUT, now=now)
+    history = load_history()  # Fail before consuming provider requests if history is invalid.
     fixtures, bdl_count = bdl_fixtures(key=key, now=now)
     events, pages = kalshi_events()
     matches = matching_event_candidates(
         fixtures, {"events": list(events.values()), "cursor": None},
     )
     selected = rotate_slate(matches, previous, limit=max_games)
-    history = load_history()
     screened, rejected = [], []
     for _, ticker, fixture in selected:
         try:
