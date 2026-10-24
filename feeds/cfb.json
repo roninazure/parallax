@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-10-24T21:51:52.787214+00:00",
+  "generated_at": "2026-10-24T22:52:52.721997+00:00",
   "lane": "CFB",
   "plays": [
     {
-      "contract_side": "NO",
-      "edge_pp": 37.31329253,
-      "market_id": "1358895",
-      "matchup": "Boise State at Washington State",
-      "model_probability": 0.528132925256802,
-      "price": 0.155,
+      "contract_side": "YES",
+      "edge_pp": 29.05271151,
+      "market_id": "1559239",
+      "matchup": "Houston at Utah",
+      "model_probability": 0.6005271150601671,
+      "price": 0.31,
       "sport": "CFB",
-      "start_time": "2026-10-24T22:00:00+00:00",
+      "start_time": "2026-10-25T02:15:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
-      "edge_pp": 15.54070719,
+      "edge_pp": 15.04070719,
       "market_id": "1557151",
       "matchup": "Virginia Tech at Clemson",
       "model_probability": 0.5804070718664851,
-      "price": 0.425,
+      "price": 0.43,
       "sport": "CFB",
       "start_time": "2026-10-24T23:00:00+00:00",
       "venue": "POLYMARKET"
@@ -34,25 +34,14 @@
       "sport": "CFB",
       "start_time": "2026-10-24T23:30:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 6.64288221,
-      "market_id": "1358901",
-      "matchup": "San Diego State at Colorado State",
-      "model_probability": 0.5714288220937473,
-      "price": 0.505,
-      "sport": "CFB",
-      "start_time": "2026-10-24T22:30:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-24T21:51:11.849975+00:00",
+  "source_feed_generated_at": "2026-10-24T22:52:15.450248+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 3
   }
 }
