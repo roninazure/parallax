@@ -220,6 +220,47 @@ def load_history() -> list:
     return nba
 
 
+def season_sensitivity_report(
+    fixture: ShadowFixture, history: list, *,
+    combined_home_probability: float,
+) -> dict:
+    """Descriptive, non-certified disagreement between separate season Elo fits.
+
+    Different seasons start independently at the Elo prior. Their difference
+    is not a confidence interval, a calibrated uncertainty estimate, or
+    proof of any executable market edge. No BUY authority.
+    """
+    season_probs: dict[str, float] = {}
+    for season in (2024, 2025):
+        one_season = [
+            game for game in history
+            if game.sport == "NBA" and game.season == season
+        ]
+        if len(one_season) != 1230:
+            raise ValueError("STOP: incomplete NBA season sensitivity history")
+        projection = predict_future(
+            one_season, sport="NBA",
+            game_date=fixture.kickoff.astimezone(ET).date(),
+            home_team=fixture.home_team, away_team=fixture.away_team,
+            game_id=fixture.game_id, season=fixture.season,
+        )
+        if projection.model_status != MODEL_STATUS or projection.home_won is not None:
+            raise ValueError("STOP: invalid NBA single-season experimental forecast")
+        season_probs[str(season)] = projection.home_win_probability
+    raw_difference_pp = 100 * abs(
+        season_probs["2025"] - season_probs["2024"]
+    )
+    return {
+        "home_probability_2024_only": round(season_probs["2024"], 6),
+        "home_probability_2025_only": round(season_probs["2025"], 6),
+        "home_probability_both_seasons": round(combined_home_probability, 6),
+        "single_season_difference_pp": round(raw_difference_pp, 2),
+        "status": "DESCRIPTIVE_UNVALIDATED",
+        "current_2026_season_results_included": False,
+        "net_trading_edge_certified": False,
+    }
+
+
 def evaluate_fixture(fixture: ShadowFixture, event: dict, history: list) -> dict:
     ticker = event.get("event_ticker")
     expected = {f"{ticker}-{fixture.away_team}", f"{ticker}-{fixture.home_team}"}
@@ -235,6 +276,9 @@ def evaluate_fixture(fixture: ShadowFixture, event: dict, history: list) -> dict
     )
     if prediction.model_status != MODEL_STATUS or prediction.home_won is not None:
         raise ValueError("NBA forecast unexpectedly certified or postgame")
+    sensitivity = season_sensitivity_report(
+        fixture, history, combined_home_probability=prediction.home_win_probability,
+    )
     positions = []
     for raw in markets:
         if raw.get("event_ticker") != ticker:
@@ -270,6 +314,7 @@ def evaluate_fixture(fixture: ShadowFixture, event: dict, history: list) -> dict
         "matchup": f"{fixture.away_team}@{fixture.home_team}",
         "start_utc": fixture.kickoff.isoformat(),
         "raw_elo_home_probability": round(prediction.home_win_probability, 6),
+        "model_season_sensitivity": sensitivity,
         "positions": positions,
     }
 
