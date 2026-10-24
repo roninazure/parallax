@@ -2,6 +2,7 @@
 from datetime import UTC, datetime, timedelta
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -158,3 +159,43 @@ def test_run_once_never_authorizes_publication(monkeypatch, tmp_path):
 def test_bounded_game_cap_rejects_invalid_counts(limit):
     with pytest.raises(ValueError):
         runner.run_once(key="test-only", max_games=limit)
+
+
+def test_season_sensitivity_is_research_only_and_records_real_disagreement(monkeypatch):
+    fixture = SimpleNamespace(
+        kickoff=datetime(2026, 10, 24, 22, tzinfo=UTC),
+        home_team="CHA", away_team="MIA", game_id="bdl:test", season=2026,
+    )
+    historical = (
+        [SimpleNamespace(sport="NBA", season=2024)] * 1230
+        + [SimpleNamespace(sport="NBA", season=2025)] * 1230
+    )
+    calls = []
+    def fake_prediction(rows, **kwargs):
+        calls.append(rows[0].season)
+        return SimpleNamespace(
+            model_status=runner.MODEL_STATUS, home_won=None,
+            home_win_probability={2024: 0.3763, 2025: 0.6877}[rows[0].season],
+        )
+    monkeypatch.setattr(runner, "predict_future", fake_prediction)
+    result = runner.season_sensitivity_report(
+        fixture, historical, combined_home_probability=0.663788,
+    )
+    assert calls == [2024, 2025]
+    assert result["single_season_difference_pp"] == 31.14
+    assert result["home_probability_both_seasons"] == 0.663788
+    assert result["status"] == "DESCRIPTIVE_UNVALIDATED"
+    assert result["net_trading_edge_certified"] is False
+    assert result["current_2026_season_results_included"] is False
+
+
+def test_season_sensitivity_requires_both_full_historical_seasons(monkeypatch):
+    fixture = SimpleNamespace(
+        kickoff=datetime(2026, 10, 24, 22, tzinfo=UTC),
+        home_team="CHA", away_team="MIA", game_id="bdl:test", season=2026,
+    )
+    with pytest.raises(ValueError, match="incomplete NBA season"):
+        runner.season_sensitivity_report(
+            fixture, [SimpleNamespace(sport="NBA", season=2025)] * 1230,
+            combined_home_probability=0.5,
+        )
