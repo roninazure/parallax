@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24T22:52:52.721997+00:00",
+  "generated_at": "2026-10-24T23:52:35.220797+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -12,36 +12,14 @@
       "sport": "CFB",
       "start_time": "2026-10-25T02:15:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 15.04070719,
-      "market_id": "1557151",
-      "matchup": "Virginia Tech at Clemson",
-      "model_probability": 0.5804070718664851,
-      "price": 0.43,
-      "sport": "CFB",
-      "start_time": "2026-10-24T23:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 13.80423192,
-      "market_id": "1395837",
-      "matchup": "Ole Miss at Texas",
-      "model_probability": 0.5580423192225259,
-      "price": 0.42,
-      "sport": "CFB",
-      "start_time": "2026-10-24T23:30:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-24T22:52:15.450248+00:00",
+  "source_feed_generated_at": "2026-10-24T23:52:04.213649+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 1
   }
 }
