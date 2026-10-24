@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-10-24T05:56:53.549048+00:00",
+  "generated_at": "2026-10-24T06:58:36.413057+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 35.81329253,
+      "edge_pp": 36.31329253,
       "market_id": "1358895",
       "matchup": "Boise State at Washington State",
       "model_probability": 0.528132925256802,
-      "price": 0.17,
+      "price": 0.165,
       "sport": "CFB",
       "start_time": "2026-10-24T22:00:00+00:00",
       "venue": "POLYMARKET"
@@ -37,11 +37,11 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 11.45515328,
+      "edge_pp": 11.95515328,
       "market_id": "1341099",
       "matchup": "LSU at Auburn",
       "model_probability": 0.40455153281340384,
-      "price": 0.29,
+      "price": 0.285,
       "sport": "CFB",
       "start_time": "2026-10-24T16:00:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-24T05:56:24.508403+00:00",
+  "source_feed_generated_at": "2026-10-24T06:57:37.361728+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
