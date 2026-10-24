@@ -1,13 +1,69 @@
 {
-  "generated_at": "2026-10-24T09:30:44.779805+00:00",
+  "generated_at": "2026-10-24T11:05:36.538771+00:00",
   "lane": "CFB",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 36.31329253,
+      "market_id": "1358895",
+      "matchup": "Boise State at Washington State",
+      "model_probability": 0.528132925256802,
+      "price": 0.165,
+      "sport": "CFB",
+      "start_time": "2026-10-24T22:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 15.87490045,
+      "market_id": "1395821",
+      "matchup": "Indiana at Michigan",
+      "model_probability": 0.4387490044631799,
+      "price": 0.28,
+      "sport": "CFB",
+      "start_time": "2026-10-24T16:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 13.80423192,
+      "market_id": "1395837",
+      "matchup": "Ole Miss at Texas",
+      "model_probability": 0.5580423192225259,
+      "price": 0.42,
+      "sport": "CFB",
+      "start_time": "2026-10-24T23:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 11.95515328,
+      "market_id": "1341099",
+      "matchup": "LSU at Auburn",
+      "model_probability": 0.40455153281340384,
+      "price": 0.285,
+      "sport": "CFB",
+      "start_time": "2026-10-24T16:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 6.52903759,
+      "market_id": "1395827",
+      "matchup": "Tennessee at South Carolina",
+      "model_probability": 0.5302903758943651,
+      "price": 0.465,
+      "sport": "CFB",
+      "start_time": "2026-10-24T19:30:00+00:00",
+      "venue": "POLYMARKET"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-24T08:00:16.500396+00:00",
-  "source_schedule_state": "STALE",
-  "state": "STALE",
+  "source_feed_generated_at": "2026-10-24T11:05:12.227524+00:00",
+  "source_schedule_state": "UNVERIFIED",
+  "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 5
   }
 }
