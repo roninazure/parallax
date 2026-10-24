@@ -160,6 +160,48 @@ def test_non_buy_verdict_is_silent(tmp_path, action):
     assert alert_dispatcher.status()["sent"] == 0
 
 
+@pytest.mark.parametrize("sport", ["NBA", "NHL"])
+def test_uncertified_league_buy_is_rejected_before_ntfy(tmp_path, sport):
+    transport = FakeTransport()
+    alert_dispatcher = dispatcher(tmp_path, transport)
+
+    result = dispatch_scored_buy(
+        alert_dispatcher,
+        play(),
+        market(),
+        sport=sport,
+        matchup="experimental league fixture",
+        detected_at="2026-09-23T15:01:02+00:00",
+    )
+
+    assert result is None
+    assert transport.calls == []
+    assert alert_dispatcher.status()["sent"] == 0
+
+
+@pytest.mark.parametrize("sport", ["NBA", "NHL"])
+def test_explicit_synthetic_certified_league_buy_uses_ntfy_dedupe(tmp_path, sport):
+    from types import SimpleNamespace
+    transport = FakeTransport()
+    alert_dispatcher = dispatcher(tmp_path, transport)
+    scored = play()
+    scored.evidence = SimpleNamespace(
+        validation_status="CALIBRATED", validation_reference="SYNTHETIC_TEST_ONLY",
+        model_version=f"{sport.lower()}-synthetic-certified-fixture-v1",
+        source_independence="INDEPENDENT",
+    )
+    scored.verdict = SimpleNamespace(failed_gates=())
+    scored.data_freshness = "FRESH"
+    scored.status = "CURRENT"
+    kwargs = dict(sport=sport, matchup="synthetic fixture", detected_at="2026-09-23T15:01:02+00:00")
+    first = dispatch_scored_buy(alert_dispatcher, scored, market(), **kwargs)
+    second = dispatch_scored_buy(alert_dispatcher, scored, market(), **kwargs)
+    assert first["status"] == "SENT" and first["deduplicated"] is False
+    assert second["status"] == "SENT" and second["deduplicated"] is True
+    assert len(transport.calls) == 1
+    assert transport.calls[0][1]["topic"] == "configured-test-topic"
+
+
 def test_ntfy_failure_is_logged_in_delivery_health_and_does_not_raise(
     tmp_path, caplog
 ):

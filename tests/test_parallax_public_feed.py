@@ -1300,3 +1300,51 @@ def test_unvalidated_or_ambiguous_mlb_postseason_buy_is_withheld(path, value):
 
     assert result["buy_publication_eligible"] is False
     assert result["summary"]["buy"] == 0
+
+
+@pytest.mark.parametrize("lane", ["nba", "nhl"])
+def test_uncertified_league_feed_keeps_watch_pass_and_suppresses_buy(lane):
+    payload = {
+        "mode": "live",
+        "market_data_complete": True,
+        "summary": {"rows": [
+            {"sport": lane.upper(), "market_id": "buy", "suggested_action": "BUY",
+             "publication_eligible": True, "updated_at": ISSUED},
+            {"sport": lane.upper(), "market_id": "watch", "suggested_action": "WATCH",
+             "updated_at": ISSUED},
+            {"sport": lane.upper(), "market_id": "pass", "suggested_action": "PASS",
+             "updated_at": ISSUED},
+        ]},
+    }
+
+    public = sanitize_completed_scan(lane, json.dumps(payload), generated_at=NOW)
+
+    assert public["lane"] == lane.upper()
+    assert public["runtime_state"] == "LIVE"
+    assert public["buy_publication_eligible"] is False
+    assert [row["action"] for row in public["plays"]] == ["WATCH", "PASS"]
+
+
+@pytest.mark.parametrize("lane", ["nba", "nhl"])
+def test_explicit_synthetic_certified_league_buy_passes_feed_gate(lane):
+    row = {
+        "sport": lane.upper(), "venue": "KALSHI", "market_id": "synthetic-only",
+        "market_title": "Synthetic matchup winner", "matchup": "Synthetic away at Synthetic home",
+        "side": "YES", "suggested_action": "BUY", "publication_eligible": True,
+        "mapping_status": "MAPPED", "acquisition_status": "ACQUIRED", "market_status": "OPEN",
+        "data_freshness": "FRESH", "status": "CURRENT", "failed_gates": [],
+        "fee_status": "VERIFIED_SCHEDULE", "evidence_source": "synthetic-fixture-test",
+        "evidence_model_version": f"{lane.lower()}-synthetic-certified-v1",
+        "evidence_validation_status": "CALIBRATED", "evidence_validation_reference": "SYNTHETIC_TEST_ONLY",
+        "game_id": "synthetic-game", "selected_team": "Synthetic home",
+        "home_team": "Synthetic home", "away_team": "Synthetic away",
+        "executable_price": 0.5, "model_probability": 0.7, "fee": 0.1,
+        "raw_edge": 20.0, "liquidity": 50.0, "net_ev_25": 4.0, "expected_return": 0.1,
+        "updated_at": "2026-09-24T12:05:00Z", "expires_at": "2026-09-24T13:00:00Z",
+        "game_start": "2026-09-25T00:00:00Z",
+    }
+    payload = {"mode": "live", "market_data_complete": True, "summary": {"rows": [row]}}
+    public = sanitize_completed_scan(lane, json.dumps(payload), generated_at=NOW)
+    assert public["summary"]["buy"] == 1
+    assert public["buy_publication_eligible"] is True
+    assert public["plays"][0]["action"] == "BUY"

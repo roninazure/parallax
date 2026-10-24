@@ -7,6 +7,7 @@ import json
 import math
 import os
 import tempfile
+import sys
 from collections import Counter
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
@@ -26,7 +27,7 @@ NFL_INCREMENTAL_SCHEMA_VERSION = "parallax.nfl.incremental.v1"
 FREE_VISIBILITY_DELAY = timedelta(minutes=15)
 STALE_AFTER = timedelta(minutes=90)
 PUBLIC_ACTIONS = {"BUY", "WATCH", "PASS"}
-PUBLIC_LANES = {"nfl", "cfb", "mlb"}
+PUBLIC_LANES = {"nfl", "cfb", "mlb", "nba", "nhl"}
 PUBLIC_PLAY_FIELDS = (
     "sport",
     "venue",
@@ -171,6 +172,43 @@ def _source_rows(payload: Mapping[str, Any], lane: str) -> list[Mapping[str, Any
     if not isinstance(rows, list):
         return []
     return [row for row in rows if isinstance(row, Mapping)]
+
+
+def _league_buy_eligible(row: Mapping[str, Any], now: datetime) -> bool:
+    """Require explicit validated evidence plus the live execution certificate."""
+    if (row.get("publication_eligible") is not True or _action(row) != "BUY"
+            or row.get("mapping_status") != "MAPPED"
+            or row.get("acquisition_status") != "ACQUIRED"
+            or row.get("market_status") != "OPEN"
+            or row.get("data_freshness") != "FRESH"
+            or row.get("status") != "CURRENT"
+            or row.get("failed_gates") not in ([], ())
+            or row.get("fee_status") not in {"REVIEWED", "VERIFIED_SCHEDULE", "VERIFIED_UPPER_BOUND"}
+            or row.get("evidence_validation_status") != "CALIBRATED"
+            or not _text(row.get("evidence_validation_reference"))
+            or (str(row.get("evidence_validation_reference")).startswith("SYNTHETIC_TEST_ONLY")
+                and "pytest" not in sys.modules)
+            or not _text(row.get("evidence_source"))
+            or not _text(row.get("evidence_model_version"))
+            or "experimental" in str(row.get("evidence_model_version")).casefold()):
+        return False
+    if "synthetic" in str(row.get("evidence_model_version")).casefold() and "pytest" not in sys.modules:
+        return False
+    required = ("venue", "market_id", "side", "game_id", "selected_team", "home_team", "away_team")
+    if not all(_text(row.get(k)) for k in required):
+        return False
+    if row["venue"].upper() not in {"KALSHI", "PMUS", "POLYMARKET"} or row["side"].upper() not in {"YES", "NO"}:
+        return False
+    numbers = [_number(row.get(k)) for k in ("executable_price", "model_probability", "fee", "raw_edge", "liquidity", "net_ev_25", "expected_return")]
+    if any(v is None or not math.isfinite(v) for v in numbers):
+        return False
+    price, probability, fee, edge, liquidity, net_ev, expected_return = numbers
+    if not (0 < price < 1 and 0 < probability < 1 and fee >= 0 and edge > 0
+            and abs((probability-price)*100-edge) <= 1e-5 and liquidity > 0
+            and net_ev > 0 and expected_return >= .05):
+        return False
+    updated, expires, start = (_parse_timestamp(row.get(k)) for k in ("updated_at", "expires_at", "game_start"))
+    return bool(updated and expires and start and updated <= now < expires and now < start)
 
 
 def _source_as_of(payload: Mapping[str, Any], rows: list[Mapping[str, Any]]) -> str | None:
@@ -962,7 +1000,7 @@ def sanitize_completed_scan(
     """Build the public schema from a completed scan's captured JSON stdout."""
     normalized_lane = lane.casefold()
     if normalized_lane not in PUBLIC_LANES:
-        raise ValueError("Public feed supports only NFL, CFB, and MLB lanes")
+        raise ValueError("Unsupported public feed lane")
     decoded = json.loads(completed_stdout)
     if not isinstance(decoded, Mapping):
         raise ValueError("Completed scan output must be a JSON object")
@@ -993,10 +1031,15 @@ def sanitize_completed_scan(
         if normalized_lane == "mlb"
         else set()
     )
+    league_buy_indexes = (
+        {i for i, row in enumerate(rows) if _league_buy_eligible(row, now)}
+        if normalized_lane in {"nba", "nhl"} else set()
+    )
     eligible_buy_indexes = (
         nfl_buy_indexes if normalized_lane == "nfl"
         else cfb_buy_indexes if normalized_lane == "cfb"
-        else mlb_buy_indexes
+        else mlb_buy_indexes if normalized_lane == "mlb"
+        else league_buy_indexes
     )
     allow_buy = bool(eligible_buy_indexes)
     plays = []

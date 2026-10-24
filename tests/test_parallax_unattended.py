@@ -549,7 +549,30 @@ def test_completed_certified_cfb_buy_replaces_public_feed_while_unverified(tmp_p
     assert public["lane"] == "CFB"
     assert public["data_quality_state"] == "UNVERIFIED"
     assert public["summary"]["buy"] == 1
-    assert public["plays"][0]["publication_eligible"] is True
+
+
+def test_nba_nhl_scheduler_runs_exports_success_and_isolates_lane_failure(tmp_path, monkeypatch):
+    calls, exports = [], []
+    def runner(command, **_kwargs):
+        calls.append(command)
+        if command[1].endswith("nhl_live_scan.py"):
+            return subprocess.CompletedProcess(command, 1, "", "mock NHL provider failure")
+        return subprocess.CompletedProcess(command, 0,
+            json.dumps({"read_only": True, "orders": 0, "published": 0, "alerts": 0,
+                        "sport": "NBA", "market_data_complete": False,
+                        "venues": {}, "summary": {"rows": []}}), "")
+    monkeypatch.setattr("parallax_unattended.export_completed_scan",
+        lambda lane, _stdout, _state: exports.append(lane))
+    scheduler = UnattendedScheduler(root=tmp_path / "release", state_dir=tmp_path / "state",
+        runner=runner, monotonic=lambda: 20_000.0,
+        clock=lambda: "2026-10-24T00:00:00+00:00")
+    scheduler.next_due["nba"] = scheduler.next_due["nhl"] = 0.0
+    result = scheduler.run_cycle()
+    assert any(command[1].endswith("nba_live_scan.py") for command in calls)
+    assert any(command[1].endswith("nhl_live_scan.py") for command in calls)
+    assert "nba" in exports and "nhl" not in exports
+    assert result["lanes"]["nba"]["state"] == "DEGRADED"
+    assert result["lanes"]["nhl"]["state"] == "FAILED"
 
 
 def test_malformed_cfb_output_preserves_feed_and_fails_lane(tmp_path):

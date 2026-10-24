@@ -939,6 +939,24 @@ def dispatch_scored_buy(
     """Dispatch one deduplicated immediate alert for a freshly scored BUY."""
     if play.suggested_action != Action.BUY:
         return None
+    if sport.upper() in {"NBA", "NHL"}:
+        evidence = getattr(play, "evidence", None)
+        if not (
+            evidence
+            and evidence.validation_status == "CALIBRATED"
+            and evidence.validation_reference.strip()
+            and (not evidence.validation_reference.startswith("SYNTHETIC_TEST_ONLY") or "pytest" in sys.modules)
+            and evidence.model_version
+            and "experimental" not in evidence.model_version.casefold()
+            and ("synthetic" not in evidence.model_version.casefold() or "pytest" in sys.modules)
+            and evidence.source_independence not in {"RESEARCH_ONLY", "UNKNOWN"}
+            and not play.verdict.failed_gates
+            and play.data_freshness == "FRESH"
+            and play.status == "CURRENT"
+            and market.status == "OPEN"
+            and market.mechanics.fee_status in {"REVIEWED", "VERIFIED_SCHEDULE", "VERIFIED_UPPER_BOUND"}
+        ):
+            return None
     prior_state = dispatcher.store.buy_state(
         sport,
         str(play.venue),

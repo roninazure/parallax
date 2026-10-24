@@ -370,8 +370,17 @@ class KalshiPublicClient:
     def series_page(self, *, limit: int, cursor: str = "") -> dict:
         return self.get("/series", status="open", limit=limit, cursor=cursor)
 
-    def events_page(self, *, series_ticker: str, limit: int, cursor: str = "") -> dict:
-        return self.get("/events", status="open", series_ticker=series_ticker, limit=limit, cursor=cursor)
+    def events_page(
+        self, *, series_ticker: str, limit: int, cursor: str = "",
+        with_nested_markets: bool = False,
+    ) -> dict:
+        params: dict[str, str | int] = {
+            "status": "open", "series_ticker": series_ticker,
+            "limit": limit, "cursor": cursor,
+        }
+        if with_nested_markets:
+            params["with_nested_markets"] = "true"
+        return self.get("/events", **params)
 
     def event_markets_page(self, *, event_ticker: str, limit: int, cursor: str = "") -> dict:
         return self.get("/markets", status="open", event_ticker=event_ticker, limit=limit, cursor=cursor, mve_filter="exclude")

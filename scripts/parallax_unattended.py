@@ -24,12 +24,14 @@ from parallax.public_feed import export_completed_scan
 
 HEALTH_FILENAME = "parallax_unattended_health.json"
 LOCK_FILENAME = "parallax_unattended.lock"
-LANES = ("nfl", "cfb", "mlb", "reconciliation")
-SPORTS_LANES = ("nfl", "cfb", "mlb")
+LANES = ("nfl", "cfb", "mlb", "nba", "nhl", "reconciliation")
+SPORTS_LANES = ("nfl", "cfb", "mlb", "nba", "nhl")
 SPORTS_INTERVAL_SECONDS = {
     "nfl": 45,
     "cfb": 3600,
     "mlb": 3600,
+    "nba": 3600,
+    "nhl": 3600,
 }
 RECONCILIATION_INTERVAL_SECONDS = 300
 # Keep the first unattended cycle bounded after launch. Subsequent cadence is
@@ -39,6 +41,8 @@ STARTUP_OFFSETS_SECONDS = {
     "mlb": 120,
     "reconciliation": 240,
     "cfb": 3600,
+    "nba": 7200,
+    "nhl": 10800,
 }
 
 
@@ -180,6 +184,8 @@ class UnattendedScheduler:
         if self._cfb_enabled():
             commands["cfb"] = [sys.executable, str(self.root / "scripts/cfb_live_scan.py")]
         commands["mlb"] = [sys.executable, "-m", "parallax", "scan", "--limit", "6"]
+        for league in ("nba", "nhl"):
+            commands[league] = [sys.executable, str(self.root / f"scripts/{league}_live_scan.py")]
         commands["reconciliation"] = [
             sys.executable,
             str(self.root / "scripts/parallax_reconcile_prospective.py"),
@@ -194,6 +200,7 @@ class UnattendedScheduler:
         # The NFL child may publish already-finalized games into the same local
         # sanitized feed while stdout remains captured for final reconciliation.
         env["PARALLAX_PUBLIC_FEED_STATE_DIR"] = str(self.state_dir)
+        env["PARALLAX_STATE_DIR"] = str(self.state_dir)
         return env
 
     def _health(self, state: str, heartbeat: str) -> dict[str, object]:
@@ -208,6 +215,8 @@ class UnattendedScheduler:
             "lanes": self.lane_health,
             "last_successful_cfb_scan": self.last_success["cfb"],
             "last_successful_mlb_scan": self.last_success["mlb"],
+            "last_successful_nba_scan": self.last_success["nba"],
+            "last_successful_nhl_scan": self.last_success["nhl"],
             "last_successful_reconciliation": self.last_success["reconciliation"],
             "recent_errors": self.recent_errors[-8:],
         }
@@ -220,7 +229,8 @@ class UnattendedScheduler:
         now = self.monotonic()
         commands = self.commands()
         for lane, command in commands.items():
-            if now < self.next_due.get(lane, now):
+            default_due = float("inf") if lane in {"nba", "nhl"} else now
+            if now < self.next_due.get(lane, default_due):
                 continue
             self.next_due[lane] = now + (
                 SPORTS_INTERVAL_SECONDS[lane]
@@ -251,6 +261,9 @@ class UnattendedScheduler:
                         raise RuntimeError("invalid JSON scan output") from exc
                     if not isinstance(decoded_output, dict):
                         raise RuntimeError("scan output must be a JSON object")
+                    if lane in {"nba", "nhl"} and decoded_output.get("scan_status") == "FAILED":
+                        failure_type = decoded_output.get("failure_type", "UnknownError")
+                        raise RuntimeError(f"{lane.upper()} scanner reported {failure_type}")
                 if lane == "nfl" and isinstance(decoded_output, dict):
                     self.nfl_provider_state = {
                         "scan_mode": decoded_output.get("scan_mode"),
@@ -268,9 +281,9 @@ class UnattendedScheduler:
                         export_completed_scan(lane, completed.stdout, self.state_dir)
                     except Exception as exc:
                         print(f"[WARN] {lane} public feed export failed: {type(exc).__name__}", file=sys.stderr, flush=True)
-                        if lane == "cfb":
-                            raise RuntimeError("CFB scan output failed public-feed validation") from exc
-                partial = lane in {"nfl", "mlb"} and _reported_market_data_incomplete(completed.stdout)
+                        if lane in {"cfb", "nba", "nhl"}:
+                            raise RuntimeError(f"{lane.upper()} scan output failed public-feed validation") from exc
+                partial = lane in {"nfl", "mlb", "nba", "nhl"} and _reported_market_data_incomplete(completed.stdout)
                 self.last_success[lane] = self.clock()
                 if lane == "nfl":
                     self.last_nfl_refresh = (
