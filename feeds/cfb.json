@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T23:49:16.376702+00:00",
+  "generated_at": "2026-10-24T00:51:28.059128+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -26,24 +26,24 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 11.45862672,
+      "edge_pp": 12.45862672,
       "market_id": "1331013",
       "matchup": "Air Force at Wyoming",
       "model_probability": 0.4395862671917594,
-      "price": 0.325,
+      "price": 0.315,
       "sport": "CFB",
       "start_time": "2026-10-24T01:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 8.06487565,
-      "market_id": "1331011",
-      "matchup": "Army at Tulsa",
-      "model_probability": 0.5806487565185172,
-      "price": 0.5,
+      "contract_side": "NO",
+      "edge_pp": 11.45515328,
+      "market_id": "1341099",
+      "matchup": "LSU at Auburn",
+      "model_probability": 0.40455153281340384,
+      "price": 0.29,
       "sport": "CFB",
-      "start_time": "2026-10-24T00:30:00+00:00",
+      "start_time": "2026-10-24T16:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-23T23:49:05.110415+00:00",
+  "source_feed_generated_at": "2026-10-24T00:50:55.048031+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
