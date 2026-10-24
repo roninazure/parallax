@@ -224,3 +224,17 @@ def test_no_matured_forecast_is_zero_gets(tmp_path, monkeypatch):
     )
     assert result["status"] == "NOTHING_MATURED"
     assert result["network_gets"] == 0
+
+
+def test_tied_stored_final_is_rejected(tmp_path, monkeypatch):
+    configure_runner(monkeypatch, tmp_path)
+    receipt(runner.ARCHIVE)
+    source = tmp_path / "verified-games.json"
+    source.write_text(json.dumps(saved_page()))
+    runner.run(games_json=source, regular_query_verified=True, now=AFTER)
+    ledger = runner.LEDGER / "nba-21717901.json"
+    stored = json.loads(ledger.read_text())
+    stored["home_score"] = stored["away_score"]
+    ledger.write_text(json.dumps(stored))
+    with pytest.raises(rec.ReconciliationError):
+        runner.run(games_json=source, regular_query_verified=True, now=AFTER)
