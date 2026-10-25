@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T16:16:04.986934+00:00",
+  "generated_at": "2026-10-25T16:19:25.043298+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -45,69 +45,14 @@
       "sport": "NFL",
       "start_time": "2026-10-25T17:00:00+00:00",
       "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 39.32354797,
-      "market_id": "1387745",
-      "matchup": "DAL at PHI",
-      "model_probability": 0.7232354796538691,
-      "price": 0.33,
-      "sport": "NFL",
-      "start_time": "2026-10-27T00:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 18.36951629,
-      "market_id": "1458580",
-      "matchup": "CAR at GB",
-      "model_probability": 0.7836951628619138,
-      "price": 0.6,
-      "sport": "NFL",
-      "start_time": "2026-10-30T00:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 8.02555023,
-      "market_id": "1545098",
-      "matchup": "ATL at TB",
-      "model_probability": 0.617755502337712,
-      "price": 0.5375,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 10.46933042,
-      "market_id": "1545096",
-      "matchup": "CLE at PIT",
-      "model_probability": 0.7546933041954901,
-      "price": 0.65,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 8.24423143,
-      "market_id": "1545094",
-      "matchup": "IND at JAX",
-      "model_probability": 0.33244231425491044,
-      "price": 0.25,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T16:15:34.954724+00:00",
+  "source_feed_generated_at": "2026-10-25T16:19:22.065638+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 9
+    "buy": 4
   }
 }
