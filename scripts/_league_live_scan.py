@@ -126,7 +126,7 @@ def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtu
                 page_size=100, max_pages=4, max_rows=400,
             )
             return rows
-        all_pmus = acquisition.discover(f"{sport}:bounded-active-universe:v1", request_markets)
+        all_pmus = acquisition.discover("bounded-active-universe:v1", request_markets)
         from parallax.discovery import CoverageReport, Coverage
         cov = CoverageReport(Coverage.BOUNDED, 4, len(all_pmus), len(all_pmus), 100, 4,
                              "cached or bounded active-market pagination", False)
@@ -139,7 +139,7 @@ def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtu
     except Exception as exc:
         if hasattr(kalshi, "close"): kalshi.close()
         pmus.close()
-        diagnostics["KALSHI" if not krows else "PMUS"] = {"coverage": {"state": "PARTIAL", "error_type": type(exc).__name__}, "discovered": 0}
+        diagnostics["KALSHI" if not krows else "PMUS"] = {"coverage": {"state": "PARTIAL", "error_type": type(exc).__name__, "error_detail": str(exc)[:300]}, "discovered": 0}
     return krows, prows, diagnostics, kalshi, pmus
 
 
