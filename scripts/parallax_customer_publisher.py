@@ -23,7 +23,7 @@ from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-LANES = ("nfl", "cfb", "mlb")
+LANES = ("nfl", "cfb", "mlb", "nba", "nhl")
 SOURCE_SCHEMA = "parallax.public.v1"
 CUSTOMER_SCHEMA = "parallax.customer.v1"
 MAX_AGE = timedelta(minutes=90)
@@ -445,12 +445,12 @@ def publish(worktree: Path, directory: Path, db: Path, state: Path, now: datetim
             changed = []
             for lane in LANES:
                 path = worktree / "feeds" / f"{lane}.json"
-                old = json.loads(path.read_text())
+                old = json.loads(path.read_text()) if path.is_file() else None
                 old_source_at = old.get("source_feed_generated_at") if isinstance(old, dict) else None
                 old_at = timestamp(old_source_at) if old_source_at else now
                 expected_source_at = expected[lane].get("source_feed_generated_at")
                 heartbeat_due = bool(expected_source_at) and timestamp(expected_source_at) - old_at >= HEARTBEAT
-                if material(old) != material(expected[lane]) or heartbeat_due:
+                if old is None or material(old) != material(expected[lane]) or heartbeat_due:
                     changed.append(lane)
                 else:
                     expected[lane] = old
