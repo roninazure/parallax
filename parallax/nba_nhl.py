@@ -90,6 +90,12 @@ def fetch_nba_fixtures(*, now: datetime | None = None, transport=None) -> list[S
     for game in data:
         if not isinstance(game, dict):
             raise ValueError("NBA schedule contained malformed game")
+        status = game.get("status_state")
+        if not isinstance(status, str) or not status.strip():
+            raise ValueError("NBA schedule game missing status_state")
+        # Only future, scheduled games may enter pregame evaluation.
+        if game.get("postponed") is True or status.lower() != "scheduled":
+            continue
         home, away = game.get("home_team"), game.get("visitor_team")
         if not isinstance(home, dict) or not isinstance(away, dict):
             raise ValueError("NBA schedule omitted team identity")
