@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T19:48:01.986000+00:00",
+  "generated_at": "2026-10-25T19:49:05.544568+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -25,17 +25,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 8.77555023,
-      "market_id": "KXNFLGAME-26NOV01ATLTB-ATL",
-      "matchup": "ATL at TB",
-      "model_probability": 0.617755502337712,
-      "price": 0.53,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "YES",
       "edge_pp": 28.85994821,
       "market_id": "1545108",
@@ -49,10 +38,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T19:47:58.813553+00:00",
+  "source_feed_generated_at": "2026-10-25T19:49:01.726397+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 4
+    "buy": 3
   }
 }
