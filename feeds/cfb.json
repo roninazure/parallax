@@ -1,13 +1,25 @@
 {
-  "generated_at": "2026-10-25T21:44:31.052792+00:00",
+  "generated_at": "2026-10-25T22:46:37.034101+00:00",
   "lane": "CFB",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 58.13208423,
+      "market_id": "1526828",
+      "matchup": "Notre Dame at Navy",
+      "model_probability": 0.6113208422869523,
+      "price": 0.03,
+      "sport": "CFB",
+      "start_time": "2026-10-31T16:00:00+00:00",
+      "venue": "POLYMARKET"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T21:44:26.957270+00:00",
+  "source_feed_generated_at": "2026-10-25T22:46:36.580582+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 1
   }
 }
