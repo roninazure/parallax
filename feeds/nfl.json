@@ -1,13 +1,69 @@
 {
-  "generated_at": "2026-10-25T02:57:56.337877+00:00",
+  "generated_at": "2026-10-25T02:58:59.845886+00:00",
   "lane": "NFL",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 27.2479229,
+      "market_id": "1358484",
+      "matchup": "CIN at BAL",
+      "model_probability": 0.6874792289964197,
+      "price": 0.415,
+      "sport": "NFL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 7.60733304,
+      "market_id": "1358482",
+      "matchup": "IND at MIN",
+      "model_probability": 0.7960733303729158,
+      "price": 0.72,
+      "sport": "NFL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 23.75740699,
+      "market_id": "1358483",
+      "matchup": "MIA at NYJ",
+      "model_probability": 0.5700740698774271,
+      "price": 0.3325,
+      "sport": "NFL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 9.09048249,
+      "market_id": "1358487",
+      "matchup": "SF at ATL",
+      "model_probability": 0.6684048248762824,
+      "price": 0.5775,
+      "sport": "NFL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 8.90851754,
+      "market_id": "KXNFLGAME-26OCT25TBCAR-TB",
+      "matchup": "TB at CAR",
+      "model_probability": 0.49908517544557873,
+      "price": 0.41,
+      "sport": "NFL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "venue": "KALSHI"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T02:57:56.614851+00:00",
-  "source_schedule_state": "STALE",
-  "state": "STALE",
+  "source_feed_generated_at": "2026-10-25T02:58:57.498521+00:00",
+  "source_schedule_state": "INCOMPLETE",
+  "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 5
   }
 }
