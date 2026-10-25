@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T18:36:01.158588+00:00",
+  "generated_at": "2026-10-25T18:40:23.619168+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,20 +14,20 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 10.83439064,
-      "market_id": "KXNFLGAME-26NOV01TENCIN-CIN",
-      "matchup": "TEN at CIN",
-      "model_probability": 0.8083439063733076,
-      "price": 0.7,
+      "contract_side": "NO",
+      "edge_pp": 17.61951629,
+      "market_id": "1458580",
+      "matchup": "CAR at GB",
+      "model_probability": 0.7836951628619138,
+      "price": 0.6075,
       "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "KALSHI"
+      "start_time": "2026-10-30T00:15:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T18:35:55.759790+00:00",
+  "source_feed_generated_at": "2026-10-25T18:39:57.633498+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
