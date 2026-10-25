@@ -1,13 +1,69 @@
 {
-  "generated_at": "2026-10-25T17:58:52.369627+00:00",
+  "generated_at": "2026-10-25T17:59:55.937698+00:00",
   "lane": "NFL",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 39.32354797,
+      "market_id": "1387745",
+      "matchup": "DAL at PHI",
+      "model_probability": 0.7232354796538691,
+      "price": 0.33,
+      "sport": "NFL",
+      "start_time": "2026-10-27T00:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 7.77555023,
+      "market_id": "KXNFLGAME-26NOV01ATLTB-ATL",
+      "matchup": "ATL at TB",
+      "model_probability": 0.617755502337712,
+      "price": 0.54,
+      "sport": "NFL",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 7.89563674,
+      "market_id": "KXNFLGAME-26NOV01BALBUF-BAL",
+      "matchup": "BAL at BUF",
+      "model_probability": 0.6989563674354297,
+      "price": 0.62,
+      "sport": "NFL",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 19.36951629,
+      "market_id": "KXNFLGAME-26OCT29CARGB-CAR",
+      "matchup": "CAR at GB",
+      "model_probability": 0.7836951628619138,
+      "price": 0.59,
+      "sport": "NFL",
+      "start_time": "2026-10-30T00:15:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 10.83439064,
+      "market_id": "KXNFLGAME-26NOV01TENCIN-CIN",
+      "matchup": "TEN at CIN",
+      "model_probability": 0.8083439063733076,
+      "price": 0.7,
+      "sport": "NFL",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "venue": "KALSHI"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T17:58:50.508491+00:00",
+  "source_feed_generated_at": "2026-10-25T17:59:54.522188+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 5
   }
 }
