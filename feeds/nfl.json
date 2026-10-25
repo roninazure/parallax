@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T21:17:56.119689+00:00",
+  "generated_at": "2026-10-25T21:21:20.086739+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,31 +14,31 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 18.33112129,
-      "market_id": "1458580",
+      "contract_side": "YES",
+      "edge_pp": 17.33112129,
+      "market_id": "KXNFLGAME-26OCT29CARGB-GB",
       "matchup": "CAR at GB",
       "model_probability": 0.7933112128564809,
-      "price": 0.61,
+      "price": 0.62,
       "sport": "NFL",
       "start_time": "2026-10-30T00:15:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 8.43760929,
-      "market_id": "1545107",
-      "matchup": "KC at DEN",
-      "model_probability": 0.5443760928557367,
-      "price": 0.46,
+      "contract_side": "YES",
+      "edge_pp": 8.31919166,
+      "market_id": "KXNFLGAME-26NOV01ATLTB-TB",
+      "matchup": "ATL at TB",
+      "model_probability": 0.6131919165532987,
+      "price": 0.53,
       "sport": "NFL",
-      "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T21:17:03.603617+00:00",
+  "source_feed_generated_at": "2026-10-25T21:21:17.114543+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
