@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T09:23:11.941382+00:00",
+  "generated_at": "2026-10-25T09:24:15.884496+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -70,11 +70,11 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 9.21933042,
+      "edge_pp": 9.46933042,
       "market_id": "1545096",
       "matchup": "CLE at PIT",
       "model_probability": 0.7546933041954901,
-      "price": 0.6625,
+      "price": 0.66,
       "sport": "NFL",
       "start_time": "2026-11-01T18:00:00+00:00",
       "venue": "POLYMARKET"
@@ -82,7 +82,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T09:22:52.887311+00:00",
+  "source_feed_generated_at": "2026-10-25T09:23:38.593900+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
