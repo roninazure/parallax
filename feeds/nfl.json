@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T20:33:55.320886+00:00",
+  "generated_at": "2026-10-25T20:34:58.889430+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -23,25 +23,14 @@
       "sport": "NFL",
       "start_time": "2026-10-30T00:15:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 14.36505294,
-      "market_id": "KXNFLGAME-26NOV01CLEPIT-PIT",
-      "matchup": "CLE at PIT",
-      "model_probability": 0.7536505293920732,
-      "price": 0.61,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-25T20:33:53.771993+00:00",
+  "source_feed_generated_at": "2026-10-25T20:34:55.983295+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 2
   }
 }
