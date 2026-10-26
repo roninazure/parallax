@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26T00:05:18.204452+00:00",
+  "generated_at": "2026-10-26T00:08:41.809788+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -15,11 +15,11 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 15.80194168,
+      "edge_pp": 13.05194168,
       "market_id": "1458580",
       "matchup": "CAR at GB",
       "model_probability": 0.7855194167683323,
-      "price": 0.6275,
+      "price": 0.655,
       "sport": "NFL",
       "start_time": "2026-10-30T00:15:00+00:00",
       "venue": "POLYMARKET"
@@ -36,17 +36,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 8.53439929,
-      "market_id": "KXNFLGAME-26NOV01BALBUF-BUF",
-      "matchup": "BAL at BUF",
-      "model_probability": 0.7153439928703467,
-      "price": 0.63,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "NO",
       "edge_pp": 10.86505294,
       "market_id": "1545096",
@@ -56,14 +45,47 @@
       "sport": "NFL",
       "start_time": "2026-11-01T18:00:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 9.18853704,
+      "market_id": "KXNFLGAME-26NOV01KCDEN-KC",
+      "matchup": "KC at DEN",
+      "model_probability": 0.5518853704298428,
+      "price": 0.46,
+      "sport": "NFL",
+      "start_time": "2026-11-01T21:25:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 23.53715255,
+      "market_id": "KXNFLGAME-26NOV01NEMIA-NE",
+      "matchup": "NE at MIA",
+      "model_probability": 0.46537152549777483,
+      "price": 0.23,
+      "sport": "NFL",
+      "start_time": "2026-11-01T21:25:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 29.10994821,
+      "market_id": "KXNFLGAME-26NOV01PHIWAS-PHI",
+      "matchup": "PHI at WAS",
+      "model_probability": 0.6610994820605354,
+      "price": 0.37,
+      "sport": "NFL",
+      "start_time": "2026-11-02T01:20:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-26T00:04:31.839482+00:00",
+  "source_feed_generated_at": "2026-10-26T00:08:30.235246+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 7
   }
 }
