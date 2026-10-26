@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26T05:52:23.998558+00:00",
+  "generated_at": "2026-10-26T05:53:29.208724+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -15,17 +15,6 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 8.03439929,
-      "market_id": "1545102",
-      "matchup": "BAL at BUF",
-      "model_probability": 0.7153439928703467,
-      "price": 0.635,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
       "edge_pp": 12.80194168,
       "market_id": "1458580",
       "matchup": "CAR at GB",
@@ -33,6 +22,17 @@
       "price": 0.6575,
       "sport": "NFL",
       "start_time": "2026-10-30T00:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 8.03439929,
+      "market_id": "1545102",
+      "matchup": "BAL at BUF",
+      "model_probability": 0.7153439928703467,
+      "price": 0.635,
+      "sport": "NFL",
+      "start_time": "2026-11-01T18:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -67,14 +67,25 @@
       "sport": "NFL",
       "start_time": "2026-11-02T01:20:00+00:00",
       "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 9.42195075,
+      "market_id": "KXNFLGAME-26NOV02CHISEA-CHI",
+      "matchup": "CHI at SEA",
+      "model_probability": 0.7142195075074612,
+      "price": 0.62,
+      "sport": "NFL",
+      "start_time": "2026-11-03T01:15:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-26T05:52:20.899875+00:00",
+  "source_feed_generated_at": "2026-10-26T05:52:25.301760+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 6
+    "buy": 7
   }
 }
