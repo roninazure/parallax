@@ -1,7 +1,29 @@
 {
-  "generated_at": "2026-10-26T10:30:21.845763+00:00",
+  "generated_at": "2026-10-26T10:31:25.540501+00:00",
   "lane": "NFL",
   "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 29.10994821,
+      "market_id": "KXNFLGAME-26NOV01PHIWAS-WAS",
+      "matchup": "PHI at WAS",
+      "model_probability": 0.6610994820605354,
+      "price": 0.37,
+      "sport": "NFL",
+      "start_time": "2026-11-02T01:20:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 10.42195075,
+      "market_id": "KXNFLGAME-26NOV02CHISEA-SEA",
+      "matchup": "CHI at SEA",
+      "model_probability": 0.7142195075074612,
+      "price": 0.61,
+      "sport": "NFL",
+      "start_time": "2026-11-03T01:15:00+00:00",
+      "venue": "KALSHI"
+    },
     {
       "contract_side": "YES",
       "edge_pp": 40.32354797,
@@ -15,6 +37,17 @@
     },
     {
       "contract_side": "NO",
+      "edge_pp": 8.28439929,
+      "market_id": "1545102",
+      "matchup": "BAL at BUF",
+      "model_probability": 0.7153439928703467,
+      "price": 0.6325,
+      "sport": "NFL",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
       "edge_pp": 12.80194168,
       "market_id": "1458580",
       "matchup": "CAR at GB",
@@ -23,14 +56,25 @@
       "sport": "NFL",
       "start_time": "2026-10-30T00:15:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 10.36505294,
+      "market_id": "KXNFLGAME-26NOV01CLEPIT-PIT",
+      "matchup": "CLE at PIT",
+      "model_probability": 0.7536505293920732,
+      "price": 0.65,
+      "sport": "NFL",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-26T10:30:19.685150+00:00",
+  "source_feed_generated_at": "2026-10-26T10:31:24.209830+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 2
+    "buy": 6
   }
 }
