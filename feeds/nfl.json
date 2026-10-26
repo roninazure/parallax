@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26T11:08:51.409028+00:00",
+  "generated_at": "2026-10-26T11:09:56.713324+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -34,14 +34,25 @@
       "sport": "NFL",
       "start_time": "2026-11-01T18:00:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 7.90180553,
+      "market_id": "1545104",
+      "matchup": "LAC at LA",
+      "model_probability": 0.3215180552805992,
+      "price": 0.2425,
+      "sport": "NFL",
+      "start_time": "2026-11-01T21:05:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-26T11:08:49.717807+00:00",
+  "source_feed_generated_at": "2026-10-26T11:08:58.479150+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 4
   }
 }
