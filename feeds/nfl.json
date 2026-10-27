@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T03:45:55.105112+00:00",
+  "generated_at": "2026-10-27T03:49:21.390746+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -82,13 +82,13 @@
     {
       "contract_side": "YES",
       "edge_pp": 28.22015054,
-      "market_id": "KXNFLGAME-26NOV01PHIWAS-PHI",
+      "market_id": "1545108",
       "matchup": "PHI at WAS",
       "model_probability": 0.642201505440642,
       "price": 0.36,
       "sport": "NFL",
       "start_time": "2026-11-02T01:20:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -104,7 +104,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-27T03:45:08.201109+00:00",
+  "source_feed_generated_at": "2026-10-27T03:49:01.835985+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
