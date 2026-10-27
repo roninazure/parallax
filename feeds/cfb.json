@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T12:51:57.956357+00:00",
+  "generated_at": "2026-10-27T13:51:18.429390+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -15,11 +15,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 9.77559767,
+      "edge_pp": 10.27559767,
       "market_id": "1438254",
       "matchup": "Delaware at Western Kentucky",
       "model_probability": 0.6027559767034186,
-      "price": 0.505,
+      "price": 0.5,
       "sport": "CFB",
       "start_time": "2026-10-27T23:00:00+00:00",
       "venue": "POLYMARKET"
@@ -27,7 +27,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-27T12:51:13.251411+00:00",
+  "source_feed_generated_at": "2026-10-27T13:51:17.193841+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
