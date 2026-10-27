@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-10-27T14:52:30.678155+00:00",
+  "generated_at": "2026-10-27T15:55:15.863841+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 58.13208423,
+      "edge_pp": 58.63208423,
       "market_id": "1526828",
       "matchup": "Notre Dame at Navy",
       "model_probability": 0.6113208422869523,
-      "price": 0.03,
+      "price": 0.025,
       "sport": "CFB",
       "start_time": "2026-10-31T16:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
-      "edge_pp": 10.27559767,
+      "edge_pp": 11.27559767,
       "market_id": "1438254",
       "matchup": "Delaware at Western Kentucky",
       "model_probability": 0.6027559767034186,
-      "price": 0.5,
+      "price": 0.49,
       "sport": "CFB",
       "start_time": "2026-10-27T23:00:00+00:00",
       "venue": "POLYMARKET"
@@ -27,7 +27,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-27T14:52:18.799614+00:00",
+  "source_feed_generated_at": "2026-10-27T15:55:09.214103+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
