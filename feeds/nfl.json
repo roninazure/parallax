@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T01:32:47.696890+00:00",
+  "generated_at": "2026-10-27T01:36:10.065509+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,15 +14,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
+      "contract_side": "NO",
       "edge_pp": 11.36505294,
-      "market_id": "KXNFLGAME-26NOV01CLEPIT-PIT",
+      "market_id": "1545096",
       "matchup": "CLE at PIT",
       "model_probability": 0.7536505293920732,
       "price": 0.64,
       "sport": "NFL",
       "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
@@ -34,47 +34,14 @@
       "sport": "NFL",
       "start_time": "2026-11-01T18:00:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 7.75411432,
-      "market_id": "1545097",
-      "matchup": "MIN at DET",
-      "model_probability": 0.4575411432258787,
-      "price": 0.38,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 22.53715255,
-      "market_id": "1545106",
-      "matchup": "NE at MIA",
-      "model_probability": 0.46537152549777483,
-      "price": 0.24,
-      "sport": "NFL",
-      "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 10.42195075,
-      "market_id": "KXNFLGAME-26NOV02CHISEA-CHI",
-      "matchup": "CHI at SEA",
-      "model_probability": 0.7142195075074612,
-      "price": 0.61,
-      "sport": "NFL",
-      "start_time": "2026-11-03T01:15:00+00:00",
-      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-27T01:32:43.996998+00:00",
+  "source_feed_generated_at": "2026-10-27T01:36:06.835055+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 6
+    "buy": 3
   }
 }
