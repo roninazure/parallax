@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T12:27:26.841720+00:00",
+  "generated_at": "2026-10-27T12:28:30.438574+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -58,15 +58,26 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
+      "contract_side": "YES",
       "edge_pp": 22.53715255,
-      "market_id": "1545106",
+      "market_id": "KXNFLGAME-26NOV01NEMIA-MIA",
       "matchup": "NE at MIA",
-      "model_probability": 0.46537152549777483,
+      "model_probability": 0.4653715254977749,
       "price": 0.24,
       "sport": "NFL",
       "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 28.22015054,
+      "market_id": "KXNFLGAME-26NOV01PHIWAS-PHI",
+      "matchup": "PHI at WAS",
+      "model_probability": 0.642201505440642,
+      "price": 0.36,
+      "sport": "NFL",
+      "start_time": "2026-11-02T01:20:00+00:00",
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -82,10 +93,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-27T12:27:22.453825+00:00",
+  "source_feed_generated_at": "2026-10-27T12:28:07.692981+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 7
+    "buy": 8
   }
 }
