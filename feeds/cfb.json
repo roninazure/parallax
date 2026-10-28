@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-28T03:24:15.233443+00:00",
+  "generated_at": "2026-10-28T04:24:39.838257+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -12,14 +12,25 @@
       "sport": "CFB",
       "start_time": "2026-10-31T16:00:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 21.68752704,
+      "market_id": "1458940",
+      "matchup": "Kennesaw State at Middle Tennessee",
+      "model_probability": 0.6718752704319586,
+      "price": 0.455,
+      "sport": "CFB",
+      "start_time": "2026-10-28T23:00:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-28T03:23:40.701177+00:00",
+  "source_feed_generated_at": "2026-10-28T04:23:42.930141+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 1
+    "buy": 2
   }
 }
