@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-28T18:52:19.926723+00:00",
+  "generated_at": "2026-10-28T18:56:51.929215+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -91,20 +91,20 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 9.17195075,
-      "market_id": "1581715",
+      "contract_side": "YES",
+      "edge_pp": 9.42195075,
+      "market_id": "KXNFLGAME-26NOV02CHISEA-SEA",
       "matchup": "CHI at SEA",
       "model_probability": 0.7142195075074612,
-      "price": 0.6225,
+      "price": 0.62,
       "sport": "NFL",
       "start_time": "2026-11-03T01:15:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-28T18:52:04.409958+00:00",
+  "source_feed_generated_at": "2026-10-28T18:56:25.047370+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
