@@ -57,6 +57,44 @@ def _history_fingerprint(rows: Iterable[FinalGame], sport: str) -> str:
     return hashlib.sha256(_canonical(value)).hexdigest()
 
 
+
+def reconcile_independent_history(
+    primary: Iterable[FinalGame],
+    independent: Iterable[FinalGame],
+    *,
+    sport: str,
+) -> str:
+    """Reconcile results by fixture identity, never provider-specific game ID.
+
+    The secondary provider may use unrelated IDs and row order. Exact date,
+    season, canonical home/away teams, and winner must still agree; duplicate
+    fixtures or missing/extra games fail closed. A successful reconciliation
+    returns the primary history fingerprint used by the model's gate.
+    This validates agreement, not the provider's legal independence.
+    """
+    first = [g for g in _prepare(primary) if g.sport == sport]
+    second = [g for g in _prepare(independent) if g.sport == sport]
+
+    def fixtures(rows: list[FinalGame]) -> dict[tuple, str]:
+        output: dict[tuple, str] = {}
+        for game in rows:
+            key = (game.season, game.game_date, game.home_team, game.away_team)
+            if (
+                not game.home_team
+                or not game.away_team
+                or game.home_team == game.away_team
+                or game.winner_team not in (game.home_team, game.away_team)
+                or key in output
+            ):
+                raise ValueError("invalid or duplicate independent fixture identity")
+            output[key] = game.winner_team
+        return output
+
+    if not first or fixtures(first) != fixtures(second):
+        raise ValueError("independent source results do not reconcile game-for-game")
+    return _history_fingerprint(first, sport)
+
+
 def _sigmoid(value: float) -> float:
     if value >= 0:
         z = math.exp(-min(value, 700.0))
@@ -301,12 +339,9 @@ def train_artifact_v2(
         raise ValueError("v2 team identities must be canonical uppercase codes")
     independent_fingerprint = None
     if independent_games is not None:
-        independent_rows = [g for g in _prepare(independent_games) if g.sport == sport]
-        independent_fingerprint = _history_fingerprint(independent_rows, sport)
-        if independent_fingerprint != _history_fingerprint(rows, sport):
-            raise ValueError(
-                "independent source results do not reconcile game-for-game"
-            )
+        independent_fingerprint = reconcile_independent_history(
+            rows, independent_games, sport=sport
+        )
     dates = sorted({g.game_date for g in rows})
     n_train, n_cal = int(0.60 * len(dates)), int(0.20 * len(dates))
     if n_train < 20 or n_cal < 10 or len(dates) - n_train - n_cal < 10:
