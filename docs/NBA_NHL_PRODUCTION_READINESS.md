@@ -224,3 +224,29 @@ bounded discovery is `DEGRADED` and `market_data_complete: false`; zero BUYs in
 that state must not be shown as a healthy, complete no-opportunity scan. A
 scanner failure appears as a failed unattended lane and does not replace the
 last valid feed.
+
+
+## Follow-up: launchd-domain detection correction (2026-10-29)
+
+The Mac mini operator subsequently verified the active production job with
+`sudo launchctl print system/com.swarmedge.parallax-sports`, showing a running
+`parallax_unattended.py` process from release
+`a517ab94087c3b63d4fe5ac914eb470aef7fb3db`. The earlier GUI-domain
+`launchctl` failure in this report is therefore **not evidence that the
+production service is absent or stopped**. The release/manifest identity
+discrepancy remains a separate cutover gate and must not be silently waived.
+
+PR #58 now probes `system` before `gui/<uid>` and `user/<uid>` in
+`scripts/league_evidence_preflight.py` and
+`scripts/diagnose_league_runtime.py`. Regression tests cover system-domain
+recognition, GUI fallback, and continued fail-closed manifest drift behavior.
+These changes are code-only; they do not deploy a collector, change launchd,
+certify a model, or authorize NBA/NHL BUY publication. The newly added tests
+still require execution in the target repository environment.
+
+**Next implementation gate:** verify real NBA account/terms authorization,
+reconcile the active release manifest without changing the running service
+during inspection, and only then stage the isolated NBA evidence collector.
+NHL remains research-only until its separate written-source authorization is
+verified. Model certification and executable quote validation remain mandatory
+before either customer-facing cutover.
