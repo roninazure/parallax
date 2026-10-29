@@ -11,6 +11,7 @@ from parallax.league_model_v2 import (
     FEATURE_NAMES,
     _features,
     forecast_features_v2,
+    reconcile_independent_history,
     train_artifact_v2,
 )
 from parallax.league_quote_snapshots import LeagueQuoteSnapshotStore
@@ -214,3 +215,47 @@ def test_quote_snapshot_store_records_sanitized_executable_depth_and_retains(tmp
     assert row["executable_depth"]["YES"] == [[0.52, 9.0]]
     assert row["rules_sha256"]
     assert "raw" not in row and "api_key" not in row
+
+
+def test_independent_provider_reconciliation_ignores_ids_and_order():
+    primary = _games()[:12]
+    secondary = [
+        FinalGame(g.sport, f"provider-b-{i}", g.season, g.game_date,
+                  g.home_team, g.away_team, g.winner_team)
+        for i, g in enumerate(reversed(primary))
+    ]
+    assert len(reconcile_independent_history(primary, secondary, sport="NBA")) == 64
+
+
+def test_independent_provider_reconciliation_rejects_wrong_winner_and_missing_game():
+    primary = _games()[:12]
+    secondary = [
+        FinalGame(g.sport, f"other-{i}", g.season, g.game_date,
+                  g.home_team, g.away_team, g.winner_team)
+        for i, g in enumerate(primary)
+    ]
+    with pytest.raises(ValueError, match="do not reconcile"):
+        reconcile_independent_history(primary, secondary[:-1], sport="NBA")
+    bad = list(secondary)
+    g = bad[0]
+    bad[0] = FinalGame(g.sport, g.game_id, g.season, g.game_date,
+                       g.home_team, g.away_team,
+                       g.away_team if g.winner_team == g.home_team else g.home_team)
+    with pytest.raises(ValueError, match="do not reconcile"):
+        reconcile_independent_history(primary, bad, sport="NBA")
+
+
+def test_independent_provider_reconciliation_rejects_duplicate_fixture_different_ids():
+    primary = _games()[:12]
+    secondary = [
+        FinalGame(g.sport, f"other-{i}", g.season, g.game_date,
+                  g.home_team, g.away_team, g.winner_team)
+        for i, g in enumerate(primary)
+    ]
+    duplicate = secondary[0]
+    secondary.append(FinalGame(
+        duplicate.sport, "different-provider-id", duplicate.season,
+        duplicate.game_date, duplicate.home_team, duplicate.away_team,
+        duplicate.winner_team))
+    with pytest.raises(ValueError, match="duplicate independent fixture"):
+        reconcile_independent_history(primary, secondary, sport="NBA")
