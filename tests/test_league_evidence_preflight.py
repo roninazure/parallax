@@ -117,7 +117,7 @@ def test_runtime_diagnostic_resolves_system_launchdaemon(monkeypatch):
         calls.append(args)
         if args == ["launchctl", "print", "system/com.swarmedge.parallax-sports"]:
             return SimpleNamespace(returncode=0,
-                stdout="state = running\\npid = 12345\\n", stderr="")
+                stdout="state = running\npid = 12345\n", stderr="")
         return SimpleNamespace(returncode=113, stdout="", stderr="not found")
 
     monkeypatch.setattr(diagnostic.subprocess, "run", fake_run)
@@ -135,7 +135,7 @@ def test_runtime_diagnostic_falls_back_to_gui_domain(monkeypatch):
 
     def fake_run(args, **kwargs):
         if args[-1] == f"gui/{uid}/com.swarmedge.parallax-sports":
-            return SimpleNamespace(returncode=0, stdout="state = running\\n", stderr="")
+            return SimpleNamespace(returncode=0, stdout="state = running\n", stderr="")
         return SimpleNamespace(returncode=113, stdout="", stderr="not found")
 
     monkeypatch.setattr(diagnostic.subprocess, "run", fake_run)
