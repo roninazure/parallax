@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-29T01:05:38.440430+00:00",
+  "generated_at": "2026-10-29T02:03:48.360051+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -11,6 +11,17 @@
       "price": 0.025,
       "sport": "CFB",
       "start_time": "2026-10-31T16:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 41.88620598,
+      "market_id": "1483546",
+      "matchup": "Florida Atlantic at North Texas",
+      "model_probability": 0.5988620598490867,
+      "price": 0.18,
+      "sport": "CFB",
+      "start_time": "2026-10-29T23:30:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -38,10 +49,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-29T01:04:54.256514+00:00",
+  "source_feed_generated_at": "2026-10-29T02:03:26.786921+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 4
   }
 }
