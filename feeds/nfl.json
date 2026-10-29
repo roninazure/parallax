@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-29T03:30:08.560669+00:00",
+  "generated_at": "2026-10-29T03:35:32.698980+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -81,11 +81,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 33.22015054,
+      "edge_pp": 33.72015054,
       "market_id": "1545108",
       "matchup": "PHI at WAS",
       "model_probability": 0.642201505440642,
-      "price": 0.31,
+      "price": 0.305,
       "sport": "NFL",
       "start_time": "2026-11-02T01:20:00+00:00",
       "venue": "POLYMARKET"
@@ -104,7 +104,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-29T03:29:22.363557+00:00",
+  "source_feed_generated_at": "2026-10-29T03:34:45.496605+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
