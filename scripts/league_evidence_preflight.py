@@ -75,8 +75,15 @@ def _manifest_matches_running_release(
         plist = plistlib.loads(plist_path.read_bytes())
     except (OSError, ValueError, TypeError):
         return False
+    if not isinstance(plist, dict) or plist.get("Label") != "com.swarmedge.parallax-sports":
+        return False
     args = plist.get("ProgramArguments")
-    if not isinstance(args, list) or not all(isinstance(arg, str) for arg in args):
+    env = plist.get("EnvironmentVariables")
+    if (
+        not isinstance(args, list)
+        or not all(isinstance(arg, str) for arg in args)
+        or not isinstance(env, dict)
+    ):
         return False
     release = (runtime_root / "releases" / active_sha).resolve()
     entrypoint = release / "scripts/parallax_unattended.py"
@@ -91,8 +98,7 @@ def _manifest_matches_running_release(
             and Path(arg).resolve() == entrypoint
             for arg in args
         )
-        or plist.get("EnvironmentVariables", {}).get("PARALLAX_RELEASE_SHA")
-        != active_sha
+        or env.get("PARALLAX_RELEASE_SHA") != active_sha
     ):
         return False
     checks = {
