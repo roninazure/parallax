@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from parallax.league_elo_experimental import load_final_games_csv
 from parallax.league_history import load_league_history
 from parallax.league_model import train_artifact
-from parallax.league_model_v2 import train_artifact_v2
+from parallax.league_model_v2 import reconcile_independent_history, train_artifact_v2
 
 
 def source_digest(sport: str, home: Path) -> str:
@@ -74,32 +74,26 @@ def main() -> int:
                 for g in load_final_games_csv(args.independent_history)
                 if g.sport == sport
             ]
-            source_rows = [
-                (
-                    g.game_id,
-                    g.season,
-                    g.game_date,
-                    g.home_team,
-                    g.away_team,
-                    g.winner_team,
+            if args.model_version == "v2":
+                reconcile_independent_history(
+                    games, independent_rows, sport=sport
                 )
-                for g in games
-            ]
-            independent_values = [
-                (
-                    g.game_id,
-                    g.season,
-                    g.game_date,
-                    g.home_team,
-                    g.away_team,
-                    g.winner_team,
-                )
-                for g in independent_rows
-            ]
-            if source_rows != independent_values:
-                raise ValueError(
-                    f"{sport} independent results do not reconcile game-for-game"
-                )
+            else:
+                # V1 retains its existing strict, provider-ID-dependent contract.
+                source_rows = [
+                    (g.game_id, g.season, g.game_date, g.home_team,
+                     g.away_team, g.winner_team)
+                    for g in games
+                ]
+                independent_values = [
+                    (g.game_id, g.season, g.game_date, g.home_team,
+                     g.away_team, g.winner_team)
+                    for g in independent_rows
+                ]
+                if source_rows != independent_values:
+                    raise ValueError(
+                        f"{sport} independent results do not reconcile game-for-game"
+                    )
             independent_sha = hashlib.sha256(
                 args.independent_history.read_bytes()
             ).hexdigest()
