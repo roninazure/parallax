@@ -41,8 +41,18 @@ def preflight(*, runtime_root: Path, authorization_file: Path,
               credential_file: Path) -> dict:
     uid = os.getuid()
     domain_ok, _ = _launchctl(f"gui/{uid}")
-    job_ok, job_output = _launchctl(f"gui/{uid}/com.swarmedge.parallax-sports")
-    active = re.search(r"/releases/([0-9a-f]{40})(?:/|\b)", job_output)
+    # The Mac mini production sports controller is a system LaunchDaemon.
+    # Do not require a GUI session when the system job is available.
+    job_domain = None
+    job_output = ""
+    for domain in ("system", f"gui/{uid}", f"user/{uid}"):
+        available, output = _launchctl(f"{domain}/com.swarmedge.parallax-sports")
+        if available:
+            job_domain = domain
+            job_output = output
+            break
+    job_ok = job_domain is not None
+    active = re.search(r"/releases/([0-9a-f]{40})(?:/|\\b)", job_output)
     active_sha = active.group(1) if active else None
     manifest_path = runtime_root / "run/parallax-sports-manifest.json"
     try:
@@ -59,7 +69,7 @@ def preflight(*, runtime_root: Path, authorization_file: Path,
     nhl_ok, nhl_auth = authorization_state("NHL", authorization)
     credential_ok = _credential_ready(credential_file)
     blockers = []
-    if not domain_ok:
+    if not domain_ok and job_domain != "system":
         blockers.append("user_gui_domain_unavailable")
     if not job_ok:
         blockers.append("production_sports_job_unavailable")
@@ -78,6 +88,7 @@ def preflight(*, runtime_root: Path, authorization_file: Path,
         "ready_for_isolated_nba_only": not blockers,
         "gui_domain_available": domain_ok,
         "sports_job_loaded": job_ok,
+        "sports_job_domain": job_domain,
         "active_sports_sha": active_sha,
         "manifest_sha": manifest_sha,
         "manifest_drift": drift,
