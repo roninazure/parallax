@@ -106,6 +106,44 @@ def test_v2_later_holdout_is_distinct_and_required_for_certification():
     assert artifact["certified"] is False
 
 
+
+def test_v2_rejects_duplicate_primary_fixture_with_distinct_provider_ids():
+    history = _games()
+    first = history[0]
+    duplicate = FinalGame(
+        first.sport, "other-provider-id", first.season, first.game_date,
+        first.home_team, first.away_team, first.winner_team,
+    )
+    with pytest.raises(ValueError, match="training history contains duplicate fixture"):
+        train_artifact_v2([*history, duplicate], sport="NBA", source_sha256="a" * 64)
+
+
+def test_v2_rejects_duplicate_forward_fixture_with_distinct_provider_ids():
+    history = _games()
+    day = max(g.game_date for g in history) + timedelta(days=1)
+    first = FinalGame("NBA", "forward-1", 2024, day, "H0", "A0", "H0")
+    duplicate = FinalGame("NBA", "forward-2", 2024, day, "H0", "A0", "H0")
+    with pytest.raises(ValueError, match="forward holdout contains duplicate fixture"):
+        train_artifact_v2(
+            history, sport="NBA", source_sha256="a" * 64,
+            forward_holdout=[first, duplicate],
+            forward_holdout_source_sha256="b" * 64,
+        )
+
+
+def test_v2_rejects_noncanonical_forward_holdout_teams():
+    history = _games()
+    day = max(g.game_date for g in history) + timedelta(days=1)
+    noncanonical = FinalGame("NBA", "forward", 2024, day, "h0", "A0", "h0")
+    with pytest.raises(ValueError, match="forward holdout team identities"):
+        train_artifact_v2(
+            history, sport="NBA", source_sha256="a" * 64,
+            forward_holdout=[noncanonical],
+            forward_holdout_source_sha256="b" * 64,
+        )
+
+
+
 def test_v2_season_boundary_resets_prior_form_and_unknown_team_fails_closed():
     games = _games()[:12]
     first_date = games[0].game_date
