@@ -170,6 +170,18 @@ def test_preflight_rejects_hash_drift_and_missing_manifest_fields(tmp_path, monk
         assert "sports_manifest_content_hashes_unverified" in drift["blockers"]
         file.write_bytes(original)
 
+    original_plist = plist.read_bytes()
+    for mutation in ("bad_label", "bad_environment"):
+        value = plistlib.loads(original_plist)
+        if mutation == "bad_label":
+            value["Label"] = "com.swarmedge.unrelated"
+        else:
+            value["EnvironmentVariables"] = "not-a-dictionary"
+        plist.write_bytes(plistlib.dumps(value))
+        assert inspect()["manifest_integrity_verified"] is False
+        assert "sports_manifest_content_hashes_unverified" in inspect()["blockers"]
+    plist.write_bytes(original_plist)
+
     manifest.write_text(json.dumps({k: v for k, v in payload.items()
                                     if k != "dependency_lock_sha256"}), encoding="utf-8")
     assert "sports_manifest_content_hashes_unverified" in inspect()["blockers"]
