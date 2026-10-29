@@ -250,3 +250,22 @@ during inspection, and only then stage the isolated NBA evidence collector.
 NHL remains research-only until its separate written-source authorization is
 verified. Model certification and executable quote validation remain mandatory
 before either customer-facing cutover.
+
+## Overnight fail-closed hardening (2026-10-29)
+
+PR #58 now requires the isolated NBA evidence preflight to verify the **loaded**
+`com.swarmedge.parallax-sports` launchd plist, not a staged candidate or
+Git SHA alone. It confirms the job reports `state = running`, the loaded plist
+identifies the active immutable release and `PARALLAX_RELEASE_SHA`, and the
+manifest matches the actual loaded plist, scheduler entrypoint, runtime
+environment, and dependency lock by SHA-256. Missing fields, unreadable
+files, malformed plist structures, or hash drift block collector readiness.
+This is read-only and cannot repair the existing production manifest.
+
+The v2 trainer also rejects duplicate primary or forward-holdout fixtures
+identified by (season, ET game date, home team, away team), even if a second
+provider supplies different game IDs. Forward-holdout team codes must be
+canonical. These checks prevent accidental duplicate-game weighting in NBA/NHL
+validation; they do not supply independent results, a fresh holdout, source
+permission, or model certification. Existing NBA/NHL BUY publication remains
+blocked. No Mac mini cutover, launchd reload, or runtime edit is part of this PR.
