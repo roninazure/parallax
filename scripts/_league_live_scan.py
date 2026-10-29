@@ -10,16 +10,16 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from parallax.league_elo_experimental import FinalGame
+from maker_spread_economics.polymarket_us import PolymarketUSPublicClient
+from parallax.alerts import AlertDeliveryStore, AlertDispatcher
+from parallax.discovery import paginate, paginate_collection
+from parallax.league_fixtures import ShadowFixture
 from parallax.league_history import load_league_history
 from parallax.league_model import load_artifact
-from parallax.league_fixtures import ShadowFixture
-from parallax.nba_nhl import scan_league, fetch_nba_fixtures, fetch_nhl_fixtures
-from parallax.discovery import paginate, paginate_collection
-from parallax.sources import KalshiPublicClient
-from maker_spread_economics.polymarket_us import PolymarketUSPublicClient
+from parallax.league_quote_snapshots import LeagueQuoteSnapshotStore
+from parallax.nba_nhl import fetch_nba_fixtures, fetch_nhl_fixtures, scan_league
 from parallax.pmus_acquisition import PMUSAcquisition
-from parallax.alerts import AlertDeliveryStore, AlertDispatcher
+from parallax.sources import KalshiPublicClient
 
 KALSHI_EVENT_PAGES = 3
 KALSHI_MAX_GAMES = 2
@@ -93,7 +93,7 @@ def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtu
             )
             return rows
         all_pmus = acquisition.discover(f"{sport}:bounded-active-universe:v1", request_markets)
-        from parallax.discovery import CoverageReport, Coverage
+        from parallax.discovery import Coverage, CoverageReport
         cov = CoverageReport(Coverage.BOUNDED, 4, len(all_pmus), len(all_pmus), 100, 4,
                              "cached or bounded active-market pagination", False)
         def belongs(row):
@@ -147,10 +147,16 @@ def main(sport: str) -> int:
             dispatcher = AlertDispatcher(AlertDeliveryStore(state / "parallax_alert_delivery.sqlite"))
         except Exception:
             dispatcher = None
+        quote_store = None
+        quote_dir = os.environ.get("PARALLAX_LEAGUE_QUOTE_SNAPSHOT_DIR")
+        if quote_dir:
+            retention = int(os.environ.get("PARALLAX_LEAGUE_QUOTE_RETENTION_DAYS", "180"))
+            quote_store = LeagueQuoteSnapshotStore(quote_dir, retention_days=retention)
         try:
             result = scan_league(sport, fixtures, history, kalshi_rows, pmus_rows,
                 kalshi_client=kclient, pmus_client=pclient,
                 pmus_acquisition=acquisition, alert_dispatcher=dispatcher,
+                quote_snapshot_store=quote_store,
                 model_artifact=model_artifact, model_artifact_error=model_artifact_error,
                 expected_model_sha256=artifact_sha,
                 now=now)

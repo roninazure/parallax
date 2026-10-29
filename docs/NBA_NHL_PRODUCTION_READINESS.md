@@ -77,6 +77,84 @@ Until these inputs exist, `league_elo_experimental` stays research-only and
 checks. The normal `qualify` economics/risk gates, feed validation, and ntfy
 dedupe remain in force. No order placement is introduced.
 
+## Model v2 feature comparison
+
+The continuation implements `parallax-league-logistic-form-v2`. Its
+dependency-free chronological feature builder uses exponentially decayed
+overall form, home and away form, opponent-adjusted result residuals, rest
+days, and explicit season resets. A regularized logistic model selects its
+penalty on a chronological validation slice inside training. A constant
+home-rate baseline and the existing calibrated Elo model are evaluated on the
+same holdout. Calibration uses a separate later window. Metrics include ten
+reliability bins and 95% confidence intervals from 400 deterministic
+ET-date-block bootstrap replicates.
+
+The available histories remain 2,460 NBA finals (seasons 2024–2025) and 5,248
+NHL finals (seasons 2022–2025). The former holdouts have already been inspected
+and are marked `EXPLORATORY_PREVIOUSLY_INSPECTED`; they are not confirmatory
+validation. There is no later independently reconciled results file. The NBA
+opening-night grading file contains two manually transcribed games, is marked
+research-only, and says exchange settlement is unverified; it is not used as a
+certification holdout. The NHL forward folder has no graded results file.
+
+| League | Candidate | Games | Brier | Log loss | ECE (10 bins) |
+| --- | --- | ---: | ---: | ---: | ---: |
+| NBA | v1 calibrated Elo | 516 | 0.19747 | 0.58358 | 0.12777 |
+| NBA | v2 feature logistic | 516 | 0.20424 | 0.59787 | 0.12872 |
+| NBA | training home-rate baseline | 516 | 0.24657 | 0.68627 | 0.01327 |
+| NBA | 50/50 baseline | 516 | 0.25000 | 0.69315 | 0.06008 |
+| NHL | v1 calibrated Elo | 1,119 | 0.25012 | 0.69362 | 0.05161 |
+| NHL | v2 feature logistic | 1,119 | 0.24935 | 0.69198 | 0.04879 |
+| NHL | training home-rate baseline | 1,119 | 0.24989 | 0.69293 | 0.01501 |
+| NHL | 50/50 baseline | 1,119 | 0.25000 | 0.69315 | 0.01832 |
+
+These repeated holdout results are exploratory, including the home-rate
+comparison. V2 does not pass the existing ECE gate for either league and does
+not outperform the v1 Elo model on NBA Brier/log loss. Its artifacts under
+`reports/nba_nhl_model_candidates/*_v2_candidate.json` are hash-verified
+research outputs. They cannot be loaded by the production Evidence path
+because there is no fresh independent forward holdout, source-use approval,
+or model-owner criteria approval. No gate was relaxed.
+
+The selected v2 95% ET-date-block bootstrap intervals are NBA Brier
+`[0.19749, 0.21154]`, log loss `[0.58367, 0.61325]`, and ECE
+`[0.09766, 0.16636]`; NHL Brier `[0.24352, 0.25448]`, log loss
+`[0.68005, 0.70247]`, and ECE `[0.01840, 0.07493]`. These intervals quantify
+variation across dates in the already-inspected holdout and do not turn it into
+a fresh confirmatory sample.
+
+The v2 runtime dispatch is implemented for a future fully certified artifact.
+Read-only executable quote/depth/fee capture is available when
+`PARALLAX_LEAGUE_QUOTE_SNAPSHOT_DIR` is set; retention is configurable with
+`PARALLAX_LEAGUE_QUOTE_RETENTION_DAYS` (default 180 days). Snapshots contain
+matched fixture identity, rules hash, timestamps, executable depth and fee
+metadata, with no raw provider payloads or credentials. These are forward
+observations and do not create historical profitability evidence.
+
+Run `python scripts/diagnose_league_runtime.py` to compare launchd plist,
+heartbeat and deployment-manifest identities without writing to runtime
+state. Reconcile by staging a fresh immutable release from the intended
+committed SHA, generating its manifest from that release's actual config and
+plist, and verifying the active process/heartbeat predicates in `deploy/README.md`
+before any separately authorized cutover. This PR does not change the active
+release.
+
+The read-only diagnostic was run on 2026-10-29. The active plist and
+heartbeat both identify release `a517ab94087c3b63d4fe5ac914eb470aef7fb3db`,
+but the heartbeat was already older than the 30-second cutover limit and
+`launchctl print` could not resolve the job. The runtime manifest instead
+claims Git SHA `bf11b4be9588392ba0c200b80b406943ca48cdd5`; its launchd plist,
+runtime config, and entrypoint hashes also disagree with the active files.
+The diagnostic made no runtime changes.
+
+**Next action:** obtain source-authorized independent NBA and NHL finals
+through a later season from a second results provider, reconcile those records
+game-for-game with the training snapshots, and collect a later forward sample.
+Then rerun `scripts/train_league_models.py --model-version v2` with
+`--independent-history` and `--forward-holdout`, alongside the documented
+source-use authorization and model-owner approval references. Until that
+evaluation passes every existing gate, keep the candidates out of runtime pins.
+
 ## Reproducible calibrated candidate replay
 
 The continuation adds `scripts/train_league_models.py` and

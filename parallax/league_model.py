@@ -378,6 +378,13 @@ def verify_artifact(
     expected_sha256: str | None = None,
 ) -> str:
     value = dict(artifact)
+    if value.get("model_version") == "parallax-league-logistic-form-v2":
+        from .league_model_v2 import verify_artifact_v2
+        return verify_artifact_v2(
+            value, sport=sport, now=now or datetime.now(UTC),
+            expected_sha256=expected_sha256,
+            require_certified=require_certified,
+        )
     digest = value.pop("artifact_sha256", None)
     actual = hashlib.sha256(_canonical(value)).hexdigest()
     if digest != actual or value.get("schema_version") != ARTIFACT_SCHEMA:
@@ -515,6 +522,7 @@ def predict(
     sport: str,
     game_id: str,
     game_date: date,
+    season: int | None = None,
     home_team: str,
     away_team: str,
     now: datetime | None = None,
@@ -532,6 +540,19 @@ def predict(
         for g in _prepare(history_rows)
         if g.sport == sport and g.game_date < game_date
     ]
+    if artifact.get("model_version") == "parallax-league-logistic-form-v2":
+        from .league_model_v2 import forecast_features_v2, predict_v2
+        features = forecast_features_v2(
+            rows, sport=sport, game_date=game_date,
+            season=season or (game_date.year if game_date.month >= 7 else game_date.year - 1),
+            home_team=home_team, away_team=away_team,
+            allowed_teams=artifact.get("teams", []),
+        )
+        p = predict_v2(features, artifact)
+        return CalibratedForecast(
+            sport, game_id, game_date, home_team, away_team, p, digest,
+            str(artifact["model_version"]), f"sha256:{digest}",
+        )
     hp = float(artifact["elo"]["home_advantage"])
     k = float(artifact["elo"]["k"])
     ratings: dict[tuple[str, str], float] = {}

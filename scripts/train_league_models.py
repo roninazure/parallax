@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from parallax.league_elo_experimental import load_final_games_csv
 from parallax.league_history import load_league_history
 from parallax.league_model import train_artifact
+from parallax.league_model_v2 import train_artifact_v2
 
 
 def source_digest(sport: str, home: Path) -> str:
@@ -49,14 +50,24 @@ def main() -> int:
         "--model-owner-approval-reference",
         help="Approved reference for the recorded model acceptance criteria",
     )
+    parser.add_argument(
+        "--forward-holdout", type=Path,
+        help="Independent finals CSV strictly later than the training snapshot",
+    )
+    parser.add_argument(
+        "--model-version", choices=("v1", "v2"), default="v2",
+        help="Model family to train (v2 is the feature-based candidate)",
+    )
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     summaries = {}
+    forward_rows = load_final_games_csv(args.forward_holdout) if args.forward_holdout else []
     for sport in ("NBA", "NHL"):
         history_path = Path("/nonexistent")
         games = load_league_history(sport, history_path, explicit=False)
         source_sha = source_digest(sport, Path.home())
         independent_sha = None
+        independent_rows = None
         if args.independent_history:
             independent_rows = [
                 g
@@ -92,15 +103,31 @@ def main() -> int:
             independent_sha = hashlib.sha256(
                 args.independent_history.read_bytes()
             ).hexdigest()
-        artifact = train_artifact(
-            games,
-            sport=sport,
-            source_sha256=source_sha,
-            independent_source_sha256=independent_sha,
-            source_authorization_reference=args.source_authorization_reference,
-            model_owner_approval_reference=args.model_owner_approval_reference,
-        )
-        output = args.output_dir / f"{sport.lower()}_calibrated.json"
+        if args.model_version == "v2":
+            fresh_games = [g for g in forward_rows if g.sport == sport]
+            forward_sha = (
+                hashlib.sha256(args.forward_holdout.read_bytes()).hexdigest()
+                if args.forward_holdout and fresh_games else None
+            )
+            artifact = train_artifact_v2(
+                games, sport=sport, source_sha256=source_sha,
+                forward_holdout=fresh_games or None,
+                forward_holdout_source_sha256=forward_sha,
+                independent_source_sha256=independent_sha,
+                independent_games=independent_rows,
+                source_authorization_reference=args.source_authorization_reference,
+                model_owner_approval_reference=args.model_owner_approval_reference,
+            )
+            suffix = "v2_candidate"
+        else:
+            artifact = train_artifact(
+                games, sport=sport, source_sha256=source_sha,
+                independent_source_sha256=independent_sha,
+                source_authorization_reference=args.source_authorization_reference,
+                model_owner_approval_reference=args.model_owner_approval_reference,
+            )
+            suffix = "calibrated"
+        output = args.output_dir / f"{sport.lower()}_{suffix}.json"
         output.write_text(
             json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n",
             encoding="utf-8",
@@ -115,7 +142,8 @@ def main() -> int:
             "splits": artifact["splits"],
             "holdout_metrics": artifact["holdout_metrics"],
             "baseline_50_50": artifact["baseline_50_50"],
-            "elo": artifact["elo"],
+            "model_comparison": artifact.get("model_comparison"),
+            "elo": artifact.get("elo"),
             "calibration": artifact["calibration"],
         }
     print(json.dumps(summaries, indent=2, sort_keys=True, allow_nan=False))

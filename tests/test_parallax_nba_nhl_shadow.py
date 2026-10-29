@@ -23,6 +23,7 @@ from parallax.league_shadow_evidence import (
 from parallax.models import Action, Side, Venue
 from parallax.normalization import normalize_kalshi, normalize_pmus
 from parallax.nba_nhl import scan_league, fetch_nba_fixtures, fetch_nhl_fixtures
+from parallax.league_quote_snapshots import LeagueQuoteSnapshotStore
 from parallax.public_feed import sanitize_completed_scan
 
 NOW = datetime(2026, 10, 19, 17, 0, tzinfo=UTC)
@@ -232,7 +233,7 @@ def test_real_nba_provider_id_to_model_to_kalshi_evidence():
                            replace(prediction, game_id="future"), now=NOW) is None
 
 
-def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification():
+def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification(tmp_path):
     fx = nba_fixture_from_balldontlie(
         NBA_BDL_GAME, regular_season_query_verified=True,
         venue_home_name="Denver", venue_away_name="Golden State",
@@ -244,10 +245,14 @@ def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification():
         def book(self, _ticker):
             return {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
                                      "no_dollars": [["0.50", "250"]]}}
-    result = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), now=NOW)
+    snapshot_store = LeagueQuoteSnapshotStore(tmp_path / "quotes")
+    result = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(),
+                         quote_snapshot_store=snapshot_store, now=NOW)
     assert result["read_only"] is True and result["orders"] == 0
     assert result["rows"] == []
     assert result["model_validation_state"] == "BLOCKED"
+    assert result["quote_snapshots"] == {"written": 1, "failures": 0, "enabled": True}
+    assert list((tmp_path / "quotes").glob("*.jsonl"))
     safe = sanitize_completed_scan("nba", __import__("json").dumps(result), generated_at=NOW)
     assert safe["summary"]["buy"] == 0
     assert safe["model_validation_state"] == "BLOCKED"
