@@ -37,7 +37,15 @@ jobs:
             tests/test_parallax_nba_nhl_shadow.py \
             tests/test_parallax_unattended.py \
             tests/test_parallax_public_feed.py \
-            tests/test_parallax_buy_alerts.py \
+            tests/test_parallax_buy_alerts.py
+      - name: Guard existing NFL, MLB and CFB lanes
+        # NFL date-only fixture parsing currently uses the host local zone.
+        # Match the Mac mini's ET operating environment without touching
+        # production NFL code in this NBA/NHL-scoped PR.
+        env:
+          TZ: America/New_York
+        run: |
+          python -m pytest -q \
             tests/test_parallax_nfl.py \
             tests/test_parallax_live_mlb.py \
             tests/test_parallax_live_cfb.py
