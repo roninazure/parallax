@@ -105,3 +105,40 @@ def test_system_launchdaemon_is_valid_without_gui_session(tmp_path, monkeypatch)
         authorization_file=auth_file, credential_file=credential)
     assert drift["ready_for_isolated_nba_only"] is False
     assert "active_release_manifest_sha_mismatch" in drift["blockers"]
+
+
+def test_runtime_diagnostic_resolves_system_launchdaemon(monkeypatch):
+    """Diagnostic must inspect system launchd before declaring production absent."""
+    from types import SimpleNamespace
+    diagnostic = _module("diagnose_league_runtime_system", "diagnose_league_runtime.py")
+    calls = []
+
+    def fake_run(args, **kwargs):
+        calls.append(args)
+        if args == ["launchctl", "print", "system/com.swarmedge.parallax-sports"]:
+            return SimpleNamespace(returncode=0,
+                stdout="state = running\\npid = 12345\\n", stderr="")
+        return SimpleNamespace(returncode=113, stdout="", stderr="not found")
+
+    monkeypatch.setattr(diagnostic.subprocess, "run", fake_run)
+    result = diagnostic._launchd_job("com.swarmedge.parallax-sports")
+    assert result["available"] is True
+    assert result["domain"] == "system"
+    assert "state = running" in result["summary"]
+    assert calls == [["launchctl", "print", "system/com.swarmedge.parallax-sports"]]
+
+
+def test_runtime_diagnostic_falls_back_to_gui_domain(monkeypatch):
+    from types import SimpleNamespace
+    diagnostic = _module("diagnose_league_runtime_gui", "diagnose_league_runtime.py")
+    uid = os.getuid()
+
+    def fake_run(args, **kwargs):
+        if args[-1] == f"gui/{uid}/com.swarmedge.parallax-sports":
+            return SimpleNamespace(returncode=0, stdout="state = running\\n", stderr="")
+        return SimpleNamespace(returncode=113, stdout="", stderr="not found")
+
+    monkeypatch.setattr(diagnostic.subprocess, "run", fake_run)
+    result = diagnostic._launchd_job("com.swarmedge.parallax-sports")
+    assert result["available"] is True
+    assert result["domain"] == f"gui/{uid}"
