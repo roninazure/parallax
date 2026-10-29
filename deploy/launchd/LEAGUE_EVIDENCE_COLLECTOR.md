@@ -31,9 +31,24 @@ with `provider: "NHL"`, `automated_schedule_access: true`, a nonempty
 `verified_at` ISO date. A URL alone does not establish permission. Authorization
 is recorded per league and never inferred. `--leagues NBA` makes no NHL fixture
 or market requests; the LaunchAgent template explicitly selects NBA only.
-Do not activate if the GUI domain/job or active SHA cannot be resolved, the
-active SHA differs from the manifest, the NBA credential file is unsafe, or
-NBA account/plan/terms authorization is unverified.
+Do not activate if the production job cannot be resolved as **running**, its
+loaded plist cannot be inspected, its release identity differs from the
+manifest, the NBA credential file is unsafe, or NBA account/plan/terms
+authorization is unverified. The preflight resolves the system LaunchDaemon
+before checking user domains; a GUI session is not required when the system
+job is available.
+
+The preflight is stricter than a Git SHA comparison: it reads the **loaded**
+launchd plist identified by `launchctl print` (not a possibly stale staging
+candidate), verifies the release root and `PARALLAX_RELEASE_SHA`, and checks
+SHA-256 for the loaded plist, runtime environment file, scheduler entrypoint,
+and dependency lock against the deployment manifest. A missing/unreadable job
+path, incomplete manifest, or any drift returns
+`sports_manifest_content_hashes_unverified` and **blocks** collection. No
+secrets or raw runtime environment values are printed. Never resolve a
+mismatch by editing the manifest in place: stage a new immutable SHA release
+and regenerate its manifest from the actual release inputs through the
+separately authorized deployment process in `deploy/README.md`.
 
 ## Stage, install, and verify after preflight passes
 
