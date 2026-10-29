@@ -87,7 +87,13 @@ def diagnose(args: argparse.Namespace) -> int:
                 index = args_list.index("--state-dir")
                 if index + 1 < len(args_list):
                     state_dir = args_list[index + 1]
-            release_sha = Path(release_path).parents[1].name if release_path else None
+            # The first argument may be a Python binary nested under .venv;
+            # parent traversal is not a reliable way to identify the release.
+            release_match = (
+                re.search(r"/releases/([0-9a-f]{40})(?:/|$)", release_path)
+                if release_path else None
+            )
+            release_sha = release_match.group(1) if release_match else None
             record = {
                 "path": str(path),
                 "plist_sha256": hashlib.sha256(raw).hexdigest(),
