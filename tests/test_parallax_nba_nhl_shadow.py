@@ -7,6 +7,7 @@ synthetic test data; no provider requests, feed publishing or BUYs.
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 import hashlib
+import importlib.util
 import json
 import os
 import subprocess
@@ -251,12 +252,65 @@ def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification(tmp
     assert result["read_only"] is True and result["orders"] == 0
     assert result["rows"] == []
     assert result["model_validation_state"] == "BLOCKED"
-    assert result["quote_snapshots"] == {"written": 1, "failures": 0, "enabled": True}
+    assert result["quote_snapshots"] == {"written": 1, "failures": 0,
+        "matched_contracts": 1, "stale": 0, "deduplicated": 0, "enabled": True}
     assert list((tmp_path / "quotes").glob("*.jsonl"))
     safe = sanitize_completed_scan("nba", __import__("json").dumps(result), generated_at=NOW)
     assert safe["summary"]["buy"] == 0
     assert safe["model_validation_state"] == "BLOCKED"
     assert safe["health_state"] == "DEGRADED"
+
+
+def test_isolated_collector_captures_without_model_and_is_idempotent(tmp_path):
+    script = __import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "collect_league_evidence.py"
+    spec = importlib.util.spec_from_file_location("collect_league_evidence", script)
+    collector = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(collector)
+    collect_once = collector.collect_once
+
+    fixtures = {sport: fixture(sport) for sport in ("NBA", "NHL")}
+    class Book:
+        def book(self, _ticker):
+            return {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
+                                     "no_dollars": [["0.50", "250"]]}}
+        def close(self):
+            pass
+    def fetch_markets(sport, _now, _acquisition, rows):
+        raw = {**MARKETS[sport], "status": "active", "market_type": "binary",
+               "price_level_structure": "linear_cent", "notional_value_dollars": "1",
+               "expected_expiration_time": "2026-10-27T05:00:00Z"}
+        return [raw], [], {"KALSHI": {"coverage": {"state": "BOUNDED"}},
+            "PMUS": {"coverage": {"state": "BOUNDED"}}}, Book(), None
+    kwargs = dict(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={s: (lambda s=s: [fixtures[s]]) for s in fixtures},
+        market_fetcher=fetch_markets)
+    first = collect_once(**kwargs)
+    assert all(first["leagues"][s]["snapshots_written"] == 1 for s in fixtures)
+    assert all(first["leagues"][s]["last_success"] == NOW.isoformat() for s in fixtures)
+    second = collect_once(**kwargs)
+    assert all(second["leagues"][s]["snapshots_written"] == 0 for s in fixtures)
+    assert all(second["leagues"][s]["deduplicated_snapshots"] == 1 for s in fixtures)
+    assert second["orders"] == second["alerts"] == second["published"] == 0
+    assert all(second["leagues"][s]["last_success"] == NOW.isoformat() for s in fixtures)
+
+
+def test_isolated_collector_empty_schedule_and_provider_failure_do_not_succeed(tmp_path):
+    script = __import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "collect_league_evidence.py"
+    spec = importlib.util.spec_from_file_location("collect_league_evidence", script)
+    collector = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(collector)
+    collect_once = collector.collect_once
+    def failed(*_args):
+        raise OSError("offline")
+    result = collect_once(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={"NBA": lambda: [], "NHL": failed},
+        market_fetcher=lambda *_args: (_ for _ in ()).throw(AssertionError("must not run")))
+    assert result["leagues"]["NBA"]["empty_coverage_reason"] == "empty_schedule"
+    assert result["leagues"]["NBA"]["last_success"] is None
+    assert result["leagues"]["NHL"]["empty_coverage_reason"] == "collection_failed"
+    assert result["leagues"]["NHL"]["source_failures"]
 
 
 def test_mocked_pmus_client_market_uses_same_fixture_match_normalize_qualify_path():

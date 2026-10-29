@@ -37,7 +37,7 @@ class LeagueQuoteSnapshotStore:
         market: NormalizedMarket,
         observed_at: str,
         yes_team: str | None,
-    ) -> Path:
+    ) -> Path | None:
         captured = datetime.now(UTC)
         snapshot = {
             "schema_version": 1,
@@ -88,6 +88,31 @@ class LeagueQuoteSnapshotStore:
             }
         filename = "parallax-league-quotes-" + captured.strftime("%Y%m%d") + ".jsonl"
         target = self.root / filename
+        try:
+            source_time = datetime.fromisoformat(observed_at.replace("Z", "+00:00"))
+            if source_time.tzinfo is None:
+                source_time = source_time.replace(tzinfo=UTC)
+        except (TypeError, ValueError):
+            raise ValueError("quote snapshot requires a valid source observation timestamp")
+        # Only retain observations with usable executable asks and source time.
+        if source_time is None or not any(
+            market.executable_depth.get(side) and price is not None
+            for side, price in (("YES", market.yes_ask), ("NO", market.no_ask))
+        ):
+            raise ValueError("quote snapshot requires executable ask depth")
+        dedupe_key = (sport, fixture.game_id, market.venue.value, market.venue_market_id,
+                      snapshot["rules_sha256"], observed_at)
+        if target.exists():
+            try:
+                with target.open("r", encoding="utf-8") as existing:
+                    for line in existing:
+                        row = json.loads(line)
+                        if (row.get("sport"), row.get("game_id"), row.get("venue"),
+                            row.get("market_id"), row.get("rules_sha256"),
+                            row.get("source_observed_at")) == dedupe_key:
+                            return None
+            except (OSError, json.JSONDecodeError):
+                pass
         encoded = (
             json.dumps(snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False)
             + "\n"

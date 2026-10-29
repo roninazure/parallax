@@ -207,7 +207,9 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
     result_alerts = {"sent": 0, "failed": 0}
     diagnostics = {"KALSHI": {"discovered": 0, "book_failures": 0},
                    "PMUS": {"discovered": 0, "book_failures": 0}}
-    quote_snapshots = {"written": 0, "failures": 0, "enabled": quote_snapshot_store is not None}
+    quote_snapshots = {"written": 0, "failures": 0, "matched_contracts": 0,
+                       "stale": 0, "deduplicated": 0,
+                       "enabled": quote_snapshot_store is not None}
     book_budget = {"KALSHI": 20, "PMUS": 20}
     for venue, markets, client in (
         (Venue.KALSHI, kalshi_rows, kalshi_client),
@@ -221,6 +223,8 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                 fixture = next((f for f in fixture_list if f.kickoff > now and _market_matches(market, raw, f)), None)
                 if fixture is None:
                     continue
+                if quote_snapshot_store is not None:
+                    quote_snapshots["matched_contracts"] += 1
                 if book_budget[venue_key] <= 0:
                     continue
                 book_budget[venue_key] -= 1
@@ -247,11 +251,22 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                     yes_team_for_snapshot = selected_yes_team(market, venue_raw, fixture)
                     if yes_team_for_snapshot is not None:
                         try:
-                            quote_snapshot_store.record(
+                            recorded = quote_snapshot_store.record(
                                 sport=sport, fixture=fixture, market=market,
                                 observed_at=observed, yes_team=yes_team_for_snapshot,
                             )
-                            quote_snapshots["written"] += 1
+                            if recorded is None:
+                                quote_snapshots["deduplicated"] += 1
+                            else:
+                                quote_snapshots["written"] += 1
+                                try:
+                                    source_time = datetime.fromisoformat(observed.replace("Z", "+00:00"))
+                                    if source_time.tzinfo is None:
+                                        source_time = source_time.replace(tzinfo=UTC)
+                                    if (now - source_time).total_seconds() > 60:
+                                        quote_snapshots["stale"] += 1
+                                except (TypeError, ValueError):
+                                    quote_snapshots["stale"] += 1
                         except (OSError, TypeError, ValueError):
                             quote_snapshots["failures"] += 1
                 if model_artifact is None or model_error:
