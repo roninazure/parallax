@@ -64,3 +64,44 @@ def test_read_only_preflight_rejects_group_readable_api_key(tmp_path, monkeypatc
         authorization_file=tmp_path / "missing-auth.json", credential_file=credential)
     assert result["nba_credential_ready"] is False
     assert "nba_api_credential_missing_or_unsafe" in result["blockers"]
+
+
+def test_system_launchdaemon_is_valid_without_gui_session(tmp_path, monkeypatch):
+    """A live system-domain sports job must not be rejected as GUI unavailable."""
+    preflight_module = _module("league_evidence_preflight_system", "league_evidence_preflight.py")
+    today = date.today().isoformat()
+    auth = {"NBA": {"provider": "BALLDONTLIE", "api_plan": "verified-plan",
+        "nba_games_access": True, "account_plan_verified": True,
+        "account_plan_verified_at": today, "terms_reviewed": True,
+        "terms_reviewed_at": today,
+        "terms_url": "https://www.balldontlie.io/terms.html"}}
+    auth_file = tmp_path / "authorization.json"
+    auth_file.write_text(json.dumps(auth), encoding="utf-8")
+    credential = tmp_path / ".bdl-api-key"
+    credential.write_text("test-secret", encoding="ascii")
+    credential.chmod(0o600)
+    runtime = tmp_path / "runtime"
+    (runtime / "run").mkdir(parents=True)
+    sha = "a" * 40
+    (runtime / "run/parallax-sports-manifest.json").write_text(
+        json.dumps({"git_sha": sha}), encoding="utf-8")
+
+    def fake_launchctl(target):
+        if target == "system/com.swarmedge.parallax-sports":
+            return True, "state = running\\npath = /opt/swarm/releases/" + sha + "/scripts/parallax_unattended.py"
+        return False, ""
+
+    monkeypatch.setattr(preflight_module, "_launchctl", fake_launchctl)
+    result = preflight_module.preflight(runtime_root=runtime,
+        authorization_file=auth_file, credential_file=credential)
+    assert result["ready_for_isolated_nba_only"] is True
+    assert result["sports_job_domain"] == "system"
+    assert result["gui_domain_available"] is False
+    assert "user_gui_domain_unavailable" not in result["blockers"]
+
+    (runtime / "run/parallax-sports-manifest.json").write_text(
+        json.dumps({"git_sha": "b" * 40}), encoding="utf-8")
+    drift = preflight_module.preflight(runtime_root=runtime,
+        authorization_file=auth_file, credential_file=credential)
+    assert drift["ready_for_isolated_nba_only"] is False
+    assert "active_release_manifest_sha_mismatch" in drift["blockers"]
