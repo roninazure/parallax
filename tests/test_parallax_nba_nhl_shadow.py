@@ -6,6 +6,8 @@ synthetic test data; no provider requests, feed publishing or BUYs.
 """
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+import hashlib
+import json
 import os
 import subprocess
 import sys
@@ -89,6 +91,36 @@ MARKETS = {
         "occurrence_datetime": "2026-10-27T03:30:00Z",
     },
 }
+
+
+def synthetic_certified_artifact(sport="NBA"):
+    from parallax.league_model import ARTIFACT_SCHEMA, MODEL_VERSION, history_fingerprint
+    artifact = {
+        "schema_version": ARTIFACT_SCHEMA, "model_version": MODEL_VERSION,
+        "sport": sport, "generated_at": NOW.isoformat(), "trained_through": "2026-10-01",
+        "source_sha256": "a" * 64, "source_game_count": 0,
+        "source_seasons": [],
+        "history_fingerprint": history_fingerprint([],sport=sport),
+        "splits": {"same_day_isolated": True, "train_games": 600,
+                    "calibration_games": 200, "holdout_games": 200},
+        "elo": {"home_advantage": 0., "k": 20.},
+        "calibration": {"method": "platt_logistic", "intercept": -2., "slope": 1.},
+        "holdout_metrics": {"n_games": 300, "brier": .2, "log_loss": .6, "ece_10_bins": .04},
+        "baseline_50_50": {"brier": .25, "log_loss": .693, "ece_10_bins": .05},
+        "independent_source_sha256": "b" * 64,
+        "source_authorization_reference": "SYNTHETIC_TEST_ONLY",
+        "model_owner_approval_reference": "SYNTHETIC_TEST_ONLY",
+        "acceptance_gates": {"holdout_nonempty": True, "beats_half_brier": True,
+                             "beats_half_log_loss": True, "beats_half_ece": True,
+                             "independent_source_verified": True,
+                             "source_authorization_documented": True,
+                             "model_owner_approval_documented": True},
+        "certified": True, "test_only": True, "ratings": {},
+    }
+    artifact["artifact_sha256"] = hashlib.sha256(
+        json.dumps(artifact, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
+    return artifact
 
 
 def fixture(sport="NBA", **changes):
@@ -214,13 +246,12 @@ def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification():
                                      "no_dollars": [["0.50", "250"]]}}
     result = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), now=NOW)
     assert result["read_only"] is True and result["orders"] == 0
-    assert len(result["rows"]) == 2
-    assert all(row["mapping_status"] == "MAPPED" for row in result["rows"])
-    assert all(row["evidence_validation_status"] == "UNVALIDATED" for row in result["rows"])
-    assert all(row["publication_eligible"] is False for row in result["rows"])
+    assert result["rows"] == []
+    assert result["model_validation_state"] == "BLOCKED"
     safe = sanitize_completed_scan("nba", __import__("json").dumps(result), generated_at=NOW)
     assert safe["summary"]["buy"] == 0
-    assert {row["action"] for row in safe["plays"]}.issubset({"WATCH", "PASS"})
+    assert safe["model_validation_state"] == "BLOCKED"
+    assert safe["health_state"] == "DEGRADED"
 
 
 def test_mocked_pmus_client_market_uses_same_fixture_match_normalize_qualify_path():
@@ -236,9 +267,8 @@ def test_mocked_pmus_client_market_uses_same_fixture_match_normalize_qualify_pat
                     f"{slug}::NO": {"best_bid": .53, "best_ask": .55,
                     "bid_size_shares": 100, "ask_size_shares": 100}}
     result = scan_league("NBA", [fixture()], [], [], [raw], pmus_client=PMUS(), now=NOW)
-    assert len(result["rows"]) == 2
-    assert all(row["acquisition_status"] == "ACQUIRED" for row in result["rows"])
-    assert all(row["publication_eligible"] is False for row in result["rows"])
+    assert result["rows"] == []
+    assert result["model_validation_state"] == "BLOCKED"
 
 
 def test_mocked_bdl_schedule_response_uses_existing_verified_fixture_adapter():
@@ -379,11 +409,8 @@ def test_mocked_nhl_schedule_response_builds_only_future_regular_fixtures():
 
 def test_synthetic_certified_provider_to_ntfy_lifecycle_is_deduplicated(monkeypatch, tmp_path):
     from dataclasses import replace as dc_replace
-    from types import SimpleNamespace
     from parallax import nba_nhl
     from parallax.alerts import AlertConfig, AlertDeliveryStore, AlertDispatcher, DeliveryResult
-    from parallax.models import Evidence
-    from parallax.normalization import rules_digest
 
     class Transport:
         calls = []
@@ -402,24 +429,30 @@ def test_synthetic_certified_provider_to_ntfy_lifecycle_is_deduplicated(monkeypa
         def book(self, _ticker):
             return {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
                                      "no_dollars": [["0.50", "250"]]}}
-    def synthetic_evidence(market, fixture, forecast, *, now):
-        return Evidence(venue=market.venue, market_id=market.venue_market_id,
-            fair_probability=.80, source="SYNTHETIC_TEST_PROVIDER", model_version="nba-synthetic-certified-v1",
-            observed_at=now.isoformat(), valid_until=(now + timedelta(minutes=5)).isoformat(),
-            rules_digest=rules_digest(market), review_reference="SYNTHETIC_TEST_ONLY",
-            rationale="Synthetic fixture only", independent_sources=("synthetic-a", "synthetic-b"),
-            validation_reference="SYNTHETIC_TEST_ONLY", validation_status="CALIBRATED",
-            source_independence="INDEPENDENT")
-    monkeypatch.setattr(nba_nhl, "shadow_evidence", synthetic_evidence)
     monkeypatch.setattr(nba_nhl, "attach_fees", lambda market, _now, **_kw: dc_replace(market,
         mechanics=dc_replace(market.mechanics, fee_rate=.001, fee_source="SYNTHETIC_TEST_ONLY",
             fee_valid_until="2026-10-27T00:00:00+00:00", fee_status="VERIFIED_SCHEDULE")))
-    first = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher, now=NOW)
-    second = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher, now=NOW)
+    artifact = synthetic_certified_artifact()
+    first = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher,
+                        model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"], now=NOW)
+    second = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher,
+                         model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"], now=NOW)
     assert any(row["publication_eligible"] for row in first["rows"])
     assert first["alerts"] == 1 and second["alerts"] == 0
     assert len(transport.calls) == 1
     assert transport.calls[0][1]["topic"] == "synthetic-topic"
+    from parallax.public_feed import sanitize_completed_scan
+    public_feed = sanitize_completed_scan("nba", json.dumps(first), generated_at=NOW)
+    assert public_feed["summary"]["buy"] == 1
+    assert public_feed["plays"][0]["publication_eligible"] is True
+    assert public_feed["source_schedule_state"] == "BOUNDED"
+    assert public_feed["market_coverage_state"] == "BOUNDED"
+    assert public_feed["opportunity_evaluation_state"] == "INCOMPLETE_COVERAGE"
+    publisher_path = __import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "parallax_customer_publisher.py"
+    monkeypatch.syspath_prepend(str(publisher_path.parent))
+    import parallax_customer_publisher as customer_publisher
+    customer = customer_publisher.build("nba", public_feed, tmp_path / "no-alerts.sqlite", NOW)
+    assert customer["summary"]["buy"] == 1
 
 
 def test_production_environment_flag_cannot_enable_synthetic_certification():

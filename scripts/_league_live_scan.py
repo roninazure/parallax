@@ -2,17 +2,18 @@
 from __future__ import annotations
 
 import json
-import hashlib
 import os
 import sys
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from parallax.league_elo_experimental import FinalGame, load_final_games_csv
-from parallax.league_shadow_evidence import ShadowFixture
+from parallax.league_elo_experimental import FinalGame
+from parallax.league_history import load_league_history
+from parallax.league_model import load_artifact
+from parallax.league_fixtures import ShadowFixture
 from parallax.nba_nhl import scan_league, fetch_nba_fixtures, fetch_nhl_fixtures
 from parallax.discovery import paginate, paginate_collection
 from parallax.sources import KalshiPublicClient
@@ -25,48 +26,7 @@ KALSHI_MAX_GAMES = 2
 _ET = ZoneInfo("America/New_York")
 
 
-def _load_existing_history(sport: str, configured_path: Path, *, explicit: bool) -> list[FinalGame]:
-    """Prefer configured runtime history, then reuse verified research snapshots."""
-    if explicit or configured_path.exists():
-        rows = load_final_games_csv(configured_path)
-        if not rows:
-            raise ValueError(f"{sport} final-results history is empty")
-        return rows
-    research = Path.home() / "parallax-research"
-    if sport == "NBA":
-        rows = load_final_games_csv(research / "nba/nba-2024-2025-canonical.csv")
-        if not rows:
-            raise ValueError("NBA verified final-results history is empty")
-        return rows
-
-    root = research / "nhl/historical"
-    manifest = json.loads((root / "acquisition-manifest.json").read_text(encoding="utf-8"))
-    rows: list[FinalGame] = []
-    seen: set[str] = set()
-    for season, info in sorted(manifest["seasons"].items()):
-        for page in info["pages"]:
-            raw = (root / page["filename"]).read_bytes()
-            if hashlib.sha256(raw).hexdigest() != page["sha256"]:
-                raise ValueError("NHL historical snapshot hash mismatch")
-            doc = json.loads(raw)
-            games = doc.get("data") if isinstance(doc, dict) else None
-            if not isinstance(games, list):
-                raise ValueError("NHL historical snapshot malformed")
-            for game in games:
-                home, away = game["home_team"]["tricode"], game["away_team"]["tricode"]
-                game_id = f"bdl:{game['id']}"
-                if game_id in seen or game["home_score"] == game["away_score"]:
-                    raise ValueError("NHL historical snapshot duplicate or tied game")
-                seen.add(game_id)
-                rows.append(FinalGame(
-                    sport="NHL", game_id=game_id, season=int(season),
-                    game_date=date.fromisoformat(game["game_date"]),
-                    home_team=home, away_team=away,
-                    winner_team=home if game["home_score"] > game["away_score"] else away,
-                ))
-    if len(rows) != 5248 or {game.season for game in rows} != {2022, 2023, 2024, 2025}:
-        raise ValueError("NHL verified historical snapshot coverage mismatch")
-    return rows
+_load_existing_history = load_league_history
 
 
 def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtures):
@@ -161,7 +121,19 @@ def main(sport: str) -> int:
     history_env = os.environ.get(f"PARALLAX_{sport}_HISTORY")
     history_path = Path(history_env) if history_env else state / f"{sport.lower()}_finals.csv"
     try:
-        history = _load_existing_history(sport, history_path, explicit=history_env is not None)
+        history = load_league_history(sport, history_path, explicit=history_env is not None)
+        artifact_env = os.environ.get(f"PARALLAX_{sport}_MODEL_ARTIFACT")
+        artifact_path = Path(artifact_env) if artifact_env else Path(__file__).resolve().parents[1] / "models/parallax" / f"{sport.lower()}_calibrated.json"
+        artifact_sha = os.environ.get(f"PARALLAX_{sport}_MODEL_SHA256")
+        model_artifact = None
+        model_artifact_error = None
+        try:
+            model_artifact = load_artifact(artifact_path, sport=sport, now=now,
+                                           expected_sha256=artifact_sha)
+        except FileNotFoundError:
+            model_artifact_error = "model artifact missing"
+        except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+            model_artifact_error = f"model artifact rejected: {type(exc).__name__}"
         if not os.environ.get(f"PARALLAX_{sport}_FIXTURES"):
             fixtures = fetch_nba_fixtures(now=now) if sport == "NBA" else fetch_nhl_fixtures(now=now)
         else:
@@ -178,7 +150,10 @@ def main(sport: str) -> int:
         try:
             result = scan_league(sport, fixtures, history, kalshi_rows, pmus_rows,
                 kalshi_client=kclient, pmus_client=pclient,
-                pmus_acquisition=acquisition, alert_dispatcher=dispatcher, now=now)
+                pmus_acquisition=acquisition, alert_dispatcher=dispatcher,
+                model_artifact=model_artifact, model_artifact_error=model_artifact_error,
+                expected_model_sha256=artifact_sha,
+                now=now)
         finally:
             if hasattr(kclient, "close"): kclient.close()
             pclient.close()
@@ -199,16 +174,41 @@ def main(sport: str) -> int:
         result["history_seasons"] = sorted({game.season for game in history})
         result["history_source"] = (
             "configured_runtime" if history_env is not None or (state / f"{sport.lower()}_finals.csv").exists()
-            else "verified_research_snapshot"
+            else "research_snapshot"
         )
+        result["model_artifact_sha256"] = model_artifact.get("artifact_sha256") if model_artifact else None
         result["matched_event_count"] = venue_health.get("KALSHI", {}).get("coverage", {}).get(
             "exact_fixture_candidates", 0,
         )
+        coverage_states = [
+            str(venue_health.get(venue, {}).get("coverage", {}).get("state", "PARTIAL"))
+            for venue in ("KALSHI", "PMUS")
+        ]
+        if any(int(venue_health.get(venue, {}).get("book_failures", 0) or 0) > 0
+               for venue in ("KALSHI", "PMUS")):
+            coverage_states.append("PARTIAL")
+        result["source_schedule_state"] = "BOUNDED"
+        result["market_coverage_state"] = (
+            "COMPLETE" if all(state == "COMPLETE" for state in coverage_states)
+            else "BOUNDED" if all(state in {"BOUNDED", "COMPLETE"} for state in coverage_states)
+            else "PARTIAL"
+        )
+        if result.get("model_validation_state") != "CERTIFIED":
+            result["opportunity_evaluation_state"] = "MODEL_BLOCKED"
+        elif result.get("market_data_complete") is not True or result["market_coverage_state"] != "COMPLETE":
+            result["opportunity_evaluation_state"] = "INCOMPLETE_COVERAGE"
+        elif any(row.get("publication_eligible") is True for row in result.get("rows", [])):
+            result["opportunity_evaluation_state"] = "BUY_CANDIDATE"
+        else:
+            result["opportunity_evaluation_state"] = "NO_QUALIFYING_BUY"
     except Exception as exc:
         result = {"read_only": True, "orders": 0, "published": 0, "alerts": 0,
             "sport": sport, "scan_mode": "LIVE_READ_ONLY", "scan_status": "FAILED",
             "failure_type": type(exc).__name__, "refreshed_at": now.isoformat(),
             "fixture_count": 0,
+            "source_schedule_state": "FAILED",
+            "market_coverage_state": "FAILED",
+            "opportunity_evaluation_state": "FAILED",
             "market_data_complete": False, "venues": {
             "KALSHI": {"coverage": {"state": "PARTIAL", "error_type": type(exc).__name__}, "discovered": 0},
                 "PMUS": {"coverage": {"state": "PARTIAL", "error_type": type(exc).__name__}, "discovered": 0}},

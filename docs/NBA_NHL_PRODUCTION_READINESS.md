@@ -22,7 +22,9 @@ does not certify the model or authorize BUY publication.
 - `run/parallax-sports-manifest.json` claims Git SHA
   `bf11b4be9588392ba0c200b80b406943ca48cdd5`, which does not match the active
   release directory, launchd configuration, or health heartbeat. Resolve this
-  manifest mismatch before treating it as deployment-integrity proof.
+  manifest mismatch before treating it as deployment-integrity proof. Read-only
+  validation against the active release and run plist also found mismatches in
+  runtime-config, launchd-plist, and scheduler-entrypoint SHA-256 values.
 - Runtime environment key names were inspected without reading or disclosing
   their values. They contain no NBA/NHL history path or model certificate
   setting, so scanners use the verified research snapshot fallback.
@@ -74,6 +76,66 @@ Until these inputs exist, `league_elo_experimental` stays research-only and
 `shadow_evidence` remains unable to pass the existing production certificate
 checks. The normal `qualify` economics/risk gates, feed validation, and ntfy
 dedupe remain in force. No order placement is introduced.
+
+## Reproducible calibrated candidate replay
+
+The continuation adds `scripts/train_league_models.py` and
+`parallax/league_model.py`. The trainer tunes Elo parameters on the first 60%
+of unique ET game dates, fits a Platt or isotonic calibrator using only the
+next 20% (the choice is selected on an ordered split inside calibration), and
+reports the final 20% once as holdout. All games from one ET date share one
+pre-date rating state. Acceptance requires a nonempty holdout, improvement
+over a 50/50 forecast on Brier, log loss, and ECE, an independently
+reconciled second results source, documented source authorization, and model
+owner approval of the criteria. No absolute ECE or minimum-sample threshold
+was invented. A generated artifact includes its source
+hash, split dates/counts, fit/calibration settings, ratings, metrics, gate
+results and self-hash. Runtime loading also requires its exact SHA-256 to be
+pinned in `PARALLAX_NBA_MODEL_SHA256` or `PARALLAX_NHL_MODEL_SHA256`.
+
+Candidate artifacts from the inspected local snapshots are stored under
+`reports/nba_nhl_model_candidates/`. They are reproducible research outputs,
+not runtime model files, and both have `certified: false`:
+
+| League | Train / calibration / holdout games | Holdout Brier (50/50) | Holdout log loss (50/50) | ECE | Failed checks |
+| --- | ---: | ---: | ---: | ---: | --- |
+| NBA | 1,472 / 472 / 516 | 0.19747 (0.25000) | 0.58358 (0.69315) | 0.12777 (0.06008) | ECE baseline; independent source; source authorization; owner approval |
+| NHL | 3,058 / 1,071 / 1,119 | 0.25012 (0.25000) | 0.69362 (0.69315) | 0.05161 (0.01832) | Brier, log-loss, ECE baselines; independent source; source authorization; owner approval |
+
+The NBA fitted Elo parameters are home adjustment 40 and K 30; NHL parameters
+are home adjustment 20 and K 10. Calibration selected Platt logistic for both
+leagues. The NBA holdout starts 2026-01-30; NHL starts 2025-11-02. No holdout
+labels were used for parameter or calibrator selection. Candidate SHA-256s
+are NBA `2f86382704b76750a9e45440bf2204b1ff5f27671ca2f705e9d51cc30dfaabe1`
+and NHL `9191a75e8a7d7404f770a883db18aa592bfe1d9c34c4c1ee415ca77b8d82b699`.
+Full machine-readable split/metric records are in the candidate artifacts.
+
+The production scanner now loads only a certified artifact with a matching
+runtime SHA pin, predicts from pregame history using the artifact's parameters
+and calibration, and builds `CALIBRATED` Evidence only after exact full-game
+contract identity mapping. The experimental Elo and shadow evidence are not
+used by the production path. Missing, stale, unpinned, or failed artifacts
+produce a blocked model state and zero scored rows. Existing qualification,
+publication validation and ntfy dedupe gates remain unchanged.
+
+**Current certification result: blocked for both leagues.** NBA fails the
+50/50 ECE baseline (0.12777 > 0.06008). NHL fails all three 50/50 baselines
+(Brier 0.25012 > 0.25; log loss 0.69362 > 0.69315; ECE 0.05161 > 0.01832).
+Neither snapshot has a second independent results source, documented source
+authorization, or model-owner criteria approval. The NHL
+acquisition manifest explicitly marks the source research-only and official
+regular-season membership unverified. No NBA acquisition/license record was
+found. The active runtime configuration also has no pinned NBA/NHL model SHA.
+Consequently the new production path is implemented but emits no certified
+NBA/NHL BUY until these actual gates pass; no training metric is inferred from
+historical executable market quotes, which are still absent.
+
+After the continuation changes were prepared, the saved unattended health
+heartbeat was still `2026-10-29T00:53:13Z`; at the `2026-10-29T01:14:04Z`
+inspection it was more than 20 minutes old. `launchctl print` could not resolve
+the service in the available GUI/user domains. Therefore current-process and
+30-second heartbeat acceptance could not be proven, and no Mac mini cutover or
+runtime-state edit was made.
 
 ## Website status contract
 
