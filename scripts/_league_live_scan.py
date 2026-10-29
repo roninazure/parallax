@@ -28,10 +28,16 @@ _ET = ZoneInfo("America/New_York")
 def _load_existing_history(sport: str, configured_path: Path, *, explicit: bool) -> list[FinalGame]:
     """Prefer configured runtime history, then reuse verified research snapshots."""
     if explicit or configured_path.exists():
-        return load_final_games_csv(configured_path)
+        rows = load_final_games_csv(configured_path)
+        if not rows:
+            raise ValueError(f"{sport} final-results history is empty")
+        return rows
     research = Path.home() / "parallax-research"
     if sport == "NBA":
-        return load_final_games_csv(research / "nba/nba-2024-2025-canonical.csv")
+        rows = load_final_games_csv(research / "nba/nba-2024-2025-canonical.csv")
+        if not rows:
+            raise ValueError("NBA verified final-results history is empty")
+        return rows
 
     root = research / "nhl/historical"
     manifest = json.loads((root / "acquisition-manifest.json").read_text(encoding="utf-8"))
@@ -189,6 +195,12 @@ def main(sport: str) -> int:
             result["fixture_source"] = "BALLDONTLIE"
         result["scan_status"] = "COMPLETED"
         result["fixture_count"] = len(fixtures)
+        result["history_game_count"] = len(history)
+        result["history_seasons"] = sorted({game.season for game in history})
+        result["history_source"] = (
+            "configured_runtime" if history_env is not None or (state / f"{sport.lower()}_finals.csv").exists()
+            else "verified_research_snapshot"
+        )
         result["matched_event_count"] = venue_health.get("KALSHI", {}).get("coverage", {}).get(
             "exact_fixture_candidates", 0,
         )
@@ -204,4 +216,4 @@ def main(sport: str) -> int:
         if isinstance(exc, ValueError):
             result["failure_reason"] = str(exc)[:180]
     print(json.dumps(result, default=str, allow_nan=False))
-    return 0
+    return 1 if result["scan_status"] == "FAILED" else 0

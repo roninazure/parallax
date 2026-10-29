@@ -336,6 +336,23 @@ def test_scanner_reuses_research_nba_history_when_runtime_csv_is_absent(tmp_path
     assert [(game.game_id, game.winner_team) for game in loaded] == [("bdl:1", "BOS")]
 
 
+def test_missing_league_history_fails_closed_with_nonzero_exit(tmp_path, monkeypatch, capsys):
+    from pathlib import Path
+
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    monkeypatch.setenv("PARALLAX_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.delenv("PARALLAX_NBA_HISTORY", raising=False)
+    monkeypatch.delenv("PARALLAX_NBA_FIXTURES", raising=False)
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    import _league_live_scan as scanner
+
+    assert scanner.main("NBA") == 1
+    payload = __import__("json").loads(capsys.readouterr().out)
+    assert payload["scan_status"] == "FAILED"
+    assert payload["failure_type"] == "FileNotFoundError"
+    assert payload["market_data_complete"] is False
+
+
 def test_mocked_nhl_schedule_response_builds_only_future_regular_fixtures():
     payload = {"gameWeek": [{"games": [{
         "id": 2026020012, "season": 20262027, "gameType": 2, "gameState": "FUT", "gameScheduleState": "OK",
