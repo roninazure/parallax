@@ -14,27 +14,34 @@ from typing import Any
 
 
 def _launchd_job(label: str) -> dict[str, Any]:
-    try:
-        result = subprocess.run(
-            ["launchctl", "print", f"gui/{os.getuid()}/{label}"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        return {"available": False, "error": type(exc).__name__}
-    safe_lines = [
-        line.strip()
-        for line in result.stdout.splitlines()
-        if re.match(r"\s*(state|pid|last exit code|program|path)\s*=", line)
-    ]
-    return {
-        "available": result.returncode == 0,
-        "summary": safe_lines if result.returncode == 0 else None,
-        "error": "launchctl_lookup_failed" if result.returncode else None,
-    }
-
+    """Resolve the actual launchd domain without changing running services."""
+    uid = os.getuid()
+    for domain in ("system", f"gui/{uid}", f"user/{uid}"):
+        try:
+            result = subprocess.run(
+                ["launchctl", "print", f"{domain}/{label}"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            return {"available": False, "error": type(exc).__name__}
+        if result.returncode != 0:
+            continue
+        safe_lines = [
+            line.strip()
+            for line in result.stdout.splitlines()
+            if re.match(r"\\s*(state|pid|last exit code|program|path)\\s*=", line)
+        ]
+        return {
+            "available": True,
+            "domain": domain,
+            "summary": safe_lines,
+            "error": None,
+        }
+    return {"available": False, "domain": None, "summary": None,
+            "error": "launchctl_lookup_failed"}
 
 def diagnose(args: argparse.Namespace) -> int:
     root = Path(args.runtime_root).expanduser()
