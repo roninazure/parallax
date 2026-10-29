@@ -32,7 +32,7 @@ def _launchd_job(label: str) -> dict[str, Any]:
         safe_lines = [
             line.strip()
             for line in result.stdout.splitlines()
-            if re.match(r"\\s*(state|pid|last exit code|program|path)\\s*=", line)
+            if re.match(r"\s*(state|pid|last exit code|program|path)\s*=", line)
         ]
         return {
             "available": True,
