@@ -337,6 +337,13 @@ def train_artifact_v2(
         for team in (g.home_team, g.away_team)
     ):
         raise ValueError("v2 team identities must be canonical uppercase codes")
+    # Provider IDs are not fixture identities. Reject duplicate finals even
+    # when an upstream export assigns a different game_id to the same game.
+    training_fixtures = [
+        (g.season, g.game_date, g.home_team, g.away_team) for g in rows
+    ]
+    if len(set(training_fixtures)) != len(training_fixtures):
+        raise ValueError("training history contains duplicate fixture identity")
     independent_fingerprint = None
     if independent_games is not None:
         independent_fingerprint = reconcile_independent_history(
@@ -361,6 +368,18 @@ def train_artifact_v2(
             )
         if len({g.game_id for g in external_holdout}) != len(external_holdout):
             raise ValueError("forward holdout contains duplicate game IDs")
+        forward_fixtures = [
+            (g.season, g.game_date, g.home_team, g.away_team)
+            for g in external_holdout
+        ]
+        if len(set(forward_fixtures)) != len(forward_fixtures):
+            raise ValueError("forward holdout contains duplicate fixture identity")
+        if any(
+            team != team.strip().upper()
+            for g in external_holdout
+            for team in (g.home_team, g.away_team)
+        ):
+            raise ValueError("forward holdout team identities must be canonical")
         holdout = external_holdout
         feature_rows = [*rows, *external_holdout]
     else:
