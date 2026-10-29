@@ -52,7 +52,7 @@ def preflight(*, runtime_root: Path, authorization_file: Path,
             job_output = output
             break
     job_ok = job_domain is not None
-    active = re.search(r"/releases/([0-9a-f]{40})(?:/|\\b)", job_output)
+    active = re.search(r"/releases/([0-9a-f]{40})(?:/|\b)", job_output)
     active_sha = active.group(1) if active else None
     manifest_path = runtime_root / "run/parallax-sports-manifest.json"
     try:
