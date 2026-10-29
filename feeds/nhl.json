@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-29T03:08:33.392782+00:00",
+  "generated_at": "2026-10-29T04:08:49.466599+00:00",
   "lane": "NHL",
   "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-29T03:08:16.534502+00:00",
+  "source_feed_generated_at": "2026-10-29T04:08:24.979019+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {

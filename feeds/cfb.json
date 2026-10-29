@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-29T03:08:33.392782+00:00",
+  "generated_at": "2026-10-29T04:08:49.466599+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -37,11 +37,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 10.1352383,
+      "edge_pp": 9.6352383,
       "market_id": "1511618",
       "matchup": "Baylor at UCF",
       "model_probability": 0.6013523830008736,
-      "price": 0.5,
+      "price": 0.505,
       "sport": "CFB",
       "start_time": "2026-10-30T23:30:00+00:00",
       "venue": "POLYMARKET"
@@ -49,7 +49,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-29T03:07:58.103482+00:00",
+  "source_feed_generated_at": "2026-10-29T04:08:01.866062+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
