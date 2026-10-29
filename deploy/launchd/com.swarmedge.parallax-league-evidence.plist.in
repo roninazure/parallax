@@ -7,6 +7,8 @@
   <array>
     <string>@PYTHON@</string>
     <string>@RELEASE_ROOT@/scripts/collect_league_evidence.py</string>
+    <string>--leagues</string><string>NBA</string>
+    <string>--authorization-file</string><string>@AUTHORIZATION_FILE@</string>
     <string>--evidence-dir</string><string>@EVIDENCE_DIR@</string>
     <string>--state-dir</string><string>@STATE_DIR@</string>
     <string>--health-path</string><string>@STATE_DIR@/health.json</string>
@@ -20,7 +22,6 @@
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key><string>/usr/bin:/bin:/usr/sbin:/sbin</string>
-    <key>PARALLAX_NHL_EVIDENCE_AUTHORIZATION_REF</key><string>@NHL_AUTHORIZATION_REFERENCE@</string>
   </dict>
 </dict>
 </plist>

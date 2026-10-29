@@ -5,13 +5,14 @@ NBA kickoff/BDL game ID are independently verified. Order books here are
 synthetic test data; no provider requests, feed publishing or BUYs.
 """
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 import hashlib
 import importlib.util
 import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 from zoneinfo import ZoneInfo
 
@@ -37,6 +38,25 @@ TIPS = {
     "NBA": datetime(2026, 10, 27, 2, 0, tzinfo=UTC),
     "NHL": datetime(2026, 10, 27, 0, 30, tzinfo=UTC),
 }
+
+EVIDENCE_AUTH = {
+    "NBA": {"provider": "BALLDONTLIE", "api_plan": "offline-test-plan",
+        "nba_games_access": True, "account_plan_verified": True,
+        "account_plan_verified_at": date.today().isoformat(), "terms_reviewed": True,
+        "terms_reviewed_at": date.today().isoformat(),
+        "terms_url": "https://www.balldontlie.io/terms.html"},
+    "NHL": {"provider": "NHL", "automated_schedule_access": True,
+        "written_authorization_ref": "test-only:authorization-fixture",
+        "verified_at": date.today().isoformat()},
+}
+
+
+def load_evidence_collector():
+    script = Path(__file__).resolve().parents[1] / "scripts" / "collect_league_evidence.py"
+    spec = importlib.util.spec_from_file_location("collect_league_evidence", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 # BALLDONTLIE Oct 26, 2026 fixture identity verified via one bounded query.
 # Team objects retain only fields required by the offline adapter.
@@ -262,10 +282,7 @@ def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification(tmp
 
 
 def test_isolated_collector_captures_without_model_and_is_idempotent(tmp_path):
-    script = __import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "collect_league_evidence.py"
-    spec = importlib.util.spec_from_file_location("collect_league_evidence", script)
-    collector = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(collector)
+    collector = load_evidence_collector()
     collect_once = collector.collect_once
 
     fixtures = {sport: fixture(sport) for sport in ("NBA", "NHL")}
@@ -284,7 +301,7 @@ def test_isolated_collector_captures_without_model_and_is_idempotent(tmp_path):
     kwargs = dict(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
         health_path=tmp_path / "state" / "health.json", now=NOW,
         fixture_fetchers={s: (lambda s=s: [fixtures[s]]) for s in fixtures},
-        market_fetcher=fetch_markets)
+        market_fetcher=fetch_markets, authorization=EVIDENCE_AUTH)
     first = collect_once(**kwargs)
     assert all(first["leagues"][s]["snapshots_written"] == 1 for s in fixtures)
     assert all(first["leagues"][s]["last_success"] == NOW.isoformat() for s in fixtures)
@@ -296,21 +313,95 @@ def test_isolated_collector_captures_without_model_and_is_idempotent(tmp_path):
 
 
 def test_isolated_collector_empty_schedule_and_provider_failure_do_not_succeed(tmp_path):
-    script = __import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "collect_league_evidence.py"
-    spec = importlib.util.spec_from_file_location("collect_league_evidence", script)
-    collector = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(collector)
+    collector = load_evidence_collector()
     collect_once = collector.collect_once
     def failed(*_args):
         raise OSError("offline")
     result = collect_once(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
         health_path=tmp_path / "state" / "health.json", now=NOW,
         fixture_fetchers={"NBA": lambda: [], "NHL": failed},
-        market_fetcher=lambda *_args: (_ for _ in ()).throw(AssertionError("must not run")))
+        market_fetcher=lambda *_args: (_ for _ in ()).throw(AssertionError("must not run")),
+        authorization=EVIDENCE_AUTH)
     assert result["leagues"]["NBA"]["empty_coverage_reason"] == "empty_schedule"
     assert result["leagues"]["NBA"]["last_success"] is None
     assert result["leagues"]["NHL"]["empty_coverage_reason"] == "collection_failed"
     assert result["leagues"]["NHL"]["source_failures"]
+    assert result["exit_code"] == 1
+
+
+def test_collector_nba_only_never_touches_nhl_and_requires_explicit_account_terms(tmp_path):
+    collect_once = load_evidence_collector().collect_once
+    calls = []
+    def nba_empty():
+        calls.append("NBA")
+        return []
+    def forbidden_nhl():
+        calls.append("NHL")
+        raise AssertionError("unselected league must not fetch fixtures")
+    result = collect_once(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={"NBA": nba_empty, "NHL": forbidden_nhl},
+        leagues=("NBA",), authorization={"NBA": EVIDENCE_AUTH["NBA"]})
+    assert calls == ["NBA"]
+    assert result["leagues"]["NBA"]["status"] == "EMPTY"
+    assert result["leagues"]["NHL"]["status"] == "NOT_SELECTED"
+    assert result["leagues"]["NHL"]["authorization"]["state"] == "UNVERIFIED"
+    assert result["exit_code"] == 0
+
+
+def test_collector_unverified_nba_is_blocked_before_any_provider_call(tmp_path):
+    collect_once = load_evidence_collector().collect_once
+    called = []
+    result = collect_once(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={"NBA": lambda: called.append("NBA"), "NHL": lambda: called.append("NHL")},
+        leagues=("NBA",), authorization={})
+    assert called == []
+    assert result["leagues"]["NBA"]["status"] == "AUTHORIZATION_BLOCKED"
+    assert result["exit_code"] == 1
+
+
+def test_collector_cli_writes_health_and_exits_nonzero_without_nba_authorization(tmp_path):
+    collector = load_evidence_collector()
+    code = collector.main(["--leagues", "NBA", "--evidence-dir", str(tmp_path / "evidence"),
+        "--state-dir", str(tmp_path / "state"), "--health-path", str(tmp_path / "state/health.json"),
+        "--log-path", str(tmp_path / "state/collector.log"),
+        "--authorization-file", str(tmp_path / "missing-authorization.json")])
+    health = json.loads((tmp_path / "state/health.json").read_text(encoding="utf-8"))
+    assert code == 1
+    assert health["leagues"]["NBA"]["status"] == "AUTHORIZATION_BLOCKED"
+    assert health["leagues"]["NHL"]["status"] == "NOT_SELECTED"
+    assert (tmp_path / "state/collector.log").stat().st_mode & 0o777 == 0o600
+
+
+def test_collector_no_markets_is_empty_but_invalid_book_is_failure(tmp_path):
+    collect_once = load_evidence_collector().collect_once
+    fx = fixture("NBA")
+    common = dict(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={"NBA": lambda: [fx]}, leagues=("NBA",), authorization=EVIDENCE_AUTH)
+    empty = collect_once(**common, market_fetcher=lambda *_args: ([], [],
+        {"KALSHI": {"discovered": 0, "coverage": {"state": "BOUNDED"}},
+         "PMUS": {"discovered": 0, "coverage": {"state": "BOUNDED"}}}, None, None))
+    assert empty["leagues"]["NBA"]["status"] == "EMPTY"
+    assert empty["leagues"]["NBA"]["last_success"] is None
+    assert empty["exit_code"] == 0
+
+    class EmptyBook:
+        def book(self, _ticker):
+            return {}
+        def close(self):
+            pass
+    raw = {**MARKETS["NBA"], "status": "active", "market_type": "binary",
+           "price_level_structure": "linear_cent", "notional_value_dollars": "1",
+           "expected_expiration_time": "2026-10-27T05:00:00Z"}
+    failed = collect_once(**common, market_fetcher=lambda *_args: ([raw], [],
+        {"KALSHI": {"discovered": 1, "coverage": {"state": "BOUNDED"}},
+         "PMUS": {"discovered": 0, "coverage": {"state": "BOUNDED"}}}, EmptyBook(), None))
+    assert failed["leagues"]["NBA"]["status"] == "FAILED"
+    assert failed["leagues"]["NBA"]["source_failures"]
+    assert failed["leagues"]["NBA"]["last_success"] is None
+    assert failed["exit_code"] == 1
 
 
 def test_mocked_pmus_client_market_uses_same_fixture_match_normalize_qualify_path():
