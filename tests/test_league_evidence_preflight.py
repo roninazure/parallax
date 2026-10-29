@@ -142,3 +142,37 @@ def test_runtime_diagnostic_falls_back_to_gui_domain(monkeypatch):
     result = diagnostic._launchd_job("com.swarmedge.parallax-sports")
     assert result["available"] is True
     assert result["domain"] == f"gui/{uid}"
+
+
+def test_runtime_diagnostic_extracts_sha_from_nested_venv_path(tmp_path, monkeypatch, capsys):
+    """Nested venv interpreter must resolve to the release SHA, not '.venv'."""
+    import plistlib
+    from types import SimpleNamespace
+    diagnostic = _module("diagnose_league_runtime_release", "diagnose_league_runtime.py")
+    sha = "a" * 40
+    runtime = tmp_path / "runtime"
+    (runtime / "run").mkdir(parents=True)
+    (runtime / "state/parallax").mkdir(parents=True)
+    (runtime / "run/parallax-sports-manifest.json").write_text(
+        json.dumps({"git_sha": sha}), encoding="utf-8")
+    (runtime / "state/parallax/parallax_unattended_health.json").write_text(
+        json.dumps({"release_sha": sha}), encoding="utf-8")
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    plist = staging / "com.swarmedge.parallax-sports.test.plist"
+    plist.write_bytes(plistlib.dumps({
+        "Label": "com.swarmedge.parallax-sports",
+        "ProgramArguments": [
+            f"/opt/swarm/releases/{sha}/.venv/bin/python",
+            f"/opt/swarm/releases/{sha}/scripts/parallax_unattended.py",
+            "--state-dir", str(runtime / "state/parallax"),
+        ],
+    }))
+    monkeypatch.setattr(diagnostic, "_launchd_job", lambda label:
+        {"available": True, "domain": "system", "summary": ["state = running"], "error": None})
+    args = SimpleNamespace(runtime_root=str(runtime), manifest=None, health=None,
+        plist_dir=str(staging), plist_pattern="*.plist")
+    assert diagnostic.diagnose(args) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["plists"][0]["release_sha_from_argument"] == sha
+    assert "manifest_git_sha_differs_from_plist_release" not in report["mismatches"]
