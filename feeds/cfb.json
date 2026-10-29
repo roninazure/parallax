@@ -1,58 +1,13 @@
 {
-  "generated_at": "2026-10-28T22:57:56.983403+00:00",
+  "generated_at": "2026-10-29T00:28:21.257685+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 58.63208423,
-      "market_id": "1526828",
-      "matchup": "Notre Dame at Navy",
-      "model_probability": 0.6113208422869523,
-      "price": 0.025,
-      "sport": "CFB",
-      "start_time": "2026-10-31T16:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 16.18752704,
-      "market_id": "1458940",
-      "matchup": "Kennesaw State at Middle Tennessee",
-      "model_probability": 0.6718752704319586,
-      "price": 0.51,
-      "sport": "CFB",
-      "start_time": "2026-10-28T23:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 15.47763981,
-      "market_id": "1591558",
-      "matchup": "Utah at Cincinnati",
-      "model_probability": 0.45977639810834015,
-      "price": 0.305,
-      "sport": "CFB",
-      "start_time": "2026-10-31T19:45:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 10.1352383,
-      "market_id": "1511618",
-      "matchup": "Baylor at UCF",
-      "model_probability": 0.6013523830008736,
-      "price": 0.5,
-      "sport": "CFB",
-      "start_time": "2026-10-30T23:30:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
   "source_feed_generated_at": "2026-10-28T22:57:47.173877+00:00",
-  "source_schedule_state": "UNVERIFIED",
-  "state": "LIVE",
+  "source_schedule_state": "STALE",
+  "state": "STALE",
   "summary": {
-    "buy": 4
+    "buy": 0
   }
 }
