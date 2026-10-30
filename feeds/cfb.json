@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T17:00:48.912017+00:00",
+  "generated_at": "2026-10-30T18:05:50.082340+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -11,17 +11,6 @@
       "price": 0.03,
       "sport": "CFB",
       "start_time": "2026-10-31T16:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 20.92076625,
-      "market_id": "1593080",
-      "matchup": "South Carolina at Oklahoma",
-      "model_probability": 0.6092076624557968,
-      "price": 0.4,
-      "sport": "CFB",
-      "start_time": "2026-10-31T20:15:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -47,6 +36,17 @@
       "venue": "POLYMARKET"
     },
     {
+      "contract_side": "NO",
+      "edge_pp": 10.59803235,
+      "market_id": "1545746",
+      "matchup": "Oregon State at Fresno State",
+      "model_probability": 0.420980323520983,
+      "price": 0.315,
+      "sport": "CFB",
+      "start_time": "2026-11-01T03:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
       "contract_side": "YES",
       "edge_pp": 6.6352383,
       "market_id": "1511618",
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-30T17:00:48.492002+00:00",
+  "source_feed_generated_at": "2026-10-30T18:05:42.171429+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
