@@ -63,8 +63,10 @@ def main() -> int:
         help="Model family to train (v2 is the feature-based candidate)",
     )
     args = parser.parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    # Validate every selected league before creating any output artifacts.
+    # A failed NHL run must never leave a newly generated NBA-only batch.
     summaries = {}
+    pending_outputs = []
     forward_rows = load_final_games_csv(args.forward_holdout) if args.forward_holdout else []
     sports = ("NBA", "NHL") if args.sport == "BOTH" else (args.sport,)
     for sport in sports:
@@ -131,9 +133,8 @@ def main() -> int:
             )
             suffix = "calibrated"
         output = args.output_dir / f"{sport.lower()}_{suffix}.json"
-        output.write_text(
-            json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n",
-            encoding="utf-8",
+        pending_outputs.append(
+            (output, json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n")
         )
         summaries[sport] = {
             "artifact": str(output),
@@ -149,6 +150,9 @@ def main() -> int:
             "elo": artifact.get("elo"),
             "calibration": artifact["calibration"],
         }
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    for output, payload in pending_outputs:
+        output.write_text(payload, encoding="utf-8")
     print(json.dumps(summaries, indent=2, sort_keys=True, allow_nan=False))
     return 0
 
