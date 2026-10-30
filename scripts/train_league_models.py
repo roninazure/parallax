@@ -38,6 +38,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument(
+        "--sport", choices=("NBA", "NHL", "BOTH"), default="BOTH",
+        help="Train one league independently, or both (default)",
+    )
+    parser.add_argument(
         "--independent-history",
         type=Path,
         help="Independent provider CSV with the same verified finals",
@@ -62,7 +66,8 @@ def main() -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     summaries = {}
     forward_rows = load_final_games_csv(args.forward_holdout) if args.forward_holdout else []
-    for sport in ("NBA", "NHL"):
+    sports = ("NBA", "NHL") if args.sport == "BOTH" else (args.sport,)
+    for sport in sports:
         history_path = Path("/nonexistent")
         games = load_league_history(sport, history_path, explicit=False)
         source_sha = source_digest(sport, Path.home())
@@ -99,6 +104,10 @@ def main() -> int:
             ).hexdigest()
         if args.model_version == "v2":
             fresh_games = [g for g in forward_rows if g.sport == sport]
+            if args.forward_holdout and not fresh_games:
+                raise ValueError(
+                    f"{sport} forward holdout file has no matching league results"
+                )
             forward_sha = (
                 hashlib.sha256(args.forward_holdout.read_bytes()).hexdigest()
                 if args.forward_holdout and fresh_games else None
