@@ -84,3 +84,25 @@ def test_explicit_forward_holdout_without_selected_league_fails_closed(
     with pytest.raises(ValueError, match="NBA forward holdout file has no matching"):
         trainer.main()
     assert not (tmp_path / "nba_v2_candidate.json").exists()
+
+
+def test_both_leagues_failure_leaves_no_partial_candidate_artifacts(
+    tmp_path, monkeypatch
+):
+    """An NHL validation failure cannot publish an NBA-only batch."""
+    visited = _stub_trainer(monkeypatch)
+
+    def train(games, *, sport, **kwargs):
+        if sport == "NHL":
+            raise ValueError("synthetic NHL calibration failure")
+        return _artifact(sport)
+
+    monkeypatch.setattr(trainer, "train_artifact_v2", train)
+    output = tmp_path / "batch"
+    monkeypatch.setattr(
+        sys, "argv", ["train_league_models.py", "--output-dir", str(output)]
+    )
+    with pytest.raises(ValueError, match="synthetic NHL calibration failure"):
+        trainer.main()
+    assert visited == ["NBA", "NHL"]
+    assert not output.exists()
