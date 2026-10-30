@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T07:28:51.604909+00:00",
+  "generated_at": "2026-10-30T08:32:32.899711+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -26,6 +26,17 @@
     },
     {
       "contract_side": "NO",
+      "edge_pp": 19.9334128,
+      "market_id": "1591562",
+      "matchup": "Oklahoma State at Iowa State",
+      "model_probability": 0.45933412795775774,
+      "price": 0.26,
+      "sport": "CFB",
+      "start_time": "2026-10-31T23:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
       "edge_pp": 16.97763981,
       "market_id": "1591558",
       "matchup": "Utah at Cincinnati",
@@ -33,17 +44,6 @@
       "price": 0.29,
       "sport": "CFB",
       "start_time": "2026-10-31T19:45:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 11.92759452,
-      "market_id": "1593085",
-      "matchup": "Ohio State at USC",
-      "model_probability": 0.42927594524841817,
-      "price": 0.31,
-      "sport": "CFB",
-      "start_time": "2026-10-31T23:30:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-30T07:28:27.351843+00:00",
+  "source_feed_generated_at": "2026-10-30T08:31:58.214220+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
