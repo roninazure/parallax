@@ -1,36 +1,36 @@
 {
-  "generated_at": "2026-10-29T23:01:36.668761+00:00",
+  "generated_at": "2026-10-30T00:05:51.789543+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 58.13208423,
+      "edge_pp": 58.63208423,
       "market_id": "1526828",
       "matchup": "Notre Dame at Navy",
       "model_probability": 0.6113208422869523,
-      "price": 0.03,
+      "price": 0.025,
       "sport": "CFB",
       "start_time": "2026-10-31T16:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
-      "edge_pp": 42.38620598,
-      "market_id": "1483546",
-      "matchup": "Florida Atlantic at North Texas",
-      "model_probability": 0.5988620598490867,
-      "price": 0.175,
+      "edge_pp": 20.92076625,
+      "market_id": "1593080",
+      "matchup": "South Carolina at Oklahoma",
+      "model_probability": 0.6092076624557968,
+      "price": 0.4,
       "sport": "CFB",
-      "start_time": "2026-10-29T23:30:00+00:00",
+      "start_time": "2026-10-31T20:15:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
-      "edge_pp": 16.47763981,
+      "edge_pp": 16.97763981,
       "market_id": "1591558",
       "matchup": "Utah at Cincinnati",
       "model_probability": 0.45977639810834015,
-      "price": 0.295,
+      "price": 0.29,
       "sport": "CFB",
       "start_time": "2026-10-31T19:45:00+00:00",
       "venue": "POLYMARKET"
@@ -48,11 +48,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 7.6352383,
+      "edge_pp": 7.1352383,
       "market_id": "1511618",
       "matchup": "Baylor at UCF",
       "model_probability": 0.6013523830008736,
-      "price": 0.525,
+      "price": 0.53,
       "sport": "CFB",
       "start_time": "2026-10-30T23:30:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-29T23:01:35.631207+00:00",
+  "source_feed_generated_at": "2026-10-30T00:05:35.575728+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
