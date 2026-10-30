@@ -370,8 +370,10 @@ def test_paired_calibration_intervals_preserve_direction_for_strict_improvement(
     baseline = [0.5] * len(outcome)
     result = _paired_delta_intervals(candidate, baseline, outcome, dates)
     assert result["n_blocks"] == 12
-    for bounds in result["intervals"].values():
-        assert bounds[1] < 0, bounds
+    # Better proper scores do not guarantee lower bin-based ECE.
+    assert result["intervals"]["brier"][1] < 0
+    assert result["intervals"]["log_loss"][1] < 0
+    assert result["intervals"]["ece_10_bins"][0] > 0
 
 
 def test_paired_calibration_intervals_reject_unaligned_samples():
