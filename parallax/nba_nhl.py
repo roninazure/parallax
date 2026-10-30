@@ -18,6 +18,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
+from .bdl_request_budget import reserve_bdl_request
 from .alerts import dispatch_scored_buy
 from .engine import qualify
 from .fees import attach_fees
@@ -86,6 +87,9 @@ def fetch_nba_fixtures(*, now: datetime | None = None, transport=None) -> list[S
     if transport:
         payload = transport(url)
     else:
+        # Fail closed before HTTP, across concurrent local processes. Injected
+        # offline test transports never spend provider quota.
+        reserve_bdl_request()
         request = Request(url, headers={"Authorization": api_key, "Accept": "application/json", "User-Agent": "PARALLAX-NBA/1"})
         with urlopen(request, timeout=8) as response:
             payload = json.loads(response.read(1_000_000))
