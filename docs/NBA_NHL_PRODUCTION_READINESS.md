@@ -318,3 +318,66 @@ carry a valid SHA-256 for its source. Rehashing an artifact cannot turn a
 missing forward source or a case-only duplicate source digest into verified
 evidence. These are integrity checks, not proof of legal provider independence
 or authorization.
+
+## 2026-10-30 — League-scoped independent validation CLI (GitHub-only)
+
+The read-only `scripts/reconcile_league_results.py` compares two **local,
+canonical final-results CSVs** by season, official ET date, home/away team and
+winner, not provider-specific game ID. It rejects missing/extra fixtures,
+duplicate fixture identities, wrong winners, empty selected-league inputs and
+byte-identical files. It emits a machine-readable count, source SHA-256 hashes
+and canonical-history fingerprint on success, with nonzero exit on mismatch.
+For NBA, prepare independently acquired and authorized results in the documented
+`sport,game_id,season,game_date,home_team,away_team,winner_team` schema:
+
+```sh
+python scripts/reconcile_league_results.py \
+  --sport NBA \
+  --primary-history "$NBA_PRIMARY_FINALS_CSV" \
+  --independent-history "$NBA_SECOND_PROVIDER_FINALS_CSV"
+```
+
+The output deliberately keeps `provider_independence_verified`,
+`source_authorization_verified`, `forward_holdout_verified`,
+`model_certified` and `production_eligible` **false**. File disagreement
+is disqualifying, but agreement and distinct bytes do **not** prove independent
+provider origin, license, sample freshness, or acceptance. Human-reviewed
+source provenance and rights records remain external blockers.
+
+`scripts/train_league_models.py --sport NBA` now evaluates NBA without
+loading or writing NHL candidate artifacts. `--sport NHL` works separately;
+omitting `--sport` preserves the existing two-league default. An explicitly
+supplied forward-holdout CSV with zero rows for the selected league now raises
+an error rather than silently falling back to an exploratory old holdout.
+A future evidence-backed NBA evaluation can use:
+
+```sh
+python scripts/train_league_models.py \
+  --sport NBA --model-version v2 \
+  --independent-history "$NBA_SECOND_PROVIDER_FINALS_CSV" \
+  --forward-holdout "$NBA_LATER_FINALS_CSV" \
+  --output-dir "$NBA_RESEARCH_OUTPUT_DIR"
+```
+
+This training command still requires the local primary research snapshot,
+verified data rights, actual later independent finals and separately approved
+model-owner criteria. The example deliberately supplies **no fabricated**
+authorization or approval references. Its output is a research candidate, not
+a release artifact; never set runtime model pins from this example alone.
+
+**Mac mini release hold:** the last documented active release is
+`a517ab94087c3b63d4fe5ac914eb470aef7fb3db`, while the last documented
+manifest identifies `bf11b4be9588392ba0c200b80b406943ca48cdd5`.
+These are historical observations, not a current host check. Before any
+separately approved deployment, collect a fresh **read-only** system-domain
+launchd, heartbeat, loaded-plist and manifest inventory; reconcile actual
+runtime-env, entrypoint, dependency-lock and plist hashes; preserve the current
+plist and immutable prior release. Only after all evidence gates pass may an
+immutable SHA-addressed release be packaged with
+`scripts/migration_preflight.py create-release`, its candidate plist linted,
+and its manifest generated and validated. The separately approved cutover must
+satisfy the 90-second process/SHA/<=30-second heartbeat/feed/critical-error
+checks in `deploy/README.md`; on failure restore the saved plist and previous
+release and verify recovery. Do not touch the customer publisher or change
+NFL/MLB/CFB lanes. No release candidate has been approved, packaged or
+deployed by this GitHub-only work.
