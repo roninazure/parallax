@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T03:51:41.036824+00:00",
+  "generated_at": "2026-10-30T03:56:11.849511+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,15 +14,15 @@
       "venue": "KALSHI"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 10.86505294,
-      "market_id": "1545096",
+      "contract_side": "YES",
+      "edge_pp": 11.36505294,
+      "market_id": "KXNFLGAME-26NOV01CLEPIT-PIT",
       "matchup": "CLE at PIT",
       "model_probability": 0.7536505293920732,
-      "price": 0.645,
+      "price": 0.64,
       "sport": "NFL",
       "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -47,26 +47,26 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
+      "contract_side": "YES",
       "edge_pp": 8.47058651,
-      "market_id": "1545107",
+      "market_id": "KXNFLGAME-26NOV01KCDEN-DEN",
       "matchup": "KC at DEN",
       "model_probability": 0.5647058651286584,
       "price": 0.48,
       "sport": "NFL",
       "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 22.03715255,
-      "market_id": "1545106",
+      "contract_side": "YES",
+      "edge_pp": 22.53715255,
+      "market_id": "KXNFLGAME-26NOV01NEMIA-MIA",
       "matchup": "NE at MIA",
-      "model_probability": 0.46537152549777483,
-      "price": 0.245,
+      "model_probability": 0.4653715254977749,
+      "price": 0.24,
       "sport": "NFL",
       "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -104,8 +104,8 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-30T03:50:28.189662+00:00",
-  "source_schedule_state": "INCOMPLETE",
+  "source_feed_generated_at": "2026-10-30T03:56:03.410160+00:00",
+  "source_schedule_state": "COMPLETE",
   "state": "LIVE",
   "summary": {
     "buy": 9
