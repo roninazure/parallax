@@ -1,0 +1,26 @@
+name: NBA/NHL Comparative Readiness Report Validation
+on:
+  push:
+    branches:
+      - codex/nba-nhl-comparative-readiness-report-20261030
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e . 'pytest>=8,<9'
+      - name: Validate NBA NHL comparative report and model tests
+        run: |
+          python -m pytest -q tests/test_nba_nhl_comparative_report.py tests/test_parallax_league_model_v2.py tests/test_reconcile_league_results.py tests/test_train_league_models_cli.py
+          python scripts/nba_nhl_comparative_report.py reports/nba_nhl_model_candidates/nba_v2_candidate.json reports/nba_nhl_model_candidates/nhl_v2_candidate.json > /dev/null
+      - name: Protect NFL MLB CFB
+        env:
+          TZ: America/New_York
+        run: python -m pytest -q tests/test_parallax_nfl.py tests/test_parallax_live_mlb.py tests/test_parallax_live_cfb.py
