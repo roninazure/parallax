@@ -40,7 +40,7 @@ TIPS = {
 }
 
 EVIDENCE_AUTH = {
-    "NBA": {"provider": "BALLDONTLIE", "api_plan": "offline-test-plan",
+    "NBA": {"provider": "BALLDONTLIE", "api_plan": "free",
         "nba_games_access": True, "account_plan_verified": True,
         "account_plan_verified_at": date.today().isoformat(), "terms_reviewed": True,
         "terms_reviewed_at": date.today().isoformat(),
