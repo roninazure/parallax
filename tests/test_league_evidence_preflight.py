@@ -64,7 +64,7 @@ def _live_sports_fixture(tmp_path):
 def test_read_only_preflight_detects_host_readiness_and_manifest_drift(tmp_path, monkeypatch):
     preflight_module = _module("league_evidence_preflight", "league_evidence_preflight.py")
     today = date.today().isoformat()
-    auth = {"NBA": {"provider": "BALLDONTLIE", "api_plan": "verified-plan",
+    auth = {"NBA": {"provider": "BALLDONTLIE", "api_plan": "free",
         "nba_games_access": True, "account_plan_verified": True,
         "account_plan_verified_at": today, "terms_reviewed": True,
         "terms_reviewed_at": today,
@@ -85,6 +85,8 @@ def test_read_only_preflight_detects_host_readiness_and_manifest_drift(tmp_path,
     assert result["sports_job_running"] is True
     assert result["active_sports_sha"] == result["manifest_sha"] == sha
     assert result["authorization"]["NBA"]["state"] == "AUTHORIZED"
+    assert result["authorization"]["NBA"]["declared_plan"] == "free"
+    assert result["authorization"]["NBA"]["free_rate_limit_per_minute"] == 5
     assert result["authorization"]["NHL"]["state"] == "UNVERIFIED"
     assert "credential-never-print" not in json.dumps(result)
 
@@ -112,7 +114,7 @@ def test_system_launchdaemon_is_valid_without_gui_session(tmp_path, monkeypatch)
     """A live system-domain sports job must not be rejected as GUI unavailable."""
     preflight_module = _module("league_evidence_preflight_system", "league_evidence_preflight.py")
     today = date.today().isoformat()
-    auth = {"NBA": {"provider": "BALLDONTLIE", "api_plan": "verified-plan",
+    auth = {"NBA": {"provider": "BALLDONTLIE", "api_plan": "free",
         "nba_games_access": True, "account_plan_verified": True,
         "account_plan_verified_at": today, "terms_reviewed": True,
         "terms_reviewed_at": today,
@@ -283,3 +285,84 @@ def test_runtime_diagnostic_extracts_sha_from_nested_venv_path(tmp_path, monkeyp
     report = json.loads(capsys.readouterr().out)
     assert report["plists"][0]["release_sha_from_argument"] == sha
     assert "manifest_git_sha_differs_from_plist_release" not in report["mismatches"]
+
+
+def test_free_plan_declaration_never_bypasses_terms_and_account_verification():
+    from scripts.collect_league_evidence import authorization_state
+    from datetime import date
+    today = date.today().isoformat()
+    stated = {
+        "NBA": {"provider": "BALLDONTLIE", "api_plan": "free",
+                "nba_games_access": True, "account_plan_verified": False,
+                "terms_reviewed": False}
+    }
+    permitted, status = authorization_state("NBA", stated)
+    assert not permitted
+    assert status["state"] == "UNVERIFIED"
+    assert status["declared_plan"] == "free"
+    assert status["free_games_endpoint_documented"] is True
+    assert status["free_rate_limit_per_minute"] == 5
+    assert status["account_plan_verified_at"] is None
+    stated["NBA"].update(
+        account_plan_verified=True, account_plan_verified_at=today,
+        terms_reviewed=True, terms_reviewed_at=today,
+        terms_url="https://www.balldontlie.io/terms.html",
+    )
+    permitted, status = authorization_state("NBA", stated)
+    assert permitted
+    assert status["state"] == "AUTHORIZED"
+
+
+def test_unknown_plan_cannot_be_marked_authorized_even_with_terms():
+    from scripts.collect_league_evidence import authorization_state
+    from datetime import date
+    today = date.today().isoformat()
+    authorized, detail = authorization_state("NBA", {
+        "NBA": {"provider": "BALLDONTLIE", "api_plan": "invented-unlimited",
+                "nba_games_access": True,
+                "account_plan_verified": True, "account_plan_verified_at": today,
+                "terms_reviewed": True, "terms_reviewed_at": today,
+                "terms_url": "https://www.balldontlie.io/terms.html"}
+    })
+    assert not authorized
+    assert detail["state"] == "UNVERIFIED"
+    assert detail["declared_plan"] is None
+
+
+def test_documented_immutable_release_manifest_is_accepted(tmp_path, monkeypatch):
+    module = _module("league_evidence_preflight_release_manifest", "league_evidence_preflight.py")
+    runtime, legacy, payload, output, _, _, _ = _live_sports_fixture(tmp_path)
+    documented = runtime / "releases" / payload["git_sha"] / "deploy" / "manifest.json"
+    documented.parent.mkdir(parents=True)
+    documented.write_text(json.dumps(payload), encoding="utf-8")
+    legacy.unlink()
+    monkeypatch.setattr(module, "_launchctl", lambda target: (
+        True, output if target.endswith("com.swarmedge.parallax-sports") else ""
+    ))
+    result = module.preflight(
+        runtime_root=runtime,
+        authorization_file=tmp_path / "missing-auth",
+        credential_file=tmp_path / "missing-key",
+    )
+    assert result["manifest_integrity_verified"] is True
+    assert result["manifest_sha"] == payload["git_sha"]
+    assert "sports_manifest_sha_unavailable" not in result["blockers"]
+
+
+def test_corrupt_documented_release_manifest_does_not_fallback_to_legacy(tmp_path, monkeypatch):
+    module = _module("league_evidence_preflight_no_manifest_bypass", "league_evidence_preflight.py")
+    runtime, legacy, payload, output, _, _, _ = _live_sports_fixture(tmp_path)
+    documented = runtime / "releases" / payload["git_sha"] / "deploy" / "manifest.json"
+    documented.parent.mkdir(parents=True)
+    documented.write_text(json.dumps({**payload, "git_sha": "b" * 40}), encoding="utf-8")
+    assert legacy.exists()
+    monkeypatch.setattr(module, "_launchctl", lambda target: (
+        True, output if target.endswith("com.swarmedge.parallax-sports") else ""
+    ))
+    result = module.preflight(
+        runtime_root=runtime,
+        authorization_file=tmp_path / "missing-auth",
+        credential_file=tmp_path / "missing-key",
+    )
+    assert result["manifest_integrity_verified"] is False
+    assert "active_release_manifest_sha_mismatch" in result["blockers"]

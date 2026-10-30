@@ -315,6 +315,57 @@ def _block_intervals(
     }
 
 
+def _paired_delta_intervals(
+    candidate: list[float],
+    reference: list[float],
+    outcomes: list[int],
+    dates: list[date],
+) -> dict[str, Any]:
+    """Paired ET-date bootstrap of candidate MINUS reference error metrics.
+
+    Preserve matched games and whole dates in every replicate. Separate
+    confidence intervals cannot establish comparative improvement.
+    A negative upper bound indicates improvement for that specific metric,
+    but never creates authorization or independent holdout evidence.
+    """
+    if not (len(candidate) == len(reference) == len(outcomes) == len(dates)):
+        raise ValueError("paired bootstrap inputs must align")
+    blocks: dict[date, list[int]] = defaultdict(list)
+    for index, day in enumerate(dates):
+        blocks[day].append(index)
+    days = sorted(blocks)
+    if len(days) < 2:
+        return {
+            "method": "paired-ET-date-block-bootstrap",
+            "n_blocks": len(days),
+            "replicates": 0,
+            "intervals": None,
+        }
+    rng = random.Random(20261030)
+    deltas = {name: [] for name in ("brier", "log_loss", "ece_10_bins")}
+    for _ in range(400):
+        indices = [
+            i
+            for day in (days[rng.randrange(len(days))] for _ in days)
+            for i in blocks[day]
+        ]
+        y = [outcomes[i] for i in indices]
+        current = _metrics([candidate[i] for i in indices], y)
+        baseline = _metrics([reference[i] for i in indices], y)
+        for name, values in deltas.items():
+            values.append(float(current[name]) - float(baseline[name]))
+    return {
+        "method": "paired-ET-date-block-bootstrap",
+        "n_blocks": len(days),
+        "replicates": 400,
+        "confidence_level": 0.95,
+        "intervals": {
+            name: [sorted(values)[9], sorted(values)[389]]
+            for name, values in deltas.items()
+        },
+    }
+
+
 def _date_isolated_selection_split(rows: list[FinalGame]) -> int:
     """Keep every ET-date fixture wholly in fit or validation.
 
@@ -625,6 +676,17 @@ def train_artifact_v2(
         "holdout_confidence_intervals": _block_intervals(
             hp, hy, [g.game_date for g in holdout]
         ),
+        "paired_baseline_delta_intervals": {
+            "candidate_minus_50_50": _paired_delta_intervals(
+                hp, [0.5] * len(hy), hy, [g.game_date for g in holdout]
+            ),
+            "candidate_minus_constant_home_rate": _paired_delta_intervals(
+                hp, [home_rate] * len(hy), hy, [g.game_date for g in holdout]
+            ),
+            "candidate_minus_elo_calibrated": _paired_delta_intervals(
+                hp, elo_hp, hy, [g.game_date for g in holdout]
+            ),
+        },
         "baseline_confidence_intervals": {
             "50_50": _block_intervals(
                 [0.5] * len(hy), hy, [g.game_date for g in holdout]

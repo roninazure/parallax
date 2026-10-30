@@ -133,7 +133,21 @@ def preflight(*, runtime_root: Path, authorization_file: Path,
     job_running = bool(re.search(r"(?m)^\s*state\s*=\s*running\s*$", job_output))
     active = re.search(r"/releases/([0-9a-f]{40})(?:/|\b)", job_output)
     active_sha = active.group(1) if active else None
-    manifest_path = runtime_root / "run/parallax-sports-manifest.json"
+    # The deployment contract writes this manifest inside each immutable
+    # release. Legacy runtime manifests are supported only when the
+    # documented release manifest does not exist, never as a fallback
+    # from a present but invalid release manifest.
+    if active_sha and re.fullmatch(r"[0-9a-f]{40}", active_sha):
+        documented_manifest = (
+            runtime_root / "releases" / active_sha / "deploy/manifest.json"
+        )
+    else:
+        documented_manifest = None
+    manifest_path = (
+        documented_manifest
+        if documented_manifest is not None and documented_manifest.exists()
+        else runtime_root / "run/parallax-sports-manifest.json"
+    )
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         manifest_sha = manifest.get("git_sha") if isinstance(manifest, dict) else None
