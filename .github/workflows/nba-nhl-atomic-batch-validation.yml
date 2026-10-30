@@ -1,0 +1,35 @@
+name: NBA/NHL Isolated Artifact Staging Validation
+
+on:
+  push:
+    branches:
+      - codex/nba-nhl-atomic-batch-artifacts-20261030
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nba-nhl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install local runtime and test dependencies
+        run: |
+          python -m pip install -e . 'pytest>=8,<9'
+      - name: Compile changed CLI and tests
+        run: |
+          python -m compileall -q scripts/train_league_models.py tests/test_train_league_models_cli.py
+      - name: Verify NBA/NHL model tests
+        run: |
+          python -m pytest -q tests/test_train_league_models_cli.py tests/test_parallax_league_model_v2.py tests/test_reconcile_league_results.py tests/test_league_evidence_preflight.py tests/test_parallax_nba_nhl_shadow.py
+      - name: Preserve NFL MLB CFB regression coverage
+        env:
+          TZ: America/New_York
+        run: |
+          python -m pytest -q tests/test_parallax_nfl.py tests/test_parallax_live_mlb.py tests/test_parallax_live_cfb.py
