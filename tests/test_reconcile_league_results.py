@@ -110,3 +110,27 @@ def test_cli_exit_codes_and_machine_readable_success(tmp_path):
     assert failure.returncode == 1
     assert "RECONCILIATION_FAILED" in failure.stderr
     assert not failure.stdout
+
+
+@pytest.mark.parametrize("changed_source", ["primary", "secondary"])
+def test_source_modified_during_parse_fails_closed(tmp_path, monkeypatch, changed_source):
+    """Report hashes must describe the exact source bytes parsed."""
+    from scripts import reconcile_league_results as reconciliation
+
+    primary, secondary = tmp_path / "primary.csv", tmp_path / "secondary.csv"
+    _write(primary, _rows("NBA", "a"))
+    _write(secondary, _rows("NBA", "b"))
+    original_loader = reconciliation.load_final_games_csv
+
+    def mutating_loader(path):
+        games = original_loader(path)
+        if path == (primary if changed_source == "primary" else secondary):
+            with path.open("a", encoding="utf-8") as handle:
+                handle.write("\\n")
+        return games
+
+    monkeypatch.setattr(reconciliation, "load_final_games_csv", mutating_loader)
+    with pytest.raises(ValueError, match=f"{changed_source} source changed"):
+        reconciliation.reconcile_files(
+            primary=primary, secondary=secondary, sport="NBA"
+        )
