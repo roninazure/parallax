@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+# Only the newest reviewed branch tip needs the full regression suite.
+concurrency:
+  group: nba-nhl-pr-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   nba-nhl-tests:
     runs-on: ubuntu-latest
