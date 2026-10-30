@@ -1,0 +1,24 @@
+name: NBA NHL Forward Holdout Offline Audit
+on:
+  push:
+    branches:
+      - codex/nba-nhl-forward-holdout-audit-20261030
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e . 'pytest>=8,<9'
+      - name: Test forward audit and NBA NHL evidence
+        run: python -m pytest -q tests/test_audit_league_forward_holdout.py tests/test_reconcile_league_results.py tests/test_train_league_models_cli.py tests/test_parallax_league_model_v2.py
+      - name: Preserve NFL MLB CFB
+        env:
+          TZ: America/New_York
+        run: python -m pytest -q tests/test_parallax_nfl.py tests/test_parallax_live_mlb.py tests/test_parallax_live_cfb.py
