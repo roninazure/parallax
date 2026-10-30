@@ -269,3 +269,44 @@ canonical. These checks prevent accidental duplicate-game weighting in NBA/NHL
 validation; they do not supply independent results, a fresh holdout, source
 permission, or model certification. Existing NBA/NHL BUY publication remains
 blocked. No Mac mini cutover, launchd reload, or runtime edit is part of this PR.
+
+## 2026-10-30 — ET-date-isolated model selection and release hold
+
+The initial v2 model-selection split used 80% of **game rows** within the
+training window. With multiple games on one ET date, that boundary could
+place same-date outcomes on both sides of the hyperparameter-selection
+partition. PR #58 now selects the first 80% of **distinct ET dates**, keeps
+every game from a date entirely in fit or validation, and records the
+fit/validation date boundaries and game counts in newly generated artifacts.
+Synthetic regression tests enforce this property. This corrects the
+validation protocol; it is **not** evidence of improved calibration.
+
+The checked-in `nba_v2_candidate.json` and `nhl_v2_candidate.json` are
+**previous exploratory outputs from before this correction**. Their recorded
+Brier, log loss, ECE, and artifact hashes are historical observations only,
+not results of the revised protocol. They remain uncertified and must not be
+pinned or represented as a current release candidate. Regenerate and
+re-evaluate both candidates against source-authorized data before comparing
+metrics or considering a release; independently reconciled results and a
+genuinely later forward holdout remain missing.
+
+**Mac mini production-code release gate (not executed):** the last documented
+active sports release is `a517ab94087c3b63d4fe5ac914eb470aef7fb3db`,
+while the recorded manifest claims
+`bf11b4be9588392ba0c200b80b406943ca48cdd5`. No new live-host
+inspection has occurred for this update. Before any separately approved
+cutover, obtain a fresh read-only system-domain launchd/heartbeat/manifest
+inventory and reconcile the loaded plist, active release SHA, dependency lock,
+runtime environment and scheduler-entrypoint hashes. Do **not** repair the
+manifest in place. Once model, provenance, quote-economics, and owner gates
+are genuinely satisfied, package an immutable candidate from the reviewed
+commit with `scripts/migration_preflight.py create-release`, render/lint the
+candidate launchd plist, generate and validate its manifest against those
+exact staged inputs, and preserve the active plist and known-good release.
+Only a separately authorized cutover may reload
+`system/com.swarmedge.parallax-sports`; verify process identity, fresh
+heartbeat (<=30 seconds), lane isolation, valid feeds and no critical errors
+within the documented 90-second window. On failure restore the saved plist,
+reload the prior release, and verify its SHA/health. Never touch the separate
+publisher or change NFL/MLB/CFB schedules as part of NBA/NHL certification.
+**No deployable NBA/NHL release candidate is approved or staged.**

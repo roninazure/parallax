@@ -27,7 +27,7 @@ jobs:
           python -m pip install -e . 'pytest>=8,<9'
       - name: Compile NBA/NHL readiness modules
         run: |
-          python -m compileall -q scripts/league_evidence_preflight.py scripts/diagnose_league_runtime.py scripts/collect_league_evidence.py
+          python -m compileall -q scripts/league_evidence_preflight.py scripts/diagnose_league_runtime.py scripts/collect_league_evidence.py scripts/train_league_models.py parallax/league_model_v2.py
       - name: Run NBA/NHL focused regression suite
         run: |
           python -m pytest -q \

@@ -10,6 +10,7 @@ from parallax.league_model import verify_artifact
 from parallax.league_model_v2 import (
     FEATURE_NAMES,
     _features,
+    _date_isolated_selection_split,
     forecast_features_v2,
     reconcile_independent_history,
     train_artifact_v2,
@@ -66,12 +67,28 @@ def test_v2_feature_generation_is_pre_date_and_rejects_future_results():
     assert len(before) == len(FEATURE_NAMES)
 
 
+def test_v2_model_selection_never_divides_one_et_game_date():
+    # A row-count split at 80% would bisect a 12-game date in this fixture.
+    training = _games()[:72 * 12]
+    split = _date_isolated_selection_split(training)
+    assert 0 < split < len(training)
+    assert training[split - 1].game_date < training[split].game_date
+    assert split == 57 * 12
+
+
 def test_v2_training_is_deterministic_and_marks_old_holdout_exploratory():
     first = train_artifact_v2(_games(), sport="NBA", source_sha256="a" * 64)
     second = train_artifact_v2(_games(), sport="NBA", source_sha256="a" * 64)
     assert first["artifact_sha256"] == second["artifact_sha256"]
     assert first["splits"]["holdout_status"] == "EXPLORATORY_PREVIOUSLY_INSPECTED"
     assert first["certified"] is False
+    selection = first["selection"]
+    assert date.fromisoformat(selection["fit_end"]) < date.fromisoformat(
+        selection["validation_start"]
+    )
+    assert selection["fit_games"] + selection["validation_games"] == (
+        first["splits"]["train_games"]
+    )
     assert first["holdout_confidence_intervals"]["method"] == "ET-date-block-bootstrap"
 
 

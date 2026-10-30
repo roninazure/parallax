@@ -315,6 +315,23 @@ def _block_intervals(
     }
 
 
+def _date_isolated_selection_split(rows: list[FinalGame]) -> int:
+    """Keep every ET-date fixture wholly in fit or validation.
+
+    An 80% split by game rows can bisect a date and expose same-day results
+    during hyperparameter selection. Select by distinct dates instead.
+    """
+    days = sorted({game.game_date for game in rows})
+    if len(days) < 2:
+        raise ValueError("model selection requires distinct ET game dates")
+    cutoff_index = max(0, min(len(days) - 2, int(0.8 * len(days)) - 1))
+    cutoff = days[cutoff_index]
+    split = sum(game.game_date <= cutoff for game in rows)
+    if not 0 < split < len(rows):
+        raise ValueError("model selection has an empty chronological partition")
+    return split
+
+
 def train_artifact_v2(
     games: Iterable[FinalGame],
     *,
@@ -388,7 +405,7 @@ def train_artifact_v2(
     feat = _features(feature_rows, sport=sport)
     train_x = [feat[(sport, g.game_id)] for g in train]
     train_y = [int(g.winner_team == g.home_team) for g in train]
-    split = max(1, int(0.8 * len(train)))
+    split = _date_isolated_selection_split(train)
     selection = []
     for l2 in (0.01, 0.1, 1.0, 10.0):
         beta = _fit_logistic(train_x[:split], train_y[:split], l2)
@@ -559,7 +576,11 @@ def train_artifact_v2(
         "features": list(FEATURE_NAMES),
         "feature_decay": DECAY,
         "selection": {
-            "method": "chronological log-loss within train",
+            "method": "ET-date-isolated chronological log-loss within train",
+            "fit_end": train[split - 1].game_date.isoformat(),
+            "validation_start": train[split].game_date.isoformat(),
+            "fit_games": split,
+            "validation_games": len(train) - split,
             "prediction_family": prediction_family,
             "validation_log_loss": selected_loss,
             "l2": chosen_l2,
