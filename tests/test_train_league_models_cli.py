@@ -73,6 +73,7 @@ def test_explicit_forward_holdout_without_selected_league_fails_closed(
         trainer, "load_final_games_csv",
         lambda path: [FinalGame("NHL", "other", 2025, date(2025, 10, 2), "H", "A", "H")],
     )
+    (tmp_path / "synthetic.csv").write_text("synthetic\n", encoding="utf-8")
     monkeypatch.setattr(
         sys, "argv",
         [
@@ -84,3 +85,33 @@ def test_explicit_forward_holdout_without_selected_league_fails_closed(
     with pytest.raises(ValueError, match="NBA forward holdout file has no matching"):
         trainer.main()
     assert not (tmp_path / "nba_v2_candidate.json").exists()
+
+
+@pytest.mark.parametrize("evidence", ["forward_holdout", "independent_history"])
+def test_external_evidence_modified_while_parsing_fails_closed(
+    tmp_path, monkeypatch, evidence
+):
+    """The stored evidence digest must refer to the bytes actually parsed."""
+    _stub_trainer(monkeypatch)
+    path = tmp_path / "evidence.csv"
+    path.write_text("snapshot-before-parsing\n", encoding="utf-8")
+    output = tmp_path / "output"
+    def mutate_during_parse(source):
+        with source.open("a", encoding="utf-8") as stream:
+            stream.write("mutated\n")
+        return [FinalGame("NBA", "example", 2025,
+                          date(2025, 10, 2), "H", "A", "H")]
+    monkeypatch.setattr(trainer, "load_final_games_csv", mutate_during_parse)
+    option = ("--forward-holdout" if evidence == "forward_holdout"
+              else "--independent-history")
+    monkeypatch.setattr(
+        sys, "argv", [
+            "train_league_models.py", "--sport", "NBA",
+            "--output-dir", str(output), option, str(path),
+        ],
+    )
+    match = ("forward holdout changed during parsing" if evidence == "forward_holdout"
+             else "independent history changed during parsing")
+    with pytest.raises(ValueError, match=match):
+        trainer.main()
+    assert not output.exists()
