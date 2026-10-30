@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T14:40:29.566911+00:00",
+  "generated_at": "2026-10-30T14:45:11.461090+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -26,17 +26,6 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 12.97526433,
-      "market_id": "1545094",
-      "matchup": "IND at JAX",
-      "model_probability": 0.327252643279374,
-      "price": 0.1975,
-      "sport": "NFL",
-      "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
       "edge_pp": 8.00411432,
       "market_id": "1545097",
       "matchup": "MIN at DET",
@@ -47,26 +36,26 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
+      "contract_side": "NO",
       "edge_pp": 8.47058651,
-      "market_id": "KXNFLGAME-26NOV01KCDEN-DEN",
+      "market_id": "1545107",
       "matchup": "KC at DEN",
       "model_probability": 0.5647058651286584,
       "price": 0.48,
       "sport": "NFL",
       "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 22.53715255,
-      "market_id": "KXNFLGAME-26NOV01NEMIA-MIA",
+      "contract_side": "NO",
+      "edge_pp": 22.03715255,
+      "market_id": "1545106",
       "matchup": "NE at MIA",
-      "model_probability": 0.4653715254977749,
-      "price": 0.24,
+      "model_probability": 0.46537152549777483,
+      "price": 0.245,
       "sport": "NFL",
       "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
@@ -81,14 +70,14 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 10.42195075,
-      "market_id": "KXNFLGAME-26NOV02CHISEA-CHI",
+      "edge_pp": 9.92195075,
+      "market_id": "1581715",
       "matchup": "CHI at SEA",
       "model_probability": 0.7142195075074612,
-      "price": 0.61,
+      "price": 0.615,
       "sport": "NFL",
       "start_time": "2026-11-03T01:15:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -104,10 +93,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-30T14:39:30.243858+00:00",
-  "source_schedule_state": "COMPLETE",
+  "source_feed_generated_at": "2026-10-30T14:44:42.145654+00:00",
+  "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 9
+    "buy": 8
   }
 }
