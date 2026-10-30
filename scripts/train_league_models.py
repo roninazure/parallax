@@ -63,7 +63,6 @@ def main() -> int:
         help="Model family to train (v2 is the feature-based candidate)",
     )
     args = parser.parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
     summaries = {}
     # Bind each parsed external snapshot to its exact source bytes. A file
     # replaced during parsing must not be represented by a later SHA-256.
@@ -143,6 +142,7 @@ def main() -> int:
             )
             suffix = "calibrated"
         output = args.output_dir / f"{sport.lower()}_{suffix}.json"
+        args.output_dir.mkdir(parents=True, exist_ok=True)
         output.write_text(
             json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n",
             encoding="utf-8",
