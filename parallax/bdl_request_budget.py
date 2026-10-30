@@ -42,6 +42,19 @@ def reserve_bdl_request(path: Path = DEFAULT_LEDGER, *, now: float | None = None
         info = path.stat()
         if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o600:
             raise RequestBudgetExceeded("request ledger file ownership/mode unsafe")
+    # Create the ledger privately before SQLite can open it.
+    try:
+        fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY
+                     | getattr(os, "O_NOFOLLOW", 0), 0o600)
+    except FileExistsError:
+        pass
+    except OSError as exc:
+        raise RequestBudgetExceeded("request ledger creation unavailable") from exc
+    else:
+        os.close(fd)
+    info = path.stat()
+    if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o600:
+        raise RequestBudgetExceeded("request ledger file ownership/mode unsafe")
     try:
         with sqlite3.connect(path, timeout=5, isolation_level=None) as db:
             # Explicitly deny any work if an existing schema is unreadable.
