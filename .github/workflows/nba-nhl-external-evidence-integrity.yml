@@ -1,0 +1,24 @@
+name: NBA NHL External Evidence Snapshot Integrity
+on:
+  push:
+    branches:
+      - codex/nba-nhl-forward-evidence-snapshot-integrity-20261030
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -e . 'pytest>=8,<9'
+      - name: NBA NHL source evidence parsing and regression
+        run: python -m pytest -q tests/test_train_league_models_cli.py tests/test_parallax_league_model_v2.py tests/test_reconcile_league_results.py tests/test_league_evidence_preflight.py
+      - name: Protect NFL MLB CFB
+        env:
+          TZ: America/New_York
+        run: python -m pytest -q tests/test_parallax_nfl.py tests/test_parallax_live_mlb.py tests/test_parallax_live_cfb.py
