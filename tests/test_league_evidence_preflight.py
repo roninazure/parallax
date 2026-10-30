@@ -327,3 +327,42 @@ def test_unknown_plan_cannot_be_marked_authorized_even_with_terms():
     assert not authorized
     assert detail["state"] == "UNVERIFIED"
     assert detail["declared_plan"] is None
+
+
+def test_documented_immutable_release_manifest_is_accepted(tmp_path, monkeypatch):
+    module = _module("league_evidence_preflight_release_manifest", "league_evidence_preflight.py")
+    runtime, legacy, payload, output, _, _, _ = _live_sports_fixture(tmp_path)
+    documented = runtime / "releases" / payload["git_sha"] / "deploy" / "manifest.json"
+    documented.parent.mkdir(parents=True)
+    documented.write_text(json.dumps(payload), encoding="utf-8")
+    legacy.unlink()
+    monkeypatch.setattr(module, "_launchctl", lambda target: (
+        True, output if target.endswith("com.swarmedge.parallax-sports") else ""
+    ))
+    result = module.preflight(
+        runtime_root=runtime,
+        authorization_file=tmp_path / "missing-auth",
+        credential_file=tmp_path / "missing-key",
+    )
+    assert result["manifest_integrity_verified"] is True
+    assert result["manifest_sha"] == payload["git_sha"]
+    assert "sports_manifest_sha_unavailable" not in result["blockers"]
+
+
+def test_corrupt_documented_release_manifest_does_not_fallback_to_legacy(tmp_path, monkeypatch):
+    module = _module("league_evidence_preflight_no_manifest_bypass", "league_evidence_preflight.py")
+    runtime, legacy, payload, output, _, _, _ = _live_sports_fixture(tmp_path)
+    documented = runtime / "releases" / payload["git_sha"] / "deploy" / "manifest.json"
+    documented.parent.mkdir(parents=True)
+    documented.write_text(json.dumps({**payload, "git_sha": "b" * 40}), encoding="utf-8")
+    assert legacy.exists()
+    monkeypatch.setattr(module, "_launchctl", lambda target: (
+        True, output if target.endswith("com.swarmedge.parallax-sports") else ""
+    ))
+    result = module.preflight(
+        runtime_root=runtime,
+        authorization_file=tmp_path / "missing-auth",
+        credential_file=tmp_path / "missing-key",
+    )
+    assert result["manifest_integrity_verified"] is False
+    assert "active_release_manifest_sha_mismatch" in result["blockers"]
