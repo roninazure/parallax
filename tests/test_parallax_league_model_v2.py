@@ -13,6 +13,7 @@ from parallax.league_model_v2 import (
     FEATURE_NAMES,
     _features,
     _date_isolated_selection_split,
+    _paired_delta_intervals,
     _canonical,
     forecast_features_v2,
     verify_artifact_v2,
@@ -348,3 +349,43 @@ def test_independent_provider_reconciliation_rejects_duplicate_fixture_different
         duplicate.winner_team))
     with pytest.raises(ValueError, match="duplicate independent fixture"):
         reconcile_independent_history(primary, secondary, sport="NBA")
+
+
+def test_paired_calibration_intervals_identical_predictions_have_zero_delta():
+    dates = [date(2025, 10, 1), date(2025, 10, 1),
+             date(2025, 10, 2), date(2025, 10, 3)]
+    candidate = [0.15, 0.8, 0.65, 0.25]
+    outcome = [0, 1, 1, 0]
+    result = _paired_delta_intervals(candidate, candidate, outcome, dates)
+    assert result["method"] == "paired-ET-date-block-bootstrap"
+    assert result["n_blocks"] == 3
+    assert result["replicates"] == 400
+    assert all(bounds == [0.0, 0.0] for bounds in result["intervals"].values())
+
+
+def test_paired_calibration_intervals_preserve_direction_for_strict_improvement():
+    dates = [date(2025, 10, 1) + timedelta(days=i // 2) for i in range(24)]
+    outcome = [i % 2 for i in range(24)]
+    candidate = [0.9 if y else 0.1 for y in outcome]
+    baseline = [0.5] * len(outcome)
+    result = _paired_delta_intervals(candidate, baseline, outcome, dates)
+    assert result["n_blocks"] == 12
+    for bounds in result["intervals"].values():
+        assert bounds[1] < 0, bounds
+
+
+def test_paired_calibration_intervals_reject_unaligned_samples():
+    with pytest.raises(ValueError, match="must align"):
+        _paired_delta_intervals([0.4], [0.5, 0.5], [1], [date(2025, 10, 1)])
+
+
+def test_v2_candidate_includes_paired_uncertainty_without_certification():
+    artifact = train_artifact_v2(_games(), sport="NBA", source_sha256="a" * 64)
+    intervals = artifact["paired_baseline_delta_intervals"]
+    assert set(intervals) == {
+        "candidate_minus_50_50",
+        "candidate_minus_constant_home_rate",
+        "candidate_minus_elo_calibrated",
+    }
+    assert all(item["replicates"] == 400 for item in intervals.values())
+    assert artifact["certified"] is False
