@@ -30,16 +30,29 @@ def reconcile_files(*, primary: Path, secondary: Path, sport: str) -> dict[str, 
     secondary_games = [g for g in load_final_games_csv(secondary) if g.sport == sport]
     if not primary_games or not secondary_games:
         raise ValueError(f"{sport} results missing from one or both source files")
-    fingerprint = reconcile_independent_history(
+    primary_fingerprint = reconcile_independent_history(
         primary_games, secondary_games, sport=sport
     )
+    # Unlike the model's primary-history fingerprint, this digest excludes
+    # provider-specific game IDs and is stable across the two reconciled files.
+    fixtures = sorted(
+        (
+            g.season, g.game_date.isoformat(), g.home_team,
+            g.away_team, g.winner_team,
+        )
+        for g in primary_games
+    )
+    fixture_sha = hashlib.sha256(
+        json.dumps(fixtures, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
     return {
         "sport": sport,
         "status": "FIXTURES_RECONCILED",
         "games_reconciled": len(primary_games),
         "primary_source_sha256": primary_sha,
         "secondary_source_sha256": secondary_sha,
-        "canonical_history_sha256": fingerprint,
+        "reconciled_fixture_sha256": fixture_sha,
+        "primary_history_fingerprint_sha256": primary_fingerprint,
         "provider_independence_verified": False,
         "source_authorization_verified": False,
         "forward_holdout_verified": False,
