@@ -65,19 +65,38 @@ def main() -> int:
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     summaries = {}
+    # Bind each parsed external snapshot to its exact source bytes. A file
+    # replaced during parsing must not be represented by a later SHA-256.
+    forward_sha = (
+        hashlib.sha256(args.forward_holdout.read_bytes()).hexdigest()
+        if args.forward_holdout else None
+    )
     forward_rows = load_final_games_csv(args.forward_holdout) if args.forward_holdout else []
+    if args.forward_holdout and hashlib.sha256(
+        args.forward_holdout.read_bytes()
+    ).hexdigest() != forward_sha:
+        raise ValueError("forward holdout changed during parsing")
+    independent_sha = (
+        hashlib.sha256(args.independent_history.read_bytes()).hexdigest()
+        if args.independent_history else None
+    )
+    independent_rows_all = (
+        load_final_games_csv(args.independent_history)
+        if args.independent_history else []
+    )
+    if args.independent_history and hashlib.sha256(
+        args.independent_history.read_bytes()
+    ).hexdigest() != independent_sha:
+        raise ValueError("independent history changed during parsing")
     sports = ("NBA", "NHL") if args.sport == "BOTH" else (args.sport,)
     for sport in sports:
         history_path = Path("/nonexistent")
         games = load_league_history(sport, history_path, explicit=False)
         source_sha = source_digest(sport, Path.home())
-        independent_sha = None
         independent_rows = None
         if args.independent_history:
             independent_rows = [
-                g
-                for g in load_final_games_csv(args.independent_history)
-                if g.sport == sport
+                g for g in independent_rows_all if g.sport == sport
             ]
             if args.model_version == "v2":
                 reconcile_independent_history(
@@ -99,23 +118,16 @@ def main() -> int:
                     raise ValueError(
                         f"{sport} independent results do not reconcile game-for-game"
                     )
-            independent_sha = hashlib.sha256(
-                args.independent_history.read_bytes()
-            ).hexdigest()
         if args.model_version == "v2":
             fresh_games = [g for g in forward_rows if g.sport == sport]
             if args.forward_holdout and not fresh_games:
                 raise ValueError(
                     f"{sport} forward holdout file has no matching league results"
                 )
-            forward_sha = (
-                hashlib.sha256(args.forward_holdout.read_bytes()).hexdigest()
-                if args.forward_holdout and fresh_games else None
-            )
             artifact = train_artifact_v2(
                 games, sport=sport, source_sha256=source_sha,
                 forward_holdout=fresh_games or None,
-                forward_holdout_source_sha256=forward_sha,
+                forward_holdout_source_sha256=forward_sha if fresh_games else None,
                 independent_source_sha256=independent_sha,
                 independent_games=independent_rows,
                 source_authorization_reference=args.source_authorization_reference,
