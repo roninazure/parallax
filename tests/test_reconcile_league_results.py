@@ -47,7 +47,11 @@ def test_reconciles_distinct_provider_ids_and_order_but_never_certifies(tmp_path
     report = reconcile_files(primary=primary, secondary=secondary, sport=sport)
     assert report["status"] == "FIXTURES_RECONCILED"
     assert report["games_reconciled"] == 4
-    assert len(report["canonical_history_sha256"]) == 64
+    assert len(report["reconciled_fixture_sha256"]) == 64
+    assert len(report["primary_history_fingerprint_sha256"]) == 64
+    reversed_report = reconcile_files(primary=secondary, secondary=primary, sport=sport)
+    assert reversed_report["reconciled_fixture_sha256"] == report["reconciled_fixture_sha256"]
+    assert reversed_report["primary_history_fingerprint_sha256"] != report["primary_history_fingerprint_sha256"]
     assert report["primary_source_sha256"] != report["secondary_source_sha256"]
     assert report["provider_independence_verified"] is False
     assert report["source_authorization_verified"] is False
