@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-10-30T23:38:11.708010+00:00",
+  "generated_at": "2026-10-30T23:42:50.233816+00:00",
   "lane": "NFL",
   "plays": [
     {
-      "contract_side": "NO",
-      "edge_pp": 9.03439929,
-      "market_id": "1545102",
+      "contract_side": "YES",
+      "edge_pp": 9.53439929,
+      "market_id": "KXNFLGAME-26NOV01BALBUF-BUF",
       "matchup": "BAL at BUF",
       "model_probability": 0.7153439928703467,
-      "price": 0.625,
+      "price": 0.62,
       "sport": "NFL",
       "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -58,15 +58,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 22.53715255,
-      "market_id": "KXNFLGAME-26NOV01NEMIA-MIA",
+      "contract_side": "NO",
+      "edge_pp": 22.03715255,
+      "market_id": "1545106",
       "matchup": "NE at MIA",
-      "model_probability": 0.4653715254977749,
-      "price": 0.24,
+      "model_probability": 0.46537152549777483,
+      "price": 0.245,
       "sport": "NFL",
       "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
@@ -81,14 +81,14 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 10.42195075,
-      "market_id": "KXNFLGAME-26NOV02CHISEA-CHI",
+      "edge_pp": 9.92195075,
+      "market_id": "1581715",
       "matchup": "CHI at SEA",
       "model_probability": 0.7142195075074612,
-      "price": 0.61,
+      "price": 0.615,
       "sport": "NFL",
       "start_time": "2026-11-03T01:15:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -104,7 +104,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-30T23:37:02.213715+00:00",
+  "source_feed_generated_at": "2026-10-30T23:42:16.670838+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
