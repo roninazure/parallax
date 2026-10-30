@@ -22,6 +22,11 @@ from parallax.pmus_acquisition import PMUSAcquisition
 from parallax.sources import KalshiPublicClient
 
 NBA_TERMS_URL = "https://www.balldontlie.io/terms.html"
+# Published BDL Free NBA tier: Games endpoint, maximum 5 requests/minute.
+# These constants are descriptive only; this collector does not acquire a
+# credential or elevate the operator's authorization automatically.
+NBA_FREE_RATE_LIMIT_PER_MINUTE = 5
+NBA_RECOGNIZED_PLANS = {"free", "all-star", "goat", "paid", "paid_plus", "all-access"}
 
 
 def authorization_state(sport: str, authorization: dict | None) -> tuple[bool, dict]:
@@ -32,9 +37,11 @@ def authorization_state(sport: str, authorization: dict | None) -> tuple[bool, d
     if sport == "NBA":
         reviewed = row.get("terms_reviewed_at")
         verified = row.get("account_plan_verified_at")
+        plan = row.get("api_plan")
+        plan_name = plan.strip().lower() if isinstance(plan, str) else None
         ok = (
             row.get("provider") == "BALLDONTLIE"
-            and isinstance(row.get("api_plan"), str) and bool(row["api_plan"].strip())
+            and plan_name in NBA_RECOGNIZED_PLANS
             and row.get("nba_games_access") is True
             and row.get("account_plan_verified") is True
             and row.get("terms_reviewed") is True
@@ -43,7 +50,12 @@ def authorization_state(sport: str, authorization: dict | None) -> tuple[bool, d
             and _recent_date(verified, max_age_days=90)
         )
         return ok, {"state": "AUTHORIZED" if ok else "UNVERIFIED",
-                    "provider": "BALLDONTLIE", "terms_reviewed_at": reviewed if ok else None,
+                    "provider": "BALLDONTLIE",
+                    "declared_plan": plan_name if plan_name in NBA_RECOGNIZED_PLANS else None,
+                    "free_games_endpoint_documented": plan_name == "free",
+                    "free_rate_limit_per_minute": NBA_FREE_RATE_LIMIT_PER_MINUTE
+                    if plan_name == "free" else None,
+                    "terms_reviewed_at": reviewed if ok else None,
                     "account_plan_verified_at": verified if ok else None}
     ref = row.get("written_authorization_ref")
     ok = (
