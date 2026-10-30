@@ -326,7 +326,8 @@ canonical final-results CSVs** by season, official ET date, home/away team and
 winner, not provider-specific game ID. It rejects missing/extra fixtures,
 duplicate fixture identities, wrong winners, empty selected-league inputs and
 byte-identical files. It emits a machine-readable count, source SHA-256 hashes
-and canonical-history fingerprint on success, with nonzero exit on mismatch.
+and a provider-ID-independent fixture digest plus the primary model-history
+fingerprint on success, with nonzero exit on mismatch.
 For NBA, prepare independently acquired and authorized results in the documented
 `sport,game_id,season,game_date,home_team,away_team,winner_team` schema:
 
