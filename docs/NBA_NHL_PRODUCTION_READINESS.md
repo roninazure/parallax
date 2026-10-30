@@ -310,3 +310,11 @@ within the documented 90-second window. On failure restore the saved plist,
 reload the prior release, and verify its SHA/health. Never touch the separate
 publisher or change NFL/MLB/CFB schedules as part of NBA/NHL certification.
 **No deployable NBA/NHL release candidate is approved or staged.**
+
+The artifact verifier also independently recomputes the evidence gates:
+secondary-source SHA-256 values must be valid and different from the primary
+digest **after case normalization**, and a claimed fresh forward holdout must
+carry a valid SHA-256 for its source. Rehashing an artifact cannot turn a
+missing forward source or a case-only duplicate source digest into verified
+evidence. These are integrity checks, not proof of legal provider independence
+or authorization.

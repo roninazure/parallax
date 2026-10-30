@@ -1,4 +1,6 @@
+import hashlib
 import json
+from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -11,7 +13,9 @@ from parallax.league_model_v2 import (
     FEATURE_NAMES,
     _features,
     _date_isolated_selection_split,
+    _canonical,
     forecast_features_v2,
+    verify_artifact_v2,
     reconcile_independent_history,
     train_artifact_v2,
 )
@@ -122,6 +126,36 @@ def test_v2_later_holdout_is_distinct_and_required_for_certification():
     assert artifact["acceptance_gates"]["independent_source_verified"] is True
     assert artifact["certified"] is False
 
+
+
+def test_v2_verifier_rejects_rehashed_missing_or_duplicate_source_evidence():
+    # Rehashing an artifact cannot manufacture a genuinely distinct provider
+    # or a SHA-pinned fresh forward holdout.
+    history = _games()
+    start = max(g.game_date for g in history) + timedelta(days=1)
+    forward = [
+        FinalGame("NBA", "forward", 2024, start, "H0", "A0", "H0"),
+    ]
+    artifact = train_artifact_v2(
+        history, sport="NBA", source_sha256="a" * 64,
+        forward_holdout=forward, forward_holdout_source_sha256="c" * 64,
+        independent_source_sha256="b" * 64, independent_games=history,
+    )
+    assert artifact["acceptance_gates"]["independent_source_verified"] is True
+    assert artifact["acceptance_gates"]["fresh_forward_holdout"] is True
+    for field, replacement in (
+        ("independent_source_sha256", "A" * 64),
+        ("forward_holdout_source_sha256", None),
+    ):
+        tampered = deepcopy(artifact)
+        tampered[field] = replacement
+        unsigned = {k: v for k, v in tampered.items() if k != "artifact_sha256"}
+        tampered["artifact_sha256"] = hashlib.sha256(_canonical(unsigned)).hexdigest()
+        with pytest.raises(ValueError, match="gates do not match recorded evidence"):
+            verify_artifact_v2(
+                tampered, sport="NBA", now=datetime(2026, 10, 30, tzinfo=UTC),
+                expected_sha256=None, require_certified=False,
+            )
 
 
 def test_v2_rejects_duplicate_primary_fixture_with_distinct_provider_ids():

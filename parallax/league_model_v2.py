@@ -535,8 +535,8 @@ def train_artifact_v2(
         "beats_half_log_loss": metrics["log_loss"] < baseline["log_loss"],
         "beats_half_ece": metrics["ece_10_bins"] < baseline["ece_10_bins"],
         "independent_source_verified": bool(
-            independent_source_sha256
-            and independent_source_sha256 != source_sha256
+            _full_sha(independent_source_sha256)
+            and independent_source_sha256.lower() != source_sha256.lower()
             and independent_fingerprint == _history_fingerprint(rows, sport)
         ),
         "source_authorization_documented": bool(
@@ -739,8 +739,10 @@ def verify_artifact_v2(
         and metrics["log_loss"] < baseline.get("log_loss", 0),
         "beats_half_ece": _finite(metrics.get("ece_10_bins"))
         and metrics["ece_10_bins"] < baseline.get("ece_10_bins", 0),
-        "independent_source_verified": full_sha(value.get("independent_source_sha256"))
-        and value.get("independent_source_sha256") != value.get("source_sha256")
+        "independent_source_verified": full_sha(value.get("source_sha256"))
+        and full_sha(value.get("independent_source_sha256"))
+        and value["independent_source_sha256"].lower()
+        != value["source_sha256"].lower()
         and value.get("independent_history_fingerprint")
         == value.get("history_fingerprint"),
         "source_authorization_documented": isinstance(
@@ -751,7 +753,8 @@ def verify_artifact_v2(
             value.get("model_owner_approval_reference"), str
         )
         and bool(value["model_owner_approval_reference"].strip()),
-        "fresh_forward_holdout": splits.get("holdout_status") == "FRESH_INDEPENDENT",
+        "fresh_forward_holdout": splits.get("holdout_status") == "FRESH_INDEPENDENT"
+        and full_sha(value.get("forward_holdout_source_sha256")),
     }
     if gates != derived or value.get("certified") is not all(derived.values()):
         raise ValueError("v2 gates do not match recorded evidence")
