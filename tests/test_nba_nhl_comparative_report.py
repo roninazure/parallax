@@ -59,3 +59,29 @@ def test_unknown_holdout_provenance_rejected():
     artifact["splits"]["holdout_status"] = "CERTIFIED"
     with pytest.raises(ValueError, match="unknown holdout provenance"):
         compare(_signed(artifact))
+
+
+def test_nba_elo_directional_reliability_gap_is_historical_not_a_tuning_signal():
+    artifact = json.loads((ROOT / "nba_v2_candidate.json").read_text())
+    report = compare(artifact)
+    bands = report["calibration_diagnostics"]["elo_calibrated_same_splits"][
+        "observed_minus_predicted_by_probability_band"
+    ]
+    assert bands["below_0_50"]["n_games"] == 176
+    assert bands["below_0_50"]["mean_gap"] == pytest.approx(-0.179000437067)
+    assert bands["at_least_0_60"]["n_games"] == 198
+    assert bands["at_least_0_60"]["mean_gap"] == pytest.approx(0.128189266796)
+    assert report["calibration_diagnostics"]["elo_calibrated_same_splits"][
+        "reconstructed_ece"
+    ] == pytest.approx(0.127774717319)
+    assert report["production_buy_authorized"] is False
+    assert report["holdout_status"] == "EXPLORATORY_PREVIOUSLY_INSPECTED"
+
+
+def test_signed_artifact_with_inconsistent_reliability_bins_fails_closed():
+    artifact = json.loads((ROOT / "nba_v2_candidate.json").read_text())
+    artifact["model_comparison"]["elo_calibrated_same_splits"][
+        "reliability_bins"
+    ][0]["home_win_rate"] = 0.9
+    with pytest.raises(ValueError, match="reliability bins disagree"):
+        compare(_signed(artifact))
