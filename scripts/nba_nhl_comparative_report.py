@@ -40,6 +40,56 @@ def _metric_set(value: object, expected_n: int) -> dict[str, float]:
     return output
 
 
+def _reliability_diagnostics(metrics: dict, expected_n: int) -> dict | None:
+    """Describe already-inspected holdout bins; never select or refit a model."""
+    bins = metrics.get("reliability_bins")
+    if bins is None:
+        return None
+    if not isinstance(bins, list) or not bins:
+        raise ValueError("invalid reliability bins")
+    seen = set()
+    total = 0
+    ece_sum = 0.0
+    groups = {
+        "below_0_50": [0, 0.0],
+        "from_0_50_to_0_60": [0, 0.0],
+        "at_least_0_60": [0, 0.0],
+    }
+    for row in bins:
+        if not isinstance(row, dict):
+            raise ValueError("invalid reliability bin row")
+        index, count = row.get("bin"), row.get("n")
+        predicted, observed = row.get("mean_probability"), row.get("home_win_rate")
+        if (type(index) is not int or not 0 <= index <= 9 or index in seen
+                or type(count) is not int or count <= 0
+                or type(predicted) not in (float, int)
+                or type(observed) not in (float, int)
+                or not math.isfinite(predicted) or not math.isfinite(observed)
+                or not 0 <= predicted <= 1 or not 0 <= observed <= 1
+                or not index / 10 <= predicted <= (index + 1) / 10):
+            raise ValueError("invalid reliability bin contents")
+        seen.add(index)
+        total += count
+        gap = observed - predicted
+        ece_sum += count * abs(gap)
+        key = (
+            "below_0_50" if index < 5 else
+            "from_0_50_to_0_60" if index == 5 else "at_least_0_60"
+        )
+        groups[key][0] += count
+        groups[key][1] += count * gap
+    if total != expected_n or abs(ece_sum / total - metrics["ece_10_bins"]) > 1e-9:
+        raise ValueError("reliability bins disagree with holdout ECE/count")
+    return {
+        "reconstructed_ece": round(ece_sum / total, 12),
+        "observed_minus_predicted_by_probability_band": {
+            key: {"n_games": n, "mean_gap": round(gap / n, 12) if n else None}
+            for key, (n, gap) in groups.items()
+        },
+        "use": "DESCRIPTIVE_ONLY_ALREADY_INSPECTED_HOLDOUT_NO_MODEL_SELECTION",
+    }
+
+
 def compare(artifact: dict) -> dict:
     if not isinstance(artifact, dict):
         raise ValueError("model artifact must be an object")
@@ -79,6 +129,12 @@ def compare(artifact: dict) -> dict:
         "holdout_status": status,
         "candidate_metrics": candidate,
         "candidate_minus_baselines": deltas,
+        "calibration_diagnostics": {
+            "selected_v2": _reliability_diagnostics(artifact["holdout_metrics"], n),
+            "elo_calibrated_same_splits": _reliability_diagnostics(
+                comparison["elo_calibrated_same_splits"], n,
+            ),
+        },
         "acceptance_gates": gates,
         # This report is diagnostic; no report can itself grant production approval.
         "production_buy_authorized": False,
