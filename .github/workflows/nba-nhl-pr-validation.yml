@@ -45,6 +45,7 @@ jobs:
             tests/test_reconcile_league_results.py \
             tests/test_train_league_models_cli.py \
             tests/test_parallax_nba_nhl_shadow.py \
+            tests/test_league_pmus_nba_discovery.py \
             tests/test_parallax_unattended.py \
             tests/test_parallax_public_feed.py \
             tests/test_parallax_buy_alerts.py
