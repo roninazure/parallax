@@ -40,6 +40,8 @@ jobs:
             tests/test_deployment_manifest_staging.py \
             tests/test_parallax_league_model.py \
             tests/test_parallax_league_model_v2.py \
+            tests/test_audit_league_forward_holdout.py \
+            tests/test_nba_nhl_comparative_report.py \
             tests/test_reconcile_league_results.py \
             tests/test_train_league_models_cli.py \
             tests/test_parallax_nba_nhl_shadow.py \
