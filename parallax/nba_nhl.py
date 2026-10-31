@@ -206,7 +206,8 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
     rows: list[dict[str, Any]] = []
     result_alerts = {"sent": 0, "failed": 0}
     diagnostics = {"KALSHI": {"discovered": 0, "book_failures": 0},
-                   "PMUS": {"discovered": 0, "book_failures": 0}}
+                   "PMUS": {"discovered": 0, "book_failures": 0,
+                            "book_states": {}}}
     quote_snapshots = {"written": 0, "failures": 0, "matched_contracts": 0,
                        "stale": 0, "deduplicated": 0,
                        "enabled": quote_snapshot_store is not None}
@@ -218,16 +219,26 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
         venue_key = "KALSHI" if venue == Venue.KALSHI else "PMUS"
         for raw in list(markets)[:500]:
             diagnostics["KALSHI" if venue == Venue.KALSHI else "PMUS"]["discovered"] += 1
+            pmus_slug = None
+            book_started = False
+            book_completed = False
             try:
                 market = normalize_kalshi(raw, {}, now.isoformat(), event=raw.get("_discovery_event")) if venue == Venue.KALSHI else normalize_pmus(raw, {}, now.isoformat())
                 fixture = next((f for f in fixture_list if f.kickoff > now and _market_matches(market, raw, f)), None)
                 if fixture is None:
                     continue
+                if venue == Venue.POLYMARKET:
+                    pmus_slug = market.slug
+                    diagnostics["PMUS"]["book_states"][pmus_slug] = "NOT_REQUESTED"
                 if quote_snapshot_store is not None:
                     quote_snapshots["matched_contracts"] += 1
                 if book_budget[venue_key] <= 0:
+                    if pmus_slug is not None:
+                        diagnostics["PMUS"]["book_states"][pmus_slug] = "BOOK_BUDGET_EXHAUSTED"
                     continue
                 book_budget[venue_key] -= 1
+                if pmus_slug is not None and client is not None:
+                    book_started = True
                 if client is None:
                     book = {}
                     observed = now.isoformat()
@@ -242,6 +253,17 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                     book, observed = acquired.book or {}, acquired.observed_at or now.isoformat()
                 else:
                     book, observed = client.book(market.slug), now.isoformat()
+                if pmus_slug is not None and book_started:
+                    yes = book.get(f"{pmus_slug}::YES") if isinstance(book, dict) else None
+                    no = book.get(f"{pmus_slug}::NO") if isinstance(book, dict) else None
+                    diagnostics["PMUS"]["book_states"][pmus_slug] = (
+                        "TWO_SIDED_QUOTES_OBSERVED"
+                        if (isinstance(yes, dict) and isinstance(no, dict)
+                            and yes.get("best_ask") is not None
+                            and no.get("best_ask") is not None)
+                        else "BOOK_MISSING_OR_INCOMPLETE"
+                    )
+                    book_completed = True
                 market = normalize_kalshi(raw, book, observed, event=raw.get("_discovery_event")) if venue == Venue.KALSHI else normalize_pmus(raw, book, observed)
                 market = attach_fees(market, now,
                     event=raw.get("_discovery_event"),
@@ -335,6 +357,8 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                                 result_alerts["failed"] += 1
                     rows.append(row)
             except Exception:
+                if pmus_slug is not None and book_started and not book_completed:
+                    diagnostics["PMUS"]["book_states"][pmus_slug] = "BOOK_REQUEST_ERROR"
                 diagnostics["KALSHI" if venue == Venue.KALSHI else "PMUS"]["book_failures"] += 1
     for key, diagnostic in diagnostics.items():
         diagnostic["book_budget_remaining"] = book_budget[key]
