@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-10-31T15:05:09.976293+00:00",
+  "generated_at": "2026-10-31T16:06:07.284442+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 58.13208423,
-      "market_id": "1526828",
-      "matchup": "Notre Dame at Navy",
-      "model_probability": 0.6113208422869523,
-      "price": 0.03,
+      "edge_pp": 31.24926167,
+      "market_id": "1593070",
+      "matchup": "Michigan at Rutgers",
+      "model_probability": 0.45749261666936625,
+      "price": 0.145,
       "sport": "CFB",
-      "start_time": "2026-10-31T16:00:00+00:00",
+      "start_time": "2026-10-31T16:30:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-31T15:04:55.543790+00:00",
+  "source_feed_generated_at": "2026-10-31T16:06:02.677575+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
