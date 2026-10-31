@@ -167,3 +167,35 @@ def test_no_upcoming_fixtures_avoids_all_requests():
     assert rows == []
     assert provider.calls == []
     assert diag["coverage"]["fixture_candidates"] == 0
+
+
+def test_book_outcomes_are_distinct_from_discovery_and_identity():
+    from parallax.nba_nhl import scan_league
+
+    class Book:
+        def __init__(self, value=None, fail=False):
+            self.value = value
+            self.fail = fail
+
+        def book(self, slug):
+            assert slug == SLUG
+            if self.fail:
+                raise RuntimeError("synthetic book outage")
+            return self.value
+
+    complete = {
+        f"{SLUG}::YES": {"best_ask": 0.51, "best_bid": 0.49},
+        f"{SLUG}::NO": {"best_ask": 0.51, "best_bid": 0.49},
+    }
+    for client, expected in (
+        (Book(complete), "TWO_SIDED_QUOTES_OBSERVED"),
+        (Book({}), "BOOK_MISSING_OR_INCOMPLETE"),
+        (Book(fail=True), "BOOK_REQUEST_ERROR"),
+    ):
+        result = scan_league(
+            "NBA", [fixture()], [], [], [market()],
+            pmus_client=client, now=NOW,
+        )
+        assert result["model_validation_state"] == "BLOCKED"
+        assert result["orders"] == result["published"] == 0
+        assert result["venues"]["PMUS"]["book_states"][SLUG] == expected
