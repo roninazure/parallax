@@ -439,7 +439,10 @@ which cannot distinguish a ranking miss from actual exchange absence.
 PR #58 now derives the *already observed* `aec-nba-<away>-<home>-<ET date>`
 slug from independently verified NBA fixtures and queries exact slug batches:
 at most **24 fixtures, 12 slugs per call, 2 acquisition-governed calls**.
-It uses the existing shared PMUS request budget and circuit breaker; no
+The NBA-only SDK client disables its implicit GET retries so those two
+admissions cannot silently expand into six HTTP attempts; other client
+defaults remain unchanged. It uses the existing shared PMUS request budget
+and circuit breaker; no
 provider call was made in this GitHub-only engineering run. An empty filtered
 response is labeled `NOT_RETURNED_UNVERIFIED`, **never** "no PMUS market".
 Unqueried fixtures, provider errors, malformed shapes, strict identity
