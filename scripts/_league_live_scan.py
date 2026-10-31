@@ -120,7 +120,10 @@ def _discover_nba_pmus(now: datetime, acquisition: PMUSAcquisition, pmus, fixtur
 
 def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtures):
     kalshi = KalshiPublicClient()
-    pmus = PolymarketUSPublicClient()
+    # SDK GET retries occur below our acquisition governor unless disabled.
+    # NBA exact-slug batches must consume at most one HTTP attempt each.
+    pmus = (PolymarketUSPublicClient(sdk_max_retries=0)
+            if sport == "NBA" else PolymarketUSPublicClient())
     krows, prows = [], []
     diagnostics = {"KALSHI": {"coverage": {"state": "PARTIAL"}, "discovered": 0},
                    "PMUS": {"coverage": {"state": "PARTIAL"}, "discovered": 0}}
