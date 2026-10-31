@@ -157,6 +157,20 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
                     "Worst-case bound, not expected fees: unknown account precision and fill allocation; no rounding rebates assumed"
                 )
                 reason = "Series/event taker schedule and market waiver checked; six-decimal model rounding plus worst-case fragmented-fill balance rounding"
+        elif (
+            market.venue == Venue.KALSHI
+            and isinstance(market.venue_market_id, str)
+            and market.venue_market_id.startswith("KXNBAGAME-")
+        ):
+            # No current published KXNBAGAME-specific fee schedule has been
+            # verified. Event/series API metadata cannot alone establish the
+            # governing published rate or authorize BUY economics.
+            proof["series_fee_evidence_verified"] = False
+            proof["market_scope"] = "KXNBAGAME"
+            reason = (
+                "KXNBAGAME published series fee evidence unverified; "
+                "event/series metadata alone cannot authorize costs"
+            )
         else:
             reason = "Market-bound event and series fee metadata unavailable"
     proof["reason"] = reason

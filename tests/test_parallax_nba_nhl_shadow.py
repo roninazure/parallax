@@ -816,3 +816,28 @@ def test_ambiguous_pmus_sides_rejected():
     raw["marketSides"] = sides
     assert shadow_evidence(replace(market, original_metadata={"market": raw}),
                            fixture(), forecast(), now=NOW) is None
+
+
+def test_kalshi_nba_game_fee_gate_remains_unverified_without_published_series_proof():
+    """Synthetic event/series metadata cannot certify KXNBAGAME economics."""
+    from parallax.fees import attach_fees
+
+    market = kalshi("NBA")
+    event = {
+        "event_ticker": MARKETS["NBA"]["event_ticker"],
+        "series_ticker": "KXNBAGAME",
+    }
+    for multiplier in (1, 0, 0.5):
+        series = {
+            "ticker": "KXNBAGAME",
+            "fee_type": "quadratic_with_maker_fees",
+            "fee_multiplier": multiplier,
+        }
+        assessed = attach_fees(market, NOW, event=event, series=series)
+        assert assessed.mechanics.fee_status == "UNVERIFIED"
+        assert assessed.mechanics.fee_rate is None
+        proof = assessed.original_metadata["fee_provenance"]
+        assert proof["series_fee_evidence_verified"] is False
+        assert proof["market_scope"] == "KXNBAGAME"
+        assert "published series fee evidence unverified" in proof["reason"]
+

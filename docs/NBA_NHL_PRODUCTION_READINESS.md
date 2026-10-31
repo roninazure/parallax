@@ -382,3 +382,24 @@ checks in `deploy/README.md`; on failure restore the saved plist and previous
 release and verify recovery. Do not touch the customer publisher or change
 NFL/MLB/CFB lanes. No release candidate has been approved, packaged or
 deployed by this GitHub-only work.
+
+
+## KXNBAGAME fee evidence gate (2026-10-31, GitHub-only)
+
+The Kalshi fee gate for NBA full-game contracts remains **BLOCKED**.
+Kalshi's official fee help (https://help.kalshi.com/en/articles/13823805-fees)
+warns that event-specific fees can differ. The official PDF URL referenced by
+the existing fee implementation
+(https://kalshi.com/docs/kalshi-fee-schedule.pdf) returned a document marked
+effective **2025-10-01** when inspected on 2026-10-31; that is not verified
+current, KXNBAGAME-specific published evidence. Secondary summaries referring
+to a 2026 schedule do not substitute for the authoritative published series
+terms and applicable account/fill rounding.
+
+For KXNBAGAME, even plausible event/series API fee metadata (including zero or
+half multipliers) leaves `fee_status=UNVERIFIED` and `fee_rate=None` until a
+reviewed, current, series-specific published schedule is verified and its
+provenance and expiration are represented in the fee model. The regression
+test uses synthetic metadata only; it makes no provider calls. Existing
+NFL/MLB/CFB fee logic is unchanged. This does not grant a model certificate,
+permission to trade, or BUY publication.
