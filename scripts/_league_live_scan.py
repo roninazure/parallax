@@ -271,6 +271,12 @@ def main(sport: str) -> int:
                 "book_failures": scan_venues.get(venue, {}).get("book_failures", 0),
                 "book_budget_per_scan": 20,
             })
+        # Fixture-level status is observational. A missing market listing is
+        # never upgraded to proof of exchange absence or book availability.
+        observed_books = scan_venues.get("PMUS", {}).get("book_states", {})
+        for entry in result["venues"].get("PMUS", {}).get("fixture_diagnostics", []):
+            if entry["discovery_state"] == "IDENTITY_VERIFIED":
+                entry["book_state"] = observed_books.get(entry["slug"], "NOT_CHECKED")
         if sport == "NHL":
             result["fixture_source"] = "NHL_WEB_SCHEDULE"
         else:
