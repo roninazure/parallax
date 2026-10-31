@@ -5,10 +5,14 @@ NBA kickoff/BDL game ID are independently verified. Order books here are
 synthetic test data; no provider requests, feed publishing or BUYs.
 """
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
+import hashlib
+import importlib.util
+import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 from zoneinfo import ZoneInfo
 
@@ -21,6 +25,7 @@ from parallax.league_shadow_evidence import (
 from parallax.models import Action, Side, Venue
 from parallax.normalization import normalize_kalshi, normalize_pmus
 from parallax.nba_nhl import scan_league, fetch_nba_fixtures, fetch_nhl_fixtures
+from parallax.league_quote_snapshots import LeagueQuoteSnapshotStore
 from parallax.public_feed import sanitize_completed_scan
 
 NOW = datetime(2026, 10, 19, 17, 0, tzinfo=UTC)
@@ -33,6 +38,25 @@ TIPS = {
     "NBA": datetime(2026, 10, 27, 2, 0, tzinfo=UTC),
     "NHL": datetime(2026, 10, 27, 0, 30, tzinfo=UTC),
 }
+
+EVIDENCE_AUTH = {
+    "NBA": {"provider": "BALLDONTLIE", "api_plan": "offline-test-plan",
+        "nba_games_access": True, "account_plan_verified": True,
+        "account_plan_verified_at": date.today().isoformat(), "terms_reviewed": True,
+        "terms_reviewed_at": date.today().isoformat(),
+        "terms_url": "https://www.balldontlie.io/terms.html"},
+    "NHL": {"provider": "NHL", "automated_schedule_access": True,
+        "written_authorization_ref": "test-only:authorization-fixture",
+        "verified_at": date.today().isoformat()},
+}
+
+
+def load_evidence_collector():
+    script = Path(__file__).resolve().parents[1] / "scripts" / "collect_league_evidence.py"
+    spec = importlib.util.spec_from_file_location("collect_league_evidence", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 # BALLDONTLIE Oct 26, 2026 fixture identity verified via one bounded query.
 # Team objects retain only fields required by the offline adapter.
@@ -89,6 +113,36 @@ MARKETS = {
         "occurrence_datetime": "2026-10-27T03:30:00Z",
     },
 }
+
+
+def synthetic_certified_artifact(sport="NBA"):
+    from parallax.league_model import ARTIFACT_SCHEMA, MODEL_VERSION, history_fingerprint
+    artifact = {
+        "schema_version": ARTIFACT_SCHEMA, "model_version": MODEL_VERSION,
+        "sport": sport, "generated_at": NOW.isoformat(), "trained_through": "2026-10-01",
+        "source_sha256": "a" * 64, "source_game_count": 0,
+        "source_seasons": [],
+        "history_fingerprint": history_fingerprint([],sport=sport),
+        "splits": {"same_day_isolated": True, "train_games": 600,
+                    "calibration_games": 200, "holdout_games": 200},
+        "elo": {"home_advantage": 0., "k": 20.},
+        "calibration": {"method": "platt_logistic", "intercept": -2., "slope": 1.},
+        "holdout_metrics": {"n_games": 300, "brier": .2, "log_loss": .6, "ece_10_bins": .04},
+        "baseline_50_50": {"brier": .25, "log_loss": .693, "ece_10_bins": .05},
+        "independent_source_sha256": "b" * 64,
+        "source_authorization_reference": "SYNTHETIC_TEST_ONLY",
+        "model_owner_approval_reference": "SYNTHETIC_TEST_ONLY",
+        "acceptance_gates": {"holdout_nonempty": True, "beats_half_brier": True,
+                             "beats_half_log_loss": True, "beats_half_ece": True,
+                             "independent_source_verified": True,
+                             "source_authorization_documented": True,
+                             "model_owner_approval_documented": True},
+        "certified": True, "test_only": True, "ratings": {},
+    }
+    artifact["artifact_sha256"] = hashlib.sha256(
+        json.dumps(artifact, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
+    return artifact
 
 
 def fixture(sport="NBA", **changes):
@@ -200,7 +254,7 @@ def test_real_nba_provider_id_to_model_to_kalshi_evidence():
                            replace(prediction, game_id="future"), now=NOW) is None
 
 
-def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification():
+def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification(tmp_path):
     fx = nba_fixture_from_balldontlie(
         NBA_BDL_GAME, regular_season_query_verified=True,
         venue_home_name="Denver", venue_away_name="Golden State",
@@ -212,15 +266,142 @@ def test_mocked_provider_fixture_to_normalized_market_and_risk_qualification():
         def book(self, _ticker):
             return {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
                                      "no_dollars": [["0.50", "250"]]}}
-    result = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), now=NOW)
+    snapshot_store = LeagueQuoteSnapshotStore(tmp_path / "quotes")
+    result = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(),
+                         quote_snapshot_store=snapshot_store, now=NOW)
     assert result["read_only"] is True and result["orders"] == 0
-    assert len(result["rows"]) == 2
-    assert all(row["mapping_status"] == "MAPPED" for row in result["rows"])
-    assert all(row["evidence_validation_status"] == "UNVALIDATED" for row in result["rows"])
-    assert all(row["publication_eligible"] is False for row in result["rows"])
+    assert result["rows"] == []
+    assert result["model_validation_state"] == "BLOCKED"
+    assert result["quote_snapshots"] == {"written": 1, "failures": 0,
+        "matched_contracts": 1, "stale": 0, "deduplicated": 0, "enabled": True}
+    assert list((tmp_path / "quotes").glob("*.jsonl"))
     safe = sanitize_completed_scan("nba", __import__("json").dumps(result), generated_at=NOW)
     assert safe["summary"]["buy"] == 0
-    assert {row["action"] for row in safe["plays"]}.issubset({"WATCH", "PASS"})
+    assert safe["model_validation_state"] == "BLOCKED"
+    assert safe["health_state"] == "DEGRADED"
+
+
+def test_isolated_collector_captures_without_model_and_is_idempotent(tmp_path):
+    collector = load_evidence_collector()
+    collect_once = collector.collect_once
+
+    fixtures = {sport: fixture(sport) for sport in ("NBA", "NHL")}
+    class Book:
+        def book(self, _ticker):
+            return {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
+                                     "no_dollars": [["0.50", "250"]]}}
+        def close(self):
+            pass
+    def fetch_markets(sport, _now, _acquisition, rows):
+        raw = {**MARKETS[sport], "status": "active", "market_type": "binary",
+               "price_level_structure": "linear_cent", "notional_value_dollars": "1",
+               "expected_expiration_time": "2026-10-27T05:00:00Z"}
+        return [raw], [], {"KALSHI": {"coverage": {"state": "BOUNDED"}},
+            "PMUS": {"coverage": {"state": "BOUNDED"}}}, Book(), None
+    kwargs = dict(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={s: (lambda s=s: [fixtures[s]]) for s in fixtures},
+        market_fetcher=fetch_markets, authorization=EVIDENCE_AUTH)
+    first = collect_once(**kwargs)
+    assert all(first["leagues"][s]["snapshots_written"] == 1 for s in fixtures)
+    assert all(first["leagues"][s]["last_success"] == NOW.isoformat() for s in fixtures)
+    second = collect_once(**kwargs)
+    assert all(second["leagues"][s]["snapshots_written"] == 0 for s in fixtures)
+    assert all(second["leagues"][s]["deduplicated_snapshots"] == 1 for s in fixtures)
+    assert second["orders"] == second["alerts"] == second["published"] == 0
+    assert all(second["leagues"][s]["last_success"] == NOW.isoformat() for s in fixtures)
+
+
+def test_isolated_collector_empty_schedule_and_provider_failure_do_not_succeed(tmp_path):
+    collector = load_evidence_collector()
+    collect_once = collector.collect_once
+    def failed(*_args):
+        raise OSError("offline")
+    result = collect_once(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={"NBA": lambda: [], "NHL": failed},
+        market_fetcher=lambda *_args: (_ for _ in ()).throw(AssertionError("must not run")),
+        authorization=EVIDENCE_AUTH)
+    assert result["leagues"]["NBA"]["empty_coverage_reason"] == "empty_schedule"
+    assert result["leagues"]["NBA"]["last_success"] is None
+    assert result["leagues"]["NHL"]["empty_coverage_reason"] == "collection_failed"
+    assert result["leagues"]["NHL"]["source_failures"]
+    assert result["exit_code"] == 1
+
+
+def test_collector_nba_only_never_touches_nhl_and_requires_explicit_account_terms(tmp_path):
+    collect_once = load_evidence_collector().collect_once
+    calls = []
+    def nba_empty():
+        calls.append("NBA")
+        return []
+    def forbidden_nhl():
+        calls.append("NHL")
+        raise AssertionError("unselected league must not fetch fixtures")
+    result = collect_once(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={"NBA": nba_empty, "NHL": forbidden_nhl},
+        leagues=("NBA",), authorization={"NBA": EVIDENCE_AUTH["NBA"]})
+    assert calls == ["NBA"]
+    assert result["leagues"]["NBA"]["status"] == "EMPTY"
+    assert result["leagues"]["NHL"]["status"] == "NOT_SELECTED"
+    assert result["leagues"]["NHL"]["authorization"]["state"] == "UNVERIFIED"
+    assert result["exit_code"] == 0
+
+
+def test_collector_unverified_nba_is_blocked_before_any_provider_call(tmp_path):
+    collect_once = load_evidence_collector().collect_once
+    called = []
+    result = collect_once(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={"NBA": lambda: called.append("NBA"), "NHL": lambda: called.append("NHL")},
+        leagues=("NBA",), authorization={})
+    assert called == []
+    assert result["leagues"]["NBA"]["status"] == "AUTHORIZATION_BLOCKED"
+    assert result["exit_code"] == 1
+
+
+def test_collector_cli_writes_health_and_exits_nonzero_without_nba_authorization(tmp_path):
+    collector = load_evidence_collector()
+    code = collector.main(["--leagues", "NBA", "--evidence-dir", str(tmp_path / "evidence"),
+        "--state-dir", str(tmp_path / "state"), "--health-path", str(tmp_path / "state/health.json"),
+        "--log-path", str(tmp_path / "state/collector.log"),
+        "--authorization-file", str(tmp_path / "missing-authorization.json")])
+    health = json.loads((tmp_path / "state/health.json").read_text(encoding="utf-8"))
+    assert code == 1
+    assert health["leagues"]["NBA"]["status"] == "AUTHORIZATION_BLOCKED"
+    assert health["leagues"]["NHL"]["status"] == "NOT_SELECTED"
+    assert (tmp_path / "state/collector.log").stat().st_mode & 0o777 == 0o600
+
+
+def test_collector_no_markets_is_empty_but_invalid_book_is_failure(tmp_path):
+    collect_once = load_evidence_collector().collect_once
+    fx = fixture("NBA")
+    common = dict(evidence_dir=tmp_path / "evidence", state_dir=tmp_path / "state",
+        health_path=tmp_path / "state" / "health.json", now=NOW,
+        fixture_fetchers={"NBA": lambda: [fx]}, leagues=("NBA",), authorization=EVIDENCE_AUTH)
+    empty = collect_once(**common, market_fetcher=lambda *_args: ([], [],
+        {"KALSHI": {"discovered": 0, "coverage": {"state": "BOUNDED"}},
+         "PMUS": {"discovered": 0, "coverage": {"state": "BOUNDED"}}}, None, None))
+    assert empty["leagues"]["NBA"]["status"] == "EMPTY"
+    assert empty["leagues"]["NBA"]["last_success"] is None
+    assert empty["exit_code"] == 0
+
+    class EmptyBook:
+        def book(self, _ticker):
+            return {}
+        def close(self):
+            pass
+    raw = {**MARKETS["NBA"], "status": "active", "market_type": "binary",
+           "price_level_structure": "linear_cent", "notional_value_dollars": "1",
+           "expected_expiration_time": "2026-10-27T05:00:00Z"}
+    failed = collect_once(**common, market_fetcher=lambda *_args: ([raw], [],
+        {"KALSHI": {"discovered": 1, "coverage": {"state": "BOUNDED"}},
+         "PMUS": {"discovered": 0, "coverage": {"state": "BOUNDED"}}}, EmptyBook(), None))
+    assert failed["leagues"]["NBA"]["status"] == "FAILED"
+    assert failed["leagues"]["NBA"]["source_failures"]
+    assert failed["leagues"]["NBA"]["last_success"] is None
+    assert failed["exit_code"] == 1
 
 
 def test_mocked_pmus_client_market_uses_same_fixture_match_normalize_qualify_path():
@@ -236,9 +417,8 @@ def test_mocked_pmus_client_market_uses_same_fixture_match_normalize_qualify_pat
                     f"{slug}::NO": {"best_bid": .53, "best_ask": .55,
                     "bid_size_shares": 100, "ask_size_shares": 100}}
     result = scan_league("NBA", [fixture()], [], [], [raw], pmus_client=PMUS(), now=NOW)
-    assert len(result["rows"]) == 2
-    assert all(row["acquisition_status"] == "ACQUIRED" for row in result["rows"])
-    assert all(row["publication_eligible"] is False for row in result["rows"])
+    assert result["rows"] == []
+    assert result["model_validation_state"] == "BLOCKED"
 
 
 def test_mocked_bdl_schedule_response_uses_existing_verified_fixture_adapter():
@@ -336,6 +516,23 @@ def test_scanner_reuses_research_nba_history_when_runtime_csv_is_absent(tmp_path
     assert [(game.game_id, game.winner_team) for game in loaded] == [("bdl:1", "BOS")]
 
 
+def test_missing_league_history_fails_closed_with_nonzero_exit(tmp_path, monkeypatch, capsys):
+    from pathlib import Path
+
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    monkeypatch.setenv("PARALLAX_STATE_DIR", str(tmp_path / "state"))
+    monkeypatch.delenv("PARALLAX_NBA_HISTORY", raising=False)
+    monkeypatch.delenv("PARALLAX_NBA_FIXTURES", raising=False)
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    import _league_live_scan as scanner
+
+    assert scanner.main("NBA") == 1
+    payload = __import__("json").loads(capsys.readouterr().out)
+    assert payload["scan_status"] == "FAILED"
+    assert payload["failure_type"] == "FileNotFoundError"
+    assert payload["market_data_complete"] is False
+
+
 def test_mocked_nhl_schedule_response_builds_only_future_regular_fixtures():
     payload = {"gameWeek": [{"games": [{
         "id": 2026020012, "season": 20262027, "gameType": 2, "gameState": "FUT", "gameScheduleState": "OK",
@@ -362,11 +559,8 @@ def test_mocked_nhl_schedule_response_builds_only_future_regular_fixtures():
 
 def test_synthetic_certified_provider_to_ntfy_lifecycle_is_deduplicated(monkeypatch, tmp_path):
     from dataclasses import replace as dc_replace
-    from types import SimpleNamespace
     from parallax import nba_nhl
     from parallax.alerts import AlertConfig, AlertDeliveryStore, AlertDispatcher, DeliveryResult
-    from parallax.models import Evidence
-    from parallax.normalization import rules_digest
 
     class Transport:
         calls = []
@@ -385,24 +579,30 @@ def test_synthetic_certified_provider_to_ntfy_lifecycle_is_deduplicated(monkeypa
         def book(self, _ticker):
             return {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
                                      "no_dollars": [["0.50", "250"]]}}
-    def synthetic_evidence(market, fixture, forecast, *, now):
-        return Evidence(venue=market.venue, market_id=market.venue_market_id,
-            fair_probability=.80, source="SYNTHETIC_TEST_PROVIDER", model_version="nba-synthetic-certified-v1",
-            observed_at=now.isoformat(), valid_until=(now + timedelta(minutes=5)).isoformat(),
-            rules_digest=rules_digest(market), review_reference="SYNTHETIC_TEST_ONLY",
-            rationale="Synthetic fixture only", independent_sources=("synthetic-a", "synthetic-b"),
-            validation_reference="SYNTHETIC_TEST_ONLY", validation_status="CALIBRATED",
-            source_independence="INDEPENDENT")
-    monkeypatch.setattr(nba_nhl, "shadow_evidence", synthetic_evidence)
     monkeypatch.setattr(nba_nhl, "attach_fees", lambda market, _now, **_kw: dc_replace(market,
         mechanics=dc_replace(market.mechanics, fee_rate=.001, fee_source="SYNTHETIC_TEST_ONLY",
             fee_valid_until="2026-10-27T00:00:00+00:00", fee_status="VERIFIED_SCHEDULE")))
-    first = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher, now=NOW)
-    second = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher, now=NOW)
+    artifact = synthetic_certified_artifact()
+    first = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher,
+                        model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"], now=NOW)
+    second = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher,
+                         model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"], now=NOW)
     assert any(row["publication_eligible"] for row in first["rows"])
     assert first["alerts"] == 1 and second["alerts"] == 0
     assert len(transport.calls) == 1
     assert transport.calls[0][1]["topic"] == "synthetic-topic"
+    from parallax.public_feed import sanitize_completed_scan
+    public_feed = sanitize_completed_scan("nba", json.dumps(first), generated_at=NOW)
+    assert public_feed["summary"]["buy"] == 1
+    assert public_feed["plays"][0]["publication_eligible"] is True
+    assert public_feed["source_schedule_state"] == "BOUNDED"
+    assert public_feed["market_coverage_state"] == "BOUNDED"
+    assert public_feed["opportunity_evaluation_state"] == "INCOMPLETE_COVERAGE"
+    publisher_path = __import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "parallax_customer_publisher.py"
+    monkeypatch.syspath_prepend(str(publisher_path.parent))
+    import parallax_customer_publisher as customer_publisher
+    customer = customer_publisher.build("nba", public_feed, tmp_path / "no-alerts.sqlite", NOW)
+    assert customer["summary"]["buy"] == 1
 
 
 def test_production_environment_flag_cannot_enable_synthetic_certification():
@@ -616,3 +816,28 @@ def test_ambiguous_pmus_sides_rejected():
     raw["marketSides"] = sides
     assert shadow_evidence(replace(market, original_metadata={"market": raw}),
                            fixture(), forecast(), now=NOW) is None
+
+
+def test_kalshi_nba_game_fee_gate_remains_unverified_without_published_series_proof():
+    """Synthetic event/series metadata cannot certify KXNBAGAME economics."""
+    from parallax.fees import attach_fees
+
+    market = kalshi("NBA")
+    event = {
+        "event_ticker": MARKETS["NBA"]["event_ticker"],
+        "series_ticker": "KXNBAGAME",
+    }
+    for multiplier in (1, 0, 0.5):
+        series = {
+            "ticker": "KXNBAGAME",
+            "fee_type": "quadratic_with_maker_fees",
+            "fee_multiplier": multiplier,
+        }
+        assessed = attach_fees(market, NOW, event=event, series=series)
+        assert assessed.mechanics.fee_status == "UNVERIFIED"
+        assert assessed.mechanics.fee_rate is None
+        proof = assessed.original_metadata["fee_provenance"]
+        assert proof["series_fee_evidence_verified"] is False
+        assert proof["market_scope"] == "KXNBAGAME"
+        assert "published series fee evidence unverified" in proof["reason"]
+

@@ -6,25 +6,35 @@ and alerts require a separately validated Evidence certificate.
 """
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from datetime import timedelta
 import json
 import os
 import stat
 import sys
+from collections.abc import Iterable
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-from typing import Any, Iterable
 from zoneinfo import ZoneInfo
 
+from .alerts import dispatch_scored_buy
 from .engine import qualify
 from .fees import attach_fees
-from .league_elo_experimental import FinalGame, predict_future
-from .league_shadow_evidence import ShadowFixture, shadow_evidence, nba_fixture_from_balldontlie
+from .league_elo_experimental import FinalGame
+from .league_fixtures import ShadowFixture, nba_fixture_from_balldontlie
+from .league_market_identity import selected_yes_team
+from .league_model import (
+    build_evidence,
+    verify_artifact,
+    verify_history_snapshot,
+)
+from .league_model import (
+    predict as predict_calibrated,
+)
+from .league_quote_snapshots import LeagueQuoteSnapshotStore
 from .models import Action, Side, Venue, utcnow
 from .normalization import normalize_kalshi, normalize_pmus
-from .alerts import dispatch_scored_buy
 
 NBA_GAMES_URL = "https://api.balldontlie.io/v1/games"
 NHL_SCHEDULE_URL = "https://api-web.nhle.com/v1/schedule"
@@ -172,7 +182,10 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                 kalshi_rows: Iterable[dict[str, Any]] = (),
                 pmus_rows: Iterable[dict[str, Any]] = (), *,
                 kalshi_client=None, pmus_client=None, pmus_acquisition=None,
-                alert_dispatcher=None,
+                alert_dispatcher=None, model_artifact: dict[str, Any] | None = None,
+                model_artifact_error: str | None = None,
+                expected_model_sha256: str | None = None,
+                quote_snapshot_store: LeagueQuoteSnapshotStore | None = None,
                 now: datetime | None = None) -> dict[str, Any]:
     """Score supported full-game markets. Provider objects expose book(id)."""
     sport = sport.upper()
@@ -181,10 +194,22 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
     now = now or utcnow()
     fixture_list = [f for f in fixtures if f.sport == sport]
     histories = list(history)
+    model_error = model_artifact_error or "certified model artifact is not configured"
+    if model_artifact is not None:
+        try:
+            verify_artifact(model_artifact, sport=sport, now=now,
+                            expected_sha256=expected_model_sha256)
+            verify_history_snapshot(histories,model_artifact,sport=sport)
+            model_error = ""
+        except (KeyError, TypeError, ValueError) as exc:
+            model_error = f"model artifact rejected: {type(exc).__name__}"
     rows: list[dict[str, Any]] = []
     result_alerts = {"sent": 0, "failed": 0}
     diagnostics = {"KALSHI": {"discovered": 0, "book_failures": 0},
                    "PMUS": {"discovered": 0, "book_failures": 0}}
+    quote_snapshots = {"written": 0, "failures": 0, "matched_contracts": 0,
+                       "stale": 0, "deduplicated": 0,
+                       "enabled": quote_snapshot_store is not None}
     book_budget = {"KALSHI": 20, "PMUS": 20}
     for venue, markets, client in (
         (Venue.KALSHI, kalshi_rows, kalshi_client),
@@ -198,6 +223,8 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                 fixture = next((f for f in fixture_list if f.kickoff > now and _market_matches(market, raw, f)), None)
                 if fixture is None:
                     continue
+                if quote_snapshot_store is not None:
+                    quote_snapshots["matched_contracts"] += 1
                 if book_budget[venue_key] <= 0:
                     continue
                 book_budget[venue_key] -= 1
@@ -219,8 +246,45 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                 market = attach_fees(market, now,
                     event=raw.get("_discovery_event"),
                     series=raw.get("_discovery_series"))
-                forecast = predict_future(histories, sport=sport, game_date=fixture.kickoff.astimezone(_ET).date(), home_team=fixture.home_team, away_team=fixture.away_team, game_id=fixture.game_id, season=fixture.season)
-                evidence = shadow_evidence(market, fixture, forecast, now=now)
+                if quote_snapshot_store is not None:
+                    venue_raw = market.original_metadata.get("market", {}) if venue == Venue.POLYMARKET else raw
+                    yes_team_for_snapshot = selected_yes_team(market, venue_raw, fixture)
+                    if yes_team_for_snapshot is not None:
+                        try:
+                            recorded = quote_snapshot_store.record(
+                                sport=sport, fixture=fixture, market=market,
+                                observed_at=observed, yes_team=yes_team_for_snapshot,
+                            )
+                            if recorded is None:
+                                quote_snapshots["deduplicated"] += 1
+                            else:
+                                quote_snapshots["written"] += 1
+                                try:
+                                    source_time = datetime.fromisoformat(observed.replace("Z", "+00:00"))
+                                    if source_time.tzinfo is None:
+                                        source_time = source_time.replace(tzinfo=UTC)
+                                    if (now - source_time).total_seconds() > 60:
+                                        quote_snapshots["stale"] += 1
+                                except (TypeError, ValueError):
+                                    quote_snapshots["stale"] += 1
+                        except (OSError, TypeError, ValueError):
+                            quote_snapshots["failures"] += 1
+                if model_artifact is None or model_error:
+                    continue
+                forecast = predict_calibrated(
+                    histories, model_artifact, sport=sport,
+                    game_date=fixture.kickoff.astimezone(_ET).date(),
+                    season=fixture.season,
+                    home_team=fixture.home_team, away_team=fixture.away_team,
+                    game_id=fixture.game_id, now=now,
+                    expected_sha256=expected_model_sha256,
+                )
+                venue_raw = market.original_metadata.get("market", {}) if venue == Venue.POLYMARKET else raw
+                yes_team = selected_yes_team(market, venue_raw, fixture)
+                if yes_team is None:
+                    continue
+                evidence = build_evidence(market, fixture, forecast, now=now,
+                                          selected_yes_team=yes_team, artifact=model_artifact)
                 if evidence is None:
                     continue
                 for side in Side:
@@ -272,26 +336,32 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                     rows.append(row)
             except Exception:
                 diagnostics["KALSHI" if venue == Venue.KALSHI else "PMUS"]["book_failures"] += 1
-    for key in diagnostics:
-        diagnostics[key]["book_budget_remaining"] = book_budget[key]
-        diagnostics[key]["book_budget_per_scan"] = 20
+    for key, diagnostic in diagnostics.items():
+        diagnostic["book_budget_remaining"] = book_budget[key]
+        diagnostic["book_budget_per_scan"] = 20
     return {"read_only": True, "orders": 0, "published": 0, "alerts": result_alerts["sent"],
             "sport": sport, "scan_mode": "LIVE_READ_ONLY", "refreshed_at": now.isoformat(),
             # Discovery is deliberately capped, so do not claim whole-market completeness.
             "market_data_complete": False,
+            "source_schedule_state": "BOUNDED",
+            "market_coverage_state": "BOUNDED",
+            "opportunity_evaluation_state": (
+                "MODEL_BLOCKED" if model_error else "INCOMPLETE_COVERAGE"
+            ),
+            "quote_snapshots": quote_snapshots,
+            "model_validation_state": "CERTIFIED" if not model_error else "BLOCKED",
+            "model_failure_reason": model_error or None,
             "venues": diagnostics, "summary": {"rows": rows}, "rows": rows}
 
 
 def _market_matches(market, raw: dict, fixture: ShadowFixture) -> bool:
-    from .league_shadow_evidence import _selected_yes
     venue_raw = market.original_metadata.get("market", {}) if market.venue == Venue.POLYMARKET else raw
-    return market.status == "OPEN" and _selected_yes(market, venue_raw, fixture) is not None
+    return market.status == "OPEN" and selected_yes_team(market, venue_raw, fixture) is not None
 
 
 def _selected(market, side: Side, fixture: ShadowFixture, raw: dict) -> str | None:
-    from .league_shadow_evidence import _selected_yes
     venue_raw = market.original_metadata.get("market", {}) if market.venue == Venue.POLYMARKET else raw
-    yes = _selected_yes(market, venue_raw, fixture)
+    yes = selected_yes_team(market, venue_raw, fixture)
     if yes is None:
         return None
     return yes if side == Side.YES else fixture.away_team if yes == fixture.home_team else fixture.home_team

@@ -1,0 +1,97 @@
+{
+  "acceptance_gates": {
+    "beats_half_brier": false,
+    "beats_half_ece": false,
+    "beats_half_log_loss": false,
+    "holdout_nonempty": true,
+    "independent_source_verified": false,
+    "model_owner_approval_documented": false,
+    "source_authorization_documented": false
+  },
+  "artifact_sha256": "9191a75e8a7d7404f770a883db18aa592bfe1d9c34c4c1ee415ca77b8d82b699",
+  "baseline_50_50": {
+    "brier": 0.25,
+    "ece_10_bins": 0.018319928507596117,
+    "log_loss": 0.6931471805599453,
+    "n_games": 1119
+  },
+  "calibration": {
+    "intercept": 0.21416902066553606,
+    "method": "platt_logistic",
+    "slope": 0.625489873906377
+  },
+  "certified": false,
+  "elo": {
+    "home_advantage": 20.0,
+    "k": 10.0
+  },
+  "generated_at": "2026-04-16T00:00:00+00:00",
+  "history_fingerprint": "1357c3ecdc6ff5baf0964aba053e8063bcb7f590c478cde0fcdad55b211637f8",
+  "holdout_metrics": {
+    "brier": 0.25011572538828225,
+    "ece_10_bins": 0.051614654579903434,
+    "log_loss": 0.6936167812873111,
+    "n_games": 1119
+  },
+  "independent_source_sha256": null,
+  "model_owner_approval_reference": null,
+  "model_version": "parallax-league-elo-calibrated-v1",
+  "ratings": {
+    "NHL:ANA": 1476.502199209281,
+    "NHL:ARI": 1447.5478578260484,
+    "NHL:BOS": 1515.149835294277,
+    "NHL:BUF": 1566.9636128844343,
+    "NHL:CAR": 1594.1612821687497,
+    "NHL:CBJ": 1489.0985233382912,
+    "NHL:CGY": 1463.2707843942342,
+    "NHL:CHI": 1376.865413332765,
+    "NHL:COL": 1600.0486304842682,
+    "NHL:DAL": 1576.519955340481,
+    "NHL:DET": 1486.8775247876047,
+    "NHL:EDM": 1520.1140910578927,
+    "NHL:FLA": 1509.2167629194666,
+    "NHL:LAK": 1480.6965548940852,
+    "NHL:MIN": 1535.5457039885173,
+    "NHL:MTL": 1549.17354534876,
+    "NHL:NJD": 1500.3781353226093,
+    "NHL:NSH": 1472.4461331175407,
+    "NHL:NYI": 1495.4495043420789,
+    "NHL:NYR": 1463.6114866681994,
+    "NHL:OTT": 1541.0812503937393,
+    "NHL:PHI": 1508.085778180173,
+    "NHL:PIT": 1492.0224273953802,
+    "NHL:SEA": 1433.5075233707253,
+    "NHL:SJS": 1423.1990940936982,
+    "NHL:STL": 1507.1270616134439,
+    "NHL:TBL": 1570.885306898372,
+    "NHL:TOR": 1463.9282174836546,
+    "NHL:UTA": 1509.4722133576165,
+    "NHL:VAN": 1392.9693181772209,
+    "NHL:VGK": 1506.3421383731638,
+    "NHL:WPG": 1497.8064754305499,
+    "NHL:WSH": 1533.9356585126789
+  },
+  "schema_version": 1,
+  "source_authorization_reference": null,
+  "source_game_count": 5248,
+  "source_seasons": [
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "source_sha256": "d4d164cbd06b2e991e348bb8e27bfd981bd1e794338e0f43915df67c215be2f4",
+  "splits": {
+    "calibration_end": "2025-11-01",
+    "calibration_games": 1071,
+    "calibration_start": "2024-12-08",
+    "holdout_end": "2026-04-16",
+    "holdout_games": 1119,
+    "holdout_start": "2025-11-02",
+    "same_day_isolated": true,
+    "train_end": "2024-12-07",
+    "train_games": 3058
+  },
+  "sport": "NHL",
+  "trained_through": "2026-04-16"
+}

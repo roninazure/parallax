@@ -1,0 +1,61 @@
+name: NBA/NHL PR validation
+
+on:
+  push:
+    branches:
+      - codex/issue-57-nba-nhl-production
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Only the newest reviewed branch tip needs the full regression suite.
+concurrency:
+  group: nba-nhl-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nba-nhl-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out reviewed branch
+        uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install runtime and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . 'pytest>=8,<9'
+      - name: Compile NBA/NHL readiness modules
+        run: |
+          python -m compileall -q scripts/league_evidence_preflight.py scripts/diagnose_league_runtime.py scripts/collect_league_evidence.py scripts/train_league_models.py scripts/reconcile_league_results.py parallax/league_model_v2.py
+      - name: Run NBA/NHL focused regression suite
+        run: |
+          python -m pytest -q \
+            tests/test_league_evidence_preflight.py \
+            tests/test_deployment_manifest_staging.py \
+            tests/test_parallax_league_model.py \
+            tests/test_parallax_league_model_v2.py \
+            tests/test_audit_league_forward_holdout.py \
+            tests/test_nba_nhl_comparative_report.py \
+            tests/test_reconcile_league_results.py \
+            tests/test_train_league_models_cli.py \
+            tests/test_parallax_nba_nhl_shadow.py \
+            tests/test_parallax_unattended.py \
+            tests/test_parallax_public_feed.py \
+            tests/test_parallax_buy_alerts.py
+      - name: Guard existing NFL, MLB and CFB lanes
+        # NFL date-only fixture parsing currently uses the host local zone.
+        # Match the Mac mini's ET operating environment without touching
+        # production NFL code in this NBA/NHL-scoped PR.
+        env:
+          TZ: America/New_York
+        run: |
+          python -m pytest -q \
+            tests/test_parallax_nfl.py \
+            tests/test_parallax_live_mlb.py \
+            tests/test_parallax_live_cfb.py

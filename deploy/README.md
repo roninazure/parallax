@@ -65,16 +65,29 @@ plutil -lint "$RENDERED_PLIST"
 Bind the release, dependency lock, runtime environment, launchd plist, and scheduler entrypoint:
 
 ```sh
-python scripts/deployment_manifest.py generate \
+# RELEASE is already read-only after create-release. Never write into it.
+# RUNTIME_ROOT, SHA, RELEASE, RUNTIME_ENV and RENDERED_PLIST are reviewed inputs.
+VENV_PYTHON="$RUNTIME_ROOT/venvs/$SHA/bin/python3"
+CANDIDATE_MANIFEST="$RUNTIME_ROOT/run/candidates/$SHA.manifest.json"
+
+"$VENV_PYTHON" scripts/deployment_manifest.py generate \
   --root "$RELEASE" \
   --runtime-env "$RUNTIME_ENV" \
   --plist "$RENDERED_PLIST" \
   --lock "$RELEASE/requirements.lock" \
   --entrypoint "$RELEASE/scripts/parallax_unattended.py" \
-  --output "$RELEASE/deploy/manifest.json"
+  --output "$CANDIDATE_MANIFEST"
+
+"$VENV_PYTHON" scripts/deployment_manifest.py validate \
+  --root "$RELEASE" \
+  --runtime-env "$RUNTIME_ENV" \
+  --plist "$RENDERED_PLIST" \
+  --lock "$RELEASE/requirements.lock" \
+  --entrypoint "$RELEASE/scripts/parallax_unattended.py" \
+  --manifest "$CANDIDATE_MANIFEST"
 ```
 
-The manifest records the Git SHA, Python version, and hashes needed to detect deployment drift.
+The candidate manifest is staged **outside** the immutable release and must never overwrite the active `run/parallax-sports-manifest.json` during inspection or rehearsal. Generate it using the SHA-matched venv interpreter so `python_version` describes the candidate runtime, not the operator's shell. The manifest records the Git SHA, Python version, and hashes needed to detect deployment drift. Revalidate it against the exact loaded plist and runtime inputs before a separately approved cutover; preserve the previous manifest with the saved plist for rollback.
 
 ## Cutover rules
 
