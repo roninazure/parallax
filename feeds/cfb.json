@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-10-31T19:18:37.924890+00:00",
+  "generated_at": "2026-10-31T20:22:18.793071+00:00",
   "lane": "CFB",
   "plays": [
     {
-      "contract_side": "YES",
-      "edge_pp": 20.42076625,
-      "market_id": "1593080",
-      "matchup": "South Carolina at Oklahoma",
-      "model_probability": 0.6092076624557968,
-      "price": 0.405,
+      "contract_side": "NO",
+      "edge_pp": 32.41892129,
+      "market_id": "1591564",
+      "matchup": "Miami at North Carolina",
+      "model_probability": 0.4841892128581561,
+      "price": 0.16,
       "sport": "CFB",
-      "start_time": "2026-10-31T20:15:00+00:00",
+      "start_time": "2026-10-31T23:30:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -22,17 +22,6 @@
       "price": 0.26,
       "sport": "CFB",
       "start_time": "2026-10-31T23:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 16.97763981,
-      "market_id": "1591558",
-      "matchup": "Utah at Cincinnati",
-      "model_probability": 0.45977639810834015,
-      "price": 0.29,
-      "sport": "CFB",
-      "start_time": "2026-10-31T19:45:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -60,10 +49,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-31T19:17:55.763318+00:00",
+  "source_feed_generated_at": "2026-10-31T20:22:15.537183+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 4
   }
 }
