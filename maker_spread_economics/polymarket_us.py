@@ -793,13 +793,18 @@ class PolymarketUSPublicClient:
         timeout_seconds: float = 8.0,
         minimum_interval_seconds: float = 2.0,
         max_requests_per_minute: int = 20,
+        sdk_max_retries: int | None = None,
     ) -> None:
         if client is None:
             try:
                 from polymarket_us import PolymarketUS
             except ImportError as exc:
                 raise SafetyStop("polymarket-us is required for Polymarket US") from exc
-            client = PolymarketUS(timeout=timeout_seconds)
+            sdk_options = (
+                {"max_retries": sdk_max_retries}
+                if sdk_max_retries is not None else {}
+            )
+            client = PolymarketUS(timeout=timeout_seconds, **sdk_options)
         self.client = client
         self.meter = RequestMeter()
         self.minimum_interval_seconds = minimum_interval_seconds
