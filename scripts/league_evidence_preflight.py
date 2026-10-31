@@ -99,13 +99,13 @@ def _manifest_matches_running_release(
         normalized(release / ".venv/bin"),
         normalized(runtime_root / "venvs" / active_sha / "bin"),
     }
-    loaded_program = re.search(r"(?m)^\\s*program\\s*=\\s*(/.*?)\\s*$", job_output)
+    loaded_program = re.search(r"(?m)^\s*program\s*=\s*(/.*?)\s*$", job_output)
     interpreter = Path(args[0]) if args else Path("")
     interpreter_ok = (
         len(args) >= 2
         and interpreter.is_absolute()
         and normalized(interpreter.parent) in allowed_venv_bins
-        and re.fullmatch(r"python(?:3(?:\\.\\d+)?)?", interpreter.name) is not None
+        and re.fullmatch(r"python(?:3(?:\.\d+)?)?", interpreter.name) is not None
         and loaded_program is not None
         and normalized(loaded_program.group(1)) == normalized(interpreter)
     )
