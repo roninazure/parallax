@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-10-31T16:06:07.284442+00:00",
+  "generated_at": "2026-10-31T17:10:26.714679+00:00",
   "lane": "CFB",
   "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 31.24926167,
-      "market_id": "1593070",
-      "matchup": "Michigan at Rutgers",
-      "model_probability": 0.45749261666936625,
-      "price": 0.145,
-      "sport": "CFB",
-      "start_time": "2026-10-31T16:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "YES",
       "edge_pp": 20.42076625,
@@ -48,6 +37,17 @@
     },
     {
       "contract_side": "NO",
+      "edge_pp": 11.42759452,
+      "market_id": "1593085",
+      "matchup": "Ohio State at USC",
+      "model_probability": 0.42927594524841817,
+      "price": 0.315,
+      "sport": "CFB",
+      "start_time": "2026-10-31T23:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
       "edge_pp": 10.59803235,
       "market_id": "1545746",
       "matchup": "Oregon State at Fresno State",
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-31T16:06:02.677575+00:00",
+  "source_feed_generated_at": "2026-10-31T17:10:08.208379+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
