@@ -1,6 +1,7 @@
 """Shared bounded live-acquisition CLI for the NBA and NHL scan lanes."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -15,18 +16,106 @@ from parallax.alerts import AlertDeliveryStore, AlertDispatcher
 from parallax.discovery import paginate, paginate_collection
 from parallax.league_fixtures import ShadowFixture
 from parallax.league_history import load_league_history
+from parallax.league_market_identity import expected_pmus_nba_slug, selected_yes_team
 from parallax.league_model import load_artifact
 from parallax.league_quote_snapshots import LeagueQuoteSnapshotStore
 from parallax.nba_nhl import fetch_nba_fixtures, fetch_nhl_fixtures, scan_league
+from parallax.normalization import normalize_pmus
 from parallax.pmus_acquisition import PMUSAcquisition
 from parallax.sources import KalshiPublicClient
 
 KALSHI_EVENT_PAGES = 3
 KALSHI_MAX_GAMES = 2
+PMUS_NBA_BATCH_SIZE = 12
+PMUS_NBA_MAX_FIXTURES = 24
 _ET = ZoneInfo("America/New_York")
 
 
 _load_existing_history = load_league_history
+
+
+def _discover_nba_pmus(now: datetime, acquisition: PMUSAcquisition, pmus, fixtures):
+    """Bounded exact-slug PMUS US lookup; no global Polymarket or book calls.
+
+    SDK MarketsListParams supports slug: list[str]. A missing filtered result
+    cannot establish that the exchange has no such market.
+    """
+    upcoming = sorted(
+        (f for f in fixtures if f.sport == "NBA" and f.kickoff > now),
+        key=lambda f: (f.kickoff, f.game_id),
+    )
+    expected = [(expected_pmus_nba_slug(f), f) for f in upcoming]
+    diagnostic_rows = [
+        {"game_id": f.game_id, "slug": slug, "discovery_state": "NOT_QUERIED_BUDGET",
+         "book_state": "NOT_CHECKED"}
+        for slug, f in expected
+    ]
+    coverage = {
+        "state": "BOUNDED",
+        "method": "PMUS_US_MARKETS_LIST_EXACT_SLUG",
+        "reason": "exact-slug filtered US listing; missing results do not prove market absence",
+        "fixture_candidates": len(expected),
+        "fixture_limit": PMUS_NBA_MAX_FIXTURES,
+        "batch_size": PMUS_NBA_BATCH_SIZE,
+        "max_provider_requests": 2,
+        "queried_fixtures": 0,
+        "returned_markets": 0,
+        "identity_verified": 0,
+    }
+    if len({slug for slug, _ in expected}) != len(expected):
+        coverage.update(state="PARTIAL", error_type="DuplicateFixtureSlug")
+        return [], {"coverage": coverage, "discovered": 0,
+                    "fixture_diagnostics": diagnostic_rows}
+    selected = expected[:PMUS_NBA_MAX_FIXTURES]
+    by_slug = {}
+    failed = False
+    for start in range(0, len(selected), PMUS_NBA_BATCH_SIZE):
+        batch = selected[start:start + PMUS_NBA_BATCH_SIZE]
+        slugs = [slug for slug, _ in batch]
+        fingerprint = hashlib.sha256("\\n".join(slugs).encode()).hexdigest()
+        try:
+            rows = acquisition.discover(
+                f"NBA:pmus-us-exact-slugs:v1:{fingerprint}",
+                lambda slugs=slugs: pmus.markets_page(
+                    limit=len(slugs), offset=0, slugs=slugs,
+                    retry_transport_errors=False,
+                ),
+            )
+            if (len(rows) > len(slugs)
+                    or len({r.get("slug") for r in rows}) != len(rows)
+                    or any(r.get("slug") not in slugs for r in rows)):
+                raise ValueError("PMUS filtered market response did not match requested slugs")
+        except Exception as exc:
+            coverage.update(state="PARTIAL", error_type=type(exc).__name__)
+            for index in range(start, start + len(batch)):
+                diagnostic_rows[index]["discovery_state"] = "DISCOVERY_ERROR"
+            failed = True
+            break
+        coverage["queried_fixtures"] += len(batch)
+        coverage["returned_markets"] += len(rows)
+        by_slug.update({row["slug"]: row for row in rows})
+        for index in range(start, start + len(batch)):
+            diagnostic_rows[index]["discovery_state"] = "NOT_RETURNED_UNVERIFIED"
+    accepted = []
+    for index, (slug, fixture) in enumerate(selected):
+        row = by_slug.get(slug)
+        if row is None:
+            continue
+        try:
+            market = normalize_pmus(row, {}, now.isoformat())
+        except (KeyError, TypeError, ValueError, AttributeError):
+            diagnostic_rows[index]["discovery_state"] = "SHAPE_REJECTED"
+            continue
+        if selected_yes_team(market, market.original_metadata.get("market", {}), fixture) is None:
+            diagnostic_rows[index]["discovery_state"] = "IDENTITY_REJECTED"
+            continue
+        diagnostic_rows[index]["discovery_state"] = "IDENTITY_VERIFIED"
+        accepted.append(row)
+    if failed or len(selected) < len(expected):
+        coverage["state"] = "PARTIAL"
+    coverage["identity_verified"] = len(accepted)
+    return accepted, {"coverage": coverage, "discovered": len(accepted),
+                      "fixture_diagnostics": diagnostic_rows}
 
 
 def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtures):
@@ -84,24 +173,36 @@ def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtu
             },
             "discovered": len(krows),
         }
-        def request_markets():
-            rows, _coverage = paginate(
-                lambda *, limit, offset: pmus.markets_page(
-                    limit=limit, offset=offset, retry_transport_errors=False,
-                ),
-                page_size=100, max_pages=4, max_rows=400,
+        if sport == "NBA":
+            prows, diagnostics["PMUS"] = _discover_nba_pmus(
+                now, acquisition, pmus, fixtures,
             )
-            return rows
-        all_pmus = acquisition.discover(f"{sport}:bounded-active-universe:v1", request_markets)
-        from parallax.discovery import Coverage, CoverageReport
-        cov = CoverageReport(Coverage.BOUNDED, 4, len(all_pmus), len(all_pmus), 100, 4,
-                             "cached or bounded active-market pagination", False)
-        def belongs(row):
-            raw = row.get("raw", {})
-            text = " ".join(str(v or "") for v in (row.get("question"), row.get("slug"), raw.get("league"), raw.get("sport"), raw.get("marketType"))).casefold()
-            return sport.casefold() in text or f"{sport.casefold()}-" in str(row.get("slug", "")).casefold()
-        prows = [r for r in all_pmus if belongs(r)]
-        diagnostics["PMUS"] = {"coverage": {"state": cov.state, "reason": "bounded active-market pagination; provider has no league filter"}, "discovered": len(prows)}
+        else:
+            # NHL has no independently observed PMUS full-game settlement
+            # shape. Preserve the existing bounded discovery without promotion.
+            def request_markets():
+                rows, _coverage = paginate(
+                    lambda *, limit, offset: pmus.markets_page(
+                        limit=limit, offset=offset, retry_transport_errors=False,
+                    ),
+                    page_size=100, max_pages=4, max_rows=400,
+                )
+                return rows
+            all_pmus = acquisition.discover(
+                f"{sport}:bounded-active-universe:v1", request_markets,
+            )
+            prows = [
+                r for r in all_pmus
+                if sport.casefold() in " ".join(str(v or "") for v in (
+                    r.get("question"), r.get("slug"), r.get("raw", {}).get("league"),
+                    r.get("raw", {}).get("sport"), r.get("raw", {}).get("marketType"),
+                )).casefold()
+            ]
+            diagnostics["PMUS"] = {
+                "coverage": {"state": "BOUNDED",
+                             "reason": "NHL identity not independently observed; ranked pagination only"},
+                "discovered": len(prows),
+            }
     except Exception as exc:
         if hasattr(kalshi, "close"): kalshi.close()
         pmus.close()
