@@ -403,3 +403,71 @@ provenance and expiration are represented in the fee model. The regression
 test uses synthetic metadata only; it makes no provider calls. Existing
 NFL/MLB/CFB fee logic is unchanged. This does not grant a model certificate,
 permission to trade, or BUY publication.
+
+
+## 2026-10-31 — NBA Elo diagnostic and PMUS US exact-slug discovery (GitHub-only)
+
+**NBA calibration is still BLOCKED.** The already-inspected, checked-in v2
+research artifact (dated 2026-04-12) reports NBA Elo holdout Brier
+`0.197470`, log loss `0.583577`, and ECE `0.127775` across 516 games.
+Its 50/50 ECE is `0.060078`, while the train-fitted constant-home-rate
+baseline ECE is `0.013266`. The existing v2 feature model ECE is
+`0.128723`. These are **historical, non-independent, previously inspected
+holdout comparisons**, not fresh evaluation under the corrected ET-date
+selection protocol. They do not authorize choosing Elo or a recalibration
+strength using that holdout.
+
+The new read-only comparative report reconstructs ECE from the signed
+reliability bins and reports directional residuals. In the historical NBA Elo
+bins, games forecast below 0.50 had an observed-minus-predicted home-win gap
+of approximately **-0.1790** (176 games), while games forecast at least 0.60
+had a gap of approximately **+0.1282** (198 games). This suggests that the
+previously fitted forecast probabilities were compressed relative to outcomes
+on that particular period; it is a **diagnostic hypothesis**, not a
+calibration fix or permission to tune on the inspected sample. Re-evaluation
+requires authorized primary/independent results and a genuinely later,
+untouched forward holdout, with all existing certification gates preserved.
+
+**Polymarket US (PMUS) NBA discovery:** The official public
+[Polymarket US Python SDK](https://github.com/Polymarket/polymarket-us-python)
+exposes `markets.list` with an exact `slug: list[str]` filter, plus
+`events.list`, `search.query`, and market-by-slug retrieval. This is the
+**US venue SDK**, not global Polymarket Gamma. The previous scanner fetched
+only the first 400 volume-ranked US markets and then searched text for NBA,
+which cannot distinguish a ranking miss from actual exchange absence.
+
+PR #58 now derives the *already observed* `aec-nba-<away>-<home>-<ET date>`
+slug from independently verified NBA fixtures and queries exact slug batches:
+at most **24 fixtures, 12 slugs per call, 2 acquisition-governed calls**.
+It uses the existing shared PMUS request budget and circuit breaker; no
+provider call was made in this GitHub-only engineering run. An empty filtered
+response is labeled `NOT_RETURNED_UNVERIFIED`, **never** "no PMUS market".
+Unqueried fixtures, provider errors, malformed shapes, strict identity
+rejections, and book availability/request failures are recorded separately.
+Only strict existing full-game settlement wording, side identity and exact
+UTC tipoff checks can promote a row to `IDENTITY_VERIFIED`. NHL's unverified
+PMUS identity remains unsupported for certification.
+
+The synthetic tests exercise positive exact-identity matching, incorrect
+settlement/start, missing markets, malformed/foreign results, two-request
+caps, circuit/error paths and book states. A live fixture-level coverage
+measurement has **not** been obtained; no US exchange availability or
+liquidity is inferred from tests. Bounded discovery never claims complete
+market coverage, and neither venue is allowed to publish NBA/NHL BUY
+without separately certified models, rights and verified fee economics.
+
+**Kalshi KXNBAGAME fees remain BLOCKED.** The directly accessible official
+[PDF](https://kalshi.com/docs/kalshi-fee-schedule.pdf) still identifies an
+effective date of **2025-10-01** when inspected on 2026-10-31. It directs
+readers to the dynamic
+[fee schedule](https://kalshi.com/fee-schedule) for current market-specific
+fees; that page did not yield verifiable KXNBAGAME series terms through the
+available read-only inspection. General fee formulas, third-party summaries
+and event metadata do not establish current KXNBAGAME maker/taker terms,
+account-specific rounding or fee provenance. No fee gate was relaxed.
+
+**Production hold:** PR #58 is a GitHub-only candidate. The historically
+documented Mac mini active release/manifest discrepancy, loaded system
+launchd/venv/SHA verification and immutable rollback procedure remain
+mandatory. No production Mac inspection, merge, restart, deployment, BUY
+publication or existing NFL/MLB/CFB lane change was performed.
