@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-31T04:39:47.539436+00:00",
+  "generated_at": "2026-10-31T05:44:57.623079+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -15,11 +15,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 20.92076625,
+      "edge_pp": 20.42076625,
       "market_id": "1593080",
       "matchup": "South Carolina at Oklahoma",
       "model_probability": 0.6092076624557968,
-      "price": 0.4,
+      "price": 0.405,
       "sport": "CFB",
       "start_time": "2026-10-31T20:15:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-31T04:38:55.087466+00:00",
+  "source_feed_generated_at": "2026-10-31T05:44:41.660446+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
