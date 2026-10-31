@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-31T19:01:36.713853+00:00",
+  "generated_at": "2026-10-31T19:06:14.297108+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -47,26 +47,26 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 8.22058651,
-      "market_id": "1545107",
+      "contract_side": "YES",
+      "edge_pp": 8.47058651,
+      "market_id": "KXNFLGAME-26NOV01KCDEN-DEN",
       "matchup": "KC at DEN",
       "model_probability": 0.5647058651286584,
-      "price": 0.4825,
+      "price": 0.48,
       "sport": "NFL",
       "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 22.28715255,
-      "market_id": "1545106",
+      "contract_side": "YES",
+      "edge_pp": 22.53715255,
+      "market_id": "KXNFLGAME-26NOV01NEMIA-MIA",
       "matchup": "NE at MIA",
-      "model_probability": 0.46537152549777483,
-      "price": 0.2425,
+      "model_probability": 0.4653715254977749,
+      "price": 0.24,
       "sport": "NFL",
       "start_time": "2026-11-01T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -80,15 +80,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 10.17195075,
-      "market_id": "1581715",
+      "contract_side": "YES",
+      "edge_pp": 10.42195075,
+      "market_id": "KXNFLGAME-26NOV02CHISEA-SEA",
       "matchup": "CHI at SEA",
       "model_probability": 0.7142195075074612,
-      "price": 0.6125,
+      "price": 0.61,
       "sport": "NFL",
       "start_time": "2026-11-03T01:15:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -104,7 +104,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-10-31T19:01:01.878353+00:00",
+  "source_feed_generated_at": "2026-10-31T19:06:03.726852+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
