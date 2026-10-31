@@ -87,8 +87,31 @@ def _manifest_matches_running_release(
         return False
     release = (runtime_root / "releases" / active_sha).resolve()
     entrypoint = release / "scripts/parallax_unattended.py"
+    # A matching plist hash alone is insufficient: an operator could regenerate
+    # the manifest for a plist that launches an unrelated Python interpreter.
+    # Check the loaded program and constrain it to this immutable release's
+    # venv (or the documented SHA-matched external venv). Do not resolve the
+    # interpreter symlink: macOS virtualenv Python often links to Homebrew.
+    def normalized(path: str | Path) -> str:
+        return os.path.normpath(os.fspath(path))
+
+    allowed_venv_bins = {
+        normalized(release / ".venv/bin"),
+        normalized(runtime_root / "venvs" / active_sha / "bin"),
+    }
+    loaded_program = re.search(r"(?m)^\\s*program\\s*=\\s*(/.*?)\\s*$", job_output)
+    interpreter = Path(args[0]) if args else Path("")
+    interpreter_ok = (
+        len(args) >= 2
+        and interpreter.is_absolute()
+        and normalized(interpreter.parent) in allowed_venv_bins
+        and re.fullmatch(r"python(?:3(?:\\.\\d+)?)?", interpreter.name) is not None
+        and loaded_program is not None
+        and normalized(loaded_program.group(1)) == normalized(interpreter)
+    )
     if (
-        args.count("--root") != 1
+        not interpreter_ok
+        or args.count("--root") != 1
         or args.count("--runtime-env") != 1
         or args.index("--root") + 1 >= len(args)
         or args.index("--runtime-env") + 1 >= len(args)
