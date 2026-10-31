@@ -56,7 +56,7 @@ def _live_sports_fixture(tmp_path):
     manifest.write_text(json.dumps(payload), encoding="utf-8")
     launchctl_output = (
         f"state = running\npath = {plist_path}\n"
-        f"program = {entrypoint}\n"
+        f"program = {release / '.venv/bin/python'}\n"
     )
     return runtime, manifest, payload, launchctl_output, entrypoint, runtime_env, plist_path
 
@@ -283,3 +283,35 @@ def test_runtime_diagnostic_extracts_sha_from_nested_venv_path(tmp_path, monkeyp
     report = json.loads(capsys.readouterr().out)
     assert report["plists"][0]["release_sha_from_argument"] == sha
     assert "manifest_git_sha_differs_from_plist_release" not in report["mismatches"]
+
+
+def test_preflight_requires_sha_pinned_loaded_python_even_with_rehashed_plist(tmp_path):
+    """A regenerated manifest must not bless an unrelated launchd interpreter."""
+    module = _module("league_evidence_preflight_python", "league_evidence_preflight.py")
+    runtime, _, payload, output, _, _, plist = _live_sports_fixture(tmp_path)
+    sha = payload["git_sha"]
+    assert module._manifest_matches_running_release(runtime, output, sha, payload)
+
+    loaded = plistlib.loads(plist.read_bytes())
+    loaded["ProgramArguments"][0] = "/usr/bin/python3"
+    plist.write_bytes(plistlib.dumps(loaded))
+    rehashed = {**payload, "launchd_plist_sha256": hashlib.sha256(plist.read_bytes()).hexdigest()}
+    assert not module._manifest_matches_running_release(runtime, output, sha, rehashed)
+
+    # The documented SHA-matched venvs/<sha> layout is valid too.
+    python = runtime / "venvs" / sha / "bin/python3.12"
+    loaded["ProgramArguments"][0] = str(python)
+    plist.write_bytes(plistlib.dumps(loaded))
+    rehashed["launchd_plist_sha256"] = hashlib.sha256(plist.read_bytes()).hexdigest()
+    updated_output = output.replace(
+        f"program = {runtime / 'releases' / sha / '.venv/bin/python'}",
+        f"program = {python}",
+    )
+    assert module._manifest_matches_running_release(runtime, updated_output, sha, rehashed)
+
+    # A loaded program inconsistent with the plist is not release-integrity proof.
+    mismatched_output = updated_output.replace(f"program = {python}", "program = /usr/bin/python3")
+    assert not module._manifest_matches_running_release(runtime, mismatched_output, sha, rehashed)
+    assert not module._manifest_matches_running_release(
+        runtime, updated_output.replace(f"program = {python}\n", ""), sha, rehashed
+    )
