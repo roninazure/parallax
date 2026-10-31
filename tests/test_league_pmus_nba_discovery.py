@@ -199,3 +199,20 @@ def test_book_outcomes_are_distinct_from_discovery_and_identity():
         assert result["model_validation_state"] == "BLOCKED"
         assert result["orders"] == result["published"] == 0
         assert result["venues"]["PMUS"]["book_states"][SLUG] == expected
+
+
+def test_nba_sdk_zero_retry_option_is_opt_in(monkeypatch):
+    import polymarket_us
+    from maker_spread_economics.polymarket_us import PolymarketUSPublicClient
+
+    options = []
+
+    class SDK:
+        def __init__(self, **kwargs):
+            options.append(kwargs)
+
+    monkeypatch.setattr(polymarket_us, "PolymarketUS", SDK)
+    PolymarketUSPublicClient(sdk_max_retries=0)
+    PolymarketUSPublicClient()
+    assert options[0]["max_retries"] == 0
+    assert "max_retries" not in options[1]
