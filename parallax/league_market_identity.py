@@ -46,6 +46,19 @@ def _instant(v: object) -> datetime | None:
         return None
 
 
+
+def expected_pmus_nba_slug(fixture) -> str:
+    """Exact observed Polymarket US NBA moneyline slug, never global Gamma."""
+    if fixture.sport != "NBA" or fixture.kickoff.tzinfo is None:
+        raise ValueError("PMUS exact slug requires a timezone-aware NBA fixture")
+    hc = _PMUS_CODES.get(fixture.home_team, fixture.home_team)
+    ac = _PMUS_CODES.get(fixture.away_team, fixture.away_team)
+    if not re.fullmatch(r"[A-Z]{2,4}", hc) or not re.fullmatch(r"[A-Z]{2,4}", ac):
+        raise ValueError("PMUS exact slug requires canonical NBA team codes")
+    day = fixture.kickoff.astimezone(_ET).date()
+    return f"aec-nba-{ac.lower()}-{hc.lower()}-{day.isoformat()}"
+
+
 def selected_yes_team(
     market: NormalizedMarket, raw: Mapping[str, object], fixture
 ) -> str | None:
@@ -116,9 +129,7 @@ def selected_yes_team(
         return None
     hc = _PMUS_CODES.get(fixture.home_team, fixture.home_team)
     ac = _PMUS_CODES.get(fixture.away_team, fixture.away_team)
-    day = fixture.kickoff.astimezone(_ET).date()
-    expected = f"aec-nba-{ac.lower()}-{hc.lower()}-{day.isoformat()}"
-    if market.slug != expected:
+    if market.slug != expected_pmus_nba_slug(fixture):
         return None
     sides = raw.get("marketSides")
     if not isinstance(sides, list) or len(sides) != 2:
