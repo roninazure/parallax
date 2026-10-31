@@ -459,9 +459,12 @@ def test_kalshi_discovery_uses_paginated_nested_events_and_exact_fixture_ticker(
             pass
 
     class PMUS:
-        def markets_page(self, *, limit, offset, retry_transport_errors):
+        def __init__(self, *, sdk_max_retries):
+            assert sdk_max_retries == 0
+        def markets_page(self, *, limit, offset, slugs, retry_transport_errors):
             assert retry_transport_errors is False
-            return {"markets": []}
+            assert offset == 0 and slugs and limit == len(slugs)
+            return []
         def close(self):
             pass
 
@@ -476,8 +479,8 @@ def test_kalshi_discovery_uses_paginated_nested_events_and_exact_fixture_ticker(
     target = fixture()
     early = [
         replace(target, game_id=f"early-{i}", kickoff=NOW + timedelta(hours=i),
-                away_team=f"A{i}", home_team=f"H{i}")
-        for i in (1, 2, 3)
+                away_team=away, home_team="DEN")
+        for i, away in enumerate(("LAL", "BOS", "CHI"), 1)
     ]
     rows, pmus_rows, health, _k, _p = scanner._live_markets(
         "NBA", NOW, Acquisition(), [*early, target],
