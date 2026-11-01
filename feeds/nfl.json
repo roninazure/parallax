@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-01T15:43:02.209910+00:00",
+  "generated_at": "2026-11-01T15:47:35.371870+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -114,11 +114,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 12.66866175,
+      "edge_pp": 12.91866175,
       "market_id": "1785080",
       "matchup": "DEN at CAR",
       "model_probability": 0.7066866174576996,
-      "price": 0.58,
+      "price": 0.5775,
       "sport": "NFL",
       "start_time": "2026-11-08T18:00:00+00:00",
       "venue": "POLYMARKET"
@@ -137,7 +137,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-01T15:42:05.536977+00:00",
+  "source_feed_generated_at": "2026-11-01T15:47:25.502427+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
