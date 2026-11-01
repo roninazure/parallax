@@ -107,6 +107,10 @@ def test_missing_filtered_result_is_not_proof_of_absent_exchange_market():
 def test_reject_wrong_settlement_and_start_time_without_book_requests():
     for bad in (
         market(marketType="spread"),
+        market(sportsMarketTypeV2="SPORTS_MARKET_TYPE_SPREAD"),
+        market(sportsMarketTypeV2="SPORTS_MARKET_TYPE_TOTAL"),
+        market(sportsMarketTypeV2="SPORTS_MARKET_TYPE_UNSPECIFIED"),
+        market(marketType="spread", sportsMarketTypeV2="SPORTS_MARKET_TYPE_MONEYLINE"),
         market(gameStartTime="2026-10-27T03:00:00+00:00"),
         market(description="winner determined by first quarter"),
     ):
@@ -216,3 +220,14 @@ def test_nba_sdk_zero_retry_option_is_opt_in(monkeypatch):
     PolymarketUSPublicClient()
     assert options[0]["max_retries"] == 0
     assert "max_retries" not in options[1]
+
+
+def test_explicit_pmus_us_v2_moneyline_type_remains_supported():
+    rows, diag = _discover_nba_pmus(
+        NOW, Acquisition(),
+        Provider([market(sportsMarketTypeV2="SPORTS_MARKET_TYPE_MONEYLINE")]),
+        [fixture()],
+    )
+    assert len(rows) == 1
+    assert diag["coverage"]["identity_verified"] == 1
+    assert diag["fixture_diagnostics"][0]["book_state"] == "NOT_CHECKED"

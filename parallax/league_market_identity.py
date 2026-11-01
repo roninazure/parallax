@@ -120,6 +120,13 @@ def selected_yes_team(
     # Only the independently observed PMUS NBA moneyline shape is supported.
     if fixture.sport != "NBA" or raw.get("marketType") != "moneyline":
         return None
+    # The US API also exposes a v2 sports type. A legacy moneyline label
+    # must not override an explicit spread, total, prop, or unknown v2 type.
+    # Older observed US contracts without this optional field stay supported.
+    if raw.get("sportsMarketTypeV2") not in (
+        None, "SPORTS_MARKET_TYPE_MONEYLINE",
+    ):
+        return None
     if (
         raw.get("slug") != market.slug
         or str(raw.get("id")) != market.venue_market_id
