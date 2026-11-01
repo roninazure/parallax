@@ -1,13 +1,80 @@
 {
-  "generated_at": "2026-11-01T20:10:24.180267+00:00",
+  "generated_at": "2026-11-01T20:11:29.598205+00:00",
   "lane": "NFL",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 22.78715255,
+      "market_id": "1545106",
+      "matchup": "NE at MIA",
+      "model_probability": 0.46537152549777483,
+      "price": 0.2375,
+      "sport": "NFL",
+      "start_time": "2026-11-01T21:25:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 34.47015054,
+      "market_id": "1545108",
+      "matchup": "PHI at WAS",
+      "model_probability": 0.642201505440642,
+      "price": 0.2975,
+      "sport": "NFL",
+      "start_time": "2026-11-02T01:20:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 9.92195075,
+      "market_id": "1581715",
+      "matchup": "CHI at SEA",
+      "model_probability": 0.7142195075074612,
+      "price": 0.615,
+      "sport": "NFL",
+      "start_time": "2026-11-03T01:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 29.74778041,
+      "market_id": "1672727",
+      "matchup": "JAX at BAL",
+      "model_probability": 0.6699778040680129,
+      "price": 0.3725,
+      "sport": "NFL",
+      "start_time": "2026-11-06T01:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 24.76782116,
+      "market_id": "1785075",
+      "matchup": "DAL at IND",
+      "model_probability": 0.4976782116277969,
+      "price": 0.25,
+      "sport": "NFL",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 8.66866175,
+      "market_id": "1785080",
+      "matchup": "DEN at CAR",
+      "model_probability": 0.7066866174576996,
+      "price": 0.62,
+      "sport": "NFL",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "venue": "POLYMARKET"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-01T20:10:24.319432+00:00",
-  "source_schedule_state": "STALE",
-  "state": "STALE",
+  "source_feed_generated_at": "2026-11-01T20:10:48.286937+00:00",
+  "source_schedule_state": "INCOMPLETE",
+  "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 6
   }
 }
