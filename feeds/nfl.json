@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-01T17:06:34.626970+00:00",
+  "generated_at": "2026-11-01T17:12:08.497733+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,15 +14,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 10.61505294,
-      "market_id": "1545096",
+      "contract_side": "YES",
+      "edge_pp": 10.36505294,
+      "market_id": "KXNFLGAME-26NOV01CLEPIT-PIT",
       "matchup": "CLE at PIT",
       "model_probability": 0.7536505293920732,
-      "price": 0.6475,
+      "price": 0.65,
       "sport": "NFL",
       "start_time": "2026-11-01T18:00:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -81,17 +81,6 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 9.24778041,
-      "market_id": "1672727",
-      "matchup": "JAX at BAL",
-      "model_probability": 0.6699778040680129,
-      "price": 0.5775,
-      "sport": "NFL",
-      "start_time": "2026-11-06T01:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
       "edge_pp": 8.25592543,
       "market_id": "1785074",
       "matchup": "CIN at ATL",
@@ -113,12 +102,12 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 12.91866175,
-      "market_id": "1785080",
-      "matchup": "DEN at CAR",
-      "model_probability": 0.7066866174576996,
-      "price": 0.5775,
+      "contract_side": "NO",
+      "edge_pp": 14.86737002,
+      "market_id": "1785079",
+      "matchup": "DET at MIA",
+      "model_probability": 0.368673700238909,
+      "price": 0.22,
       "sport": "NFL",
       "start_time": "2026-11-08T18:00:00+00:00",
       "venue": "POLYMARKET"
@@ -137,10 +126,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-01T17:06:17.324042+00:00",
+  "source_feed_generated_at": "2026-11-01T17:11:34.351185+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 12
+    "buy": 11
   }
 }
