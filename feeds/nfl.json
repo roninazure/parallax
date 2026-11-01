@@ -1,69 +1,13 @@
 {
-  "generated_at": "2026-11-01T22:32:45.812300+00:00",
+  "generated_at": "2026-11-01T22:37:25.162454+00:00",
   "lane": "NFL",
-  "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 34.22015054,
-      "market_id": "1545108",
-      "matchup": "PHI at WAS",
-      "model_probability": 0.642201505440642,
-      "price": 0.3,
-      "sport": "NFL",
-      "start_time": "2026-11-02T01:20:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 9.92195075,
-      "market_id": "1581715",
-      "matchup": "CHI at SEA",
-      "model_probability": 0.7142195075074612,
-      "price": 0.615,
-      "sport": "NFL",
-      "start_time": "2026-11-03T01:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 35.17188989,
-      "market_id": "1672727",
-      "matchup": "JAX at BAL",
-      "model_probability": 0.6542188988906608,
-      "price": 0.3025,
-      "sport": "NFL",
-      "start_time": "2026-11-06T01:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 7.64883261,
-      "market_id": "KXNFLGAME-26NOV08CINATL-ATL",
-      "matchup": "CIN at ATL",
-      "model_probability": 0.46648832610155455,
-      "price": 0.39,
-      "sport": "NFL",
-      "start_time": "2026-11-08T14:30:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 20.29531778,
-      "market_id": "1785083",
-      "matchup": "HOU at LAC",
-      "model_probability": 0.5654531777531616,
-      "price": 0.3625,
-      "sport": "NFL",
-      "start_time": "2026-11-08T21:05:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-01T22:32:08.534400+00:00",
-  "source_schedule_state": "INCOMPLETE",
-  "state": "LIVE",
+  "source_feed_generated_at": "2026-11-01T22:37:25.517790+00:00",
+  "source_schedule_state": "STALE",
+  "state": "STALE",
   "summary": {
-    "buy": 5
+    "buy": 0
   }
 }
