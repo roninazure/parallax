@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-01T04:48:32.698173+00:00",
+  "generated_at": "2026-11-01T04:53:16.058948+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -103,17 +103,6 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 8.00592543,
-      "market_id": "1785074",
-      "matchup": "CIN at ATL",
-      "model_probability": 0.48255925432472757,
-      "price": 0.4025,
-      "sport": "NFL",
-      "start_time": "2026-11-08T14:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
       "edge_pp": 17.51782116,
       "market_id": "1785075",
       "matchup": "DAL at IND",
@@ -159,10 +148,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-01T04:47:44.817717+00:00",
+  "source_feed_generated_at": "2026-11-01T04:53:04.378624+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 14
+    "buy": 13
   }
 }
