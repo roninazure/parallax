@@ -1,25 +1,13 @@
 {
-  "generated_at": "2026-11-01T02:41:20.744136+00:00",
+  "generated_at": "2026-11-01T03:40:47.209257+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 10.59803235,
-      "market_id": "1545746",
-      "matchup": "Oregon State at Fresno State",
-      "model_probability": 0.420980323520983,
-      "price": 0.315,
-      "sport": "CFB",
-      "start_time": "2026-11-01T03:00:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-01T02:40:33.953217+00:00",
+  "source_feed_generated_at": "2026-11-01T03:40:05.432449+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 1
+    "buy": 0
   }
 }
