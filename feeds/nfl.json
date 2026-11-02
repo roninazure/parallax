@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T10:06:55.325039+00:00",
+  "generated_at": "2026-11-02T10:11:34.956365+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -12,6 +12,17 @@
       "sport": "NFL",
       "start_time": "2026-11-03T01:15:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 7.64883261,
+      "market_id": "KXNFLGAME-26NOV08CINATL-ATL",
+      "matchup": "CIN at ATL",
+      "model_probability": 0.46648832610155455,
+      "price": 0.39,
+      "sport": "NFL",
+      "start_time": "2026-11-08T14:30:00+00:00",
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -45,22 +56,11 @@
       "sport": "NFL",
       "start_time": "2026-11-08T21:05:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 7.82720641,
-      "market_id": "1827181",
-      "matchup": "BUF at MIN",
-      "model_probability": 0.48077206410369133,
-      "price": 0.4025,
-      "sport": "NFL",
-      "start_time": "2026-11-10T01:15:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-02T10:06:18.357147+00:00",
+  "source_feed_generated_at": "2026-11-02T10:11:34.417512+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
