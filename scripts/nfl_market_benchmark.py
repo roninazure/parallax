@@ -17,7 +17,7 @@ from pathlib import Path
 from statistics import mean
 from urllib.request import Request, urlopen
 
-from parallax.nfl import SOURCE_URL, _advance, _probability, parse_games
+from parallax.nfl import SOURCE_URL, NFLGame, _advance, _int, _kickoff, _probability, parse_games
 from sports.devig import american_to_decimal, devig_two_way
 
 MAX_SOURCE_BYTES = 8_000_000
@@ -54,13 +54,35 @@ def _metrics(rows: list[dict], key: str) -> dict:
     }
 
 
-def benchmark(csv_text: str, *, season: int = 2025, min_paired: int = 100) -> dict:
+def benchmark(csv_text: str, *, season: int = 2025, min_paired: int = 100,
+              variant: str = "baseline") -> dict:
     reader = csv.DictReader(io.StringIO(csv_text))
     columns = set(reader.fieldnames or ())
     if not REQUIRED.issubset(columns):
         raise ValueError("missing required historical columns: " + ", ".join(sorted(REQUIRED - columns)))
     raw_by_id = {row["game_id"]: row for row in reader}
-    games = [game for game in parse_games(csv_text) if game.season <= season]
+    if variant == "baseline":
+        games = [game for game in parse_games(csv_text) if game.season <= season]
+    elif variant == "postseason_and_tie_corrected":
+        # EXPERIMENTAL ONLY: recover nflverse's actual WC/DIV/CON/SB types
+        # rather than treating them as 'POST', and handle ties as 0.5 outcomes.
+        # Evaluate identical regular-season games; this candidate NEVER
+        # flows into NFL live prediction or publication.
+        games = []
+        for raw in raw_by_id.values():
+            game_type = str(raw.get("game_type") or "").upper()
+            year = _int(raw.get("season"))
+            if year is None or year > season or game_type not in {"REG", "POST", "WC", "DIV", "CON", "SB"}:
+                continue
+            kickoff = _kickoff(raw)
+            home, away = str(raw.get("home_team") or "").strip(), str(raw.get("away_team") or "").strip()
+            if not kickoff or not home or not away:
+                continue
+            games.append(NFLGame(raw["game_id"], year, game_type, kickoff, home, away,
+                                 _int(raw.get("home_score")), _int(raw.get("away_score"))))
+        games.sort(key=lambda game: (game.kickoff, game.game_id))
+    else:
+        raise ValueError("unknown forecast variant")
     ratings: dict[str, float] = {}
     scored: list[dict] = []
     index = 0
@@ -74,7 +96,7 @@ def benchmark(csv_text: str, *, season: int = 2025, min_paired: int = 100) -> di
                                          ratings.get(game.away_team, 1500.0)))
                      for game in games[index:end]]
         for game, p_home in scheduled:
-            if game.season != season or game.home_score is None or game.away_score is None:
+            if game.season != season or game.game_type != "REG" or game.home_score is None or game.away_score is None:
                 continue
             if game.home_score == game.away_score:
                 continue  # binary winner comparison cannot label ties as away wins
@@ -84,7 +106,14 @@ def benchmark(csv_text: str, *, season: int = 2025, min_paired: int = 100) -> di
                            "home_win": int(game.home_score > game.away_score),
                            "elo_home": p_home, "market_home": matched_p})
         for game, p_home in scheduled:
-            _advance(ratings, game, p_home)  # existing production Elo, unchanged
+            if (variant == "postseason_and_tie_corrected"
+                    and game.home_score is not None and game.away_score is not None
+                    and game.home_score == game.away_score):
+                delta = 20.0 * (0.5 - p_home)
+                ratings[game.home_team] = ratings.get(game.home_team, 1500.0) + delta
+                ratings[game.away_team] = ratings.get(game.away_team, 1500.0) - delta
+            else:
+                _advance(ratings, game, p_home)  # existing production Elo for baseline
         index = end
 
     matched = [row for row in scored if row["market_home"] is not None]
@@ -106,7 +135,7 @@ def benchmark(csv_text: str, *, season: int = 2025, min_paired: int = 100) -> di
         status = "ELO_AHEAD_IN_RETROSPECTIVE_SAMPLE_ONLY"
 
     return {
-        "season": season, "model_version": "nfl-v1-elo-rolling",
+        "season": season, "model_version": "nfl-v1-elo-rolling", "variant": variant,
         "source_url": SOURCE_URL, "source_sha256": hashlib.sha256(csv_text.encode()).hexdigest(),
         "status": status, "completed_binary_games": len(scored),
         "paired_market_games": len(matched), "unpaired_games": len(scored) - len(matched),
@@ -131,6 +160,7 @@ def main() -> int:
     src.add_argument("--csv", type=Path, help="frozen local nflverse games.csv")
     src.add_argument("--fetch-once", action="store_true", help="one bounded public nflverse request; no retries")
     parser.add_argument("--season", type=int, default=2025)
+    parser.add_argument("--variant", choices=("baseline", "postseason_and_tie_corrected"), default="baseline")
     parser.add_argument("--min-paired", type=int, default=100)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -143,7 +173,7 @@ def main() -> int:
         csv_text = data.decode("utf-8")
     else:
         csv_text = args.csv.read_text(encoding="utf-8")
-    result = benchmark(csv_text, season=args.season, min_paired=args.min_paired)
+    result = benchmark(csv_text, season=args.season, min_paired=args.min_paired, variant=args.variant)
     result["generated_utc"] = datetime.now(timezone.utc).isoformat()
     output = json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n"
     if args.output:
