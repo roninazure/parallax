@@ -21,7 +21,8 @@ sys.path.insert(0, str(ROOT))
 from parallax.nfl import parse_games
 from scripts.sports_scan import load_quota_state, persist_quota_state, quota_allows_request
 from sports.nfl_evidence import match_nfl_evidence
-from sports.odds_provider import OddsResponse, fetch_odds_with_quota
+from sports.odds_provider import OddsResponse
+from sports.nfl_odds_v4 import fetch_nfl_v4_once
 
 
 def capture(response: OddsResponse, games_csv: str, *, observed_at: datetime) -> dict:
@@ -64,7 +65,6 @@ def quota_headroom_verified(state: dict | None, *, reserve: int) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--games-csv", required=True, type=Path)
-    parser.add_argument("--sport-key", required=True, help="Verified provider NFL identifier")
     parser.add_argument("--quota-state", type=Path, default=Path("reports/sports_quota_state.json"))
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--min-quota-reserve", type=int, default=10)
@@ -91,7 +91,7 @@ def main() -> int:
     games_csv = args.games_csv.read_text(encoding="utf-8")
     if not parse_games(games_csv):
         parser.error("empty or invalid official NFL schedule")
-    response = fetch_odds_with_quota(api_key=api_key, sport_key=args.sport_key, now=now)
+    response = fetch_nfl_v4_once(api_key=api_key, now=now)
     persist_quota_state(args.quota_state, response, now)
     report = capture(response, games_csv, observed_at=now)
     args.output.parent.mkdir(parents=True, exist_ok=True)
