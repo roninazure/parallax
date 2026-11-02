@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T02:09:11.873325+00:00",
+  "generated_at": "2026-11-02T02:13:54.059855+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,15 +14,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 8.39883261,
-      "market_id": "1785074",
+      "contract_side": "YES",
+      "edge_pp": 8.64883261,
+      "market_id": "KXNFLGAME-26NOV08CINATL-ATL",
       "matchup": "CIN at ATL",
       "model_probability": 0.46648832610155455,
-      "price": 0.3825,
+      "price": 0.38,
       "sport": "NFL",
       "start_time": "2026-11-08T14:30:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -31,6 +31,17 @@
       "matchup": "DAL at IND",
       "model_probability": 0.5096651556831409,
       "price": 0.3025,
+      "sport": "NFL",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 11.94658802,
+      "market_id": "1785080",
+      "matchup": "DEN at CAR",
+      "model_probability": 0.7169658802373331,
+      "price": 0.5975,
       "sport": "NFL",
       "start_time": "2026-11-08T18:00:00+00:00",
       "venue": "POLYMARKET"
@@ -45,17 +56,6 @@
       "sport": "NFL",
       "start_time": "2026-11-08T18:00:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 34.98626319,
-      "market_id": "KXNFLGAME-26NOV08NYGPHI-NYG",
-      "matchup": "NYG at PHI",
-      "model_probability": 0.7998626318760493,
-      "price": 0.45,
-      "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
-      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -82,7 +82,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-02T02:08:21.987068+00:00",
+  "source_feed_generated_at": "2026-11-02T02:13:40.836431+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
