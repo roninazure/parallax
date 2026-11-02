@@ -66,3 +66,19 @@ def test_order_of_same_kickoff_games_does_not_change_forecasts():
 def test_missing_odds_columns_fail_loudly():
     with pytest.raises(ValueError, match="missing required historical columns"):
         benchmark("game_id,season\na,2025\n")
+
+
+def test_postseason_and_tie_candidate_changes_historical_state_only():
+    postseason = {**sample("playoff", "2025-01-12", "42", "0"),
+                  "season": "2024", "game_type": "DIV"}
+    regular = sample("regular", "2025-09-07", "21", "14")
+    data = source([postseason, regular])
+    baseline = benchmark(data, min_paired=1)
+    challenger = benchmark(data, min_paired=1, variant="postseason_and_tie_corrected")
+    assert baseline["paired_market_games"] == challenger["paired_market_games"] == 1
+    assert baseline["paired_comparison"]["elo"]["mean_probability"] != challenger["paired_comparison"]["elo"]["mean_probability"]
+
+
+def test_unsupported_challenger_fails_closed():
+    with pytest.raises(ValueError, match="unknown forecast variant"):
+        benchmark(source([sample("regular", "2025-09-07", "21", "14")]), variant="unknown")
