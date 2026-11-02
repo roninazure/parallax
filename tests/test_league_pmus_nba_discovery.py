@@ -260,6 +260,39 @@ def test_current_observed_us_rules_match_exact_full_game_contract():
     assert diag["coverage"]["identity_verified"] == 1
 
 
+def test_current_us_full_team_outcome_labels_match_nickname_rules():
+    # Live Nov 1 source shape: settlement code plus nickname, but the
+    # corresponding side description and team.name contain city + nickname.
+    observed = market(
+        description=CURRENT_DESCRIPTION,
+        sportsMarketTypeV2="SPORTS_MARKET_TYPE_MONEYLINE",
+    )
+    observed["raw"]["marketSides"][0].update(description="Golden State Warriors")
+    observed["raw"]["marketSides"][0]["team"]["name"] = "Golden State Warriors"
+    observed["raw"]["marketSides"][1].update(description="Denver Nuggets")
+    observed["raw"]["marketSides"][1]["team"]["name"] = "Denver Nuggets"
+    rows, diag = _discover_nba_pmus(
+        NOW, Acquisition(), Provider([observed]), [fixture()],
+    )
+    assert len(rows) == 1
+    assert diag["coverage"]["identity_verified"] == 1
+
+    for mutate in ("Golden State Lakers", "Denver Warriors"):
+        bad = market(description=CURRENT_DESCRIPTION)
+        bad["raw"]["marketSides"][0].update(description="Golden State Warriors")
+        bad["raw"]["marketSides"][0]["team"]["name"] = "Golden State Warriors"
+        bad["raw"]["marketSides"][1].update(description="Denver Nuggets")
+        bad["raw"]["marketSides"][1]["team"]["name"] = "Denver Nuggets"
+        index = 0 if mutate.startswith("Golden") else 1
+        bad["raw"]["marketSides"][index]["description"] = mutate
+        bad["raw"]["marketSides"][index]["team"]["name"] = mutate
+        rows, diag = _discover_nba_pmus(
+            NOW, Acquisition(), Provider([bad]), [fixture()],
+        )
+        assert rows == []
+        assert diag["fixture_diagnostics"][0]["discovery_state"] == "IDENTITY_REJECTED"
+
+
 def test_current_us_rules_fail_closed_on_settlement_or_identity_drift():
     mutations = (
         CURRENT_DESCRIPTION.replace("Overtime is included", "Overtime is excluded"),
