@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T02:27:30.062196+00:00",
+  "generated_at": "2026-11-02T02:32:13.149967+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -14,17 +14,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 8.64883261,
-      "market_id": "KXNFLGAME-26NOV08CINATL-ATL",
-      "matchup": "CIN at ATL",
-      "model_probability": 0.46648832610155455,
-      "price": 0.38,
-      "sport": "NFL",
-      "start_time": "2026-11-08T14:30:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "NO",
       "edge_pp": 20.71651557,
       "market_id": "1785075",
@@ -37,11 +26,33 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 8.93056161,
-      "market_id": "1785079",
+      "edge_pp": 12.69658802,
+      "market_id": "KXNFLGAME-26NOV08DENCAR-CAR",
+      "matchup": "DEN at CAR",
+      "model_probability": 0.7169658802373331,
+      "price": 0.59,
+      "sport": "NFL",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 10.43056161,
+      "market_id": "KXNFLGAME-26NOV08DETMIA-MIA",
       "matchup": "DET at MIA",
       "model_probability": 0.3443056161263436,
-      "price": 0.255,
+      "price": 0.24,
+      "sport": "NFL",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 36.48626319,
+      "market_id": "1785081",
+      "matchup": "NYG at PHI",
+      "model_probability": 0.7998626318760493,
+      "price": 0.435,
       "sport": "NFL",
       "start_time": "2026-11-08T18:00:00+00:00",
       "venue": "POLYMARKET"
@@ -71,10 +82,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-02T02:26:25.626808+00:00",
+  "source_feed_generated_at": "2026-11-02T02:31:47.428604+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 6
+    "buy": 7
   }
 }
