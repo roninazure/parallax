@@ -1080,6 +1080,23 @@ def sanitize_completed_scan(
     }
     if market_data_complete is not None:
         result["market_data_complete"] = market_data_complete
+    if normalized_lane in {"nba", "nhl"}:
+        model_state = decoded.get("model_validation_state")
+        result["model_validation_state"] = (
+            model_state if isinstance(model_state, str)
+            and model_state in {"CERTIFIED", "BLOCKED"} else "UNKNOWN"
+        )
+        for field, allowed in (
+            ("source_schedule_state", {"BOUNDED", "COMPLETE", "PARTIAL", "FAILED"}),
+            ("market_coverage_state", {"BOUNDED", "COMPLETE", "PARTIAL", "FAILED"}),
+            ("opportunity_evaluation_state", {"MODEL_BLOCKED", "INCOMPLETE_COVERAGE", "NO_QUALIFYING_BUY", "BUY_CANDIDATE", "FAILED"}),
+        ):
+            value = decoded.get(field)
+            result[field] = value if isinstance(value, str) and value in allowed else "UNKNOWN"
+        if decoded.get("model_artifact_sha256"):
+            result["model_artifact_sha256"] = str(decoded["model_artifact_sha256"])
+        if decoded.get("model_failure_reason"):
+            result["model_failure_reason"] = str(decoded["model_failure_reason"])[:120]
     eligible_nfl_game_ids = (
         {str(rows[index]["game_id"]) for index in nfl_buy_indexes}
         if normalized_lane == "nfl"

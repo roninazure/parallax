@@ -1,0 +1,92 @@
+{
+  "acceptance_gates": {
+    "beats_half_brier": true,
+    "beats_half_ece": false,
+    "beats_half_log_loss": true,
+    "holdout_nonempty": true,
+    "independent_source_verified": false,
+    "model_owner_approval_documented": false,
+    "source_authorization_documented": false
+  },
+  "artifact_sha256": "2f86382704b76750a9e45440bf2204b1ff5f27671ca2f705e9d51cc30dfaabe1",
+  "baseline_50_50": {
+    "brier": 0.25,
+    "ece_10_bins": 0.06007751937984496,
+    "log_loss": 0.6931471805599453,
+    "n_games": 516
+  },
+  "calibration": {
+    "intercept": 0.08780963017658344,
+    "method": "platt_logistic",
+    "slope": 0.5181095346239206
+  },
+  "certified": false,
+  "elo": {
+    "home_advantage": 40.0,
+    "k": 30.0
+  },
+  "generated_at": "2026-04-12T00:00:00+00:00",
+  "history_fingerprint": "099dfd534d83e4cc560446b070fee87b9c17a1b01e8626d00d28c8f24af3b8d5",
+  "holdout_metrics": {
+    "brier": 0.19747021377631446,
+    "ece_10_bins": 0.12777471731927403,
+    "log_loss": 0.5835771236657619,
+    "n_games": 516
+  },
+  "independent_source_sha256": null,
+  "model_owner_approval_reference": null,
+  "model_version": "parallax-league-elo-calibrated-v1",
+  "ratings": {
+    "NBA:ATL": 1589.9813834909376,
+    "NBA:BKN": 1262.0248484767262,
+    "NBA:BOS": 1698.1954092957224,
+    "NBA:CHA": 1605.210133092958,
+    "NBA:CHI": 1334.0559269467108,
+    "NBA:CLE": 1631.6814111951062,
+    "NBA:DAL": 1341.8251346455932,
+    "NBA:DEN": 1684.080306872133,
+    "NBA:DET": 1680.191793912327,
+    "NBA:GSW": 1398.9506653290412,
+    "NBA:HOU": 1604.2056656479529,
+    "NBA:IND": 1307.900597986157,
+    "NBA:LAC": 1547.9498775209083,
+    "NBA:LAL": 1637.8811589312954,
+    "NBA:MEM": 1263.0894778816423,
+    "NBA:MIA": 1503.3811248349791,
+    "NBA:MIL": 1376.7885900980273,
+    "NBA:MIN": 1570.3389764676567,
+    "NBA:NOP": 1379.2094007679184,
+    "NBA:NYK": 1632.7476004683224,
+    "NBA:OKC": 1748.193359698604,
+    "NBA:ORL": 1554.3444578591775,
+    "NBA:PHI": 1530.7275910424414,
+    "NBA:PHX": 1513.9207876893527,
+    "NBA:POR": 1534.6356550044814,
+    "NBA:SAC": 1345.7586849427166,
+    "NBA:SAS": 1742.5798513253085,
+    "NBA:TOR": 1523.867737747504,
+    "NBA:UTA": 1258.1262913282574,
+    "NBA:WAS": 1198.1560995000423
+  },
+  "schema_version": 1,
+  "source_authorization_reference": null,
+  "source_game_count": 2460,
+  "source_seasons": [
+    2024,
+    2025
+  ],
+  "source_sha256": "56a1765eea67c970d29019afc6b5904bcdffe3ec0212fcdf1c3a09e4911f0b84",
+  "splits": {
+    "calibration_end": "2026-01-29",
+    "calibration_games": 472,
+    "calibration_start": "2025-11-23",
+    "holdout_end": "2026-04-12",
+    "holdout_games": 516,
+    "holdout_start": "2026-01-30",
+    "same_day_isolated": true,
+    "train_end": "2025-11-22",
+    "train_games": 1472
+  },
+  "sport": "NBA",
+  "trained_through": "2026-04-12"
+}

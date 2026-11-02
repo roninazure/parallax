@@ -68,10 +68,17 @@ def test_reusable_economic_lane_classifies_all_required_subtypes():
 
 
 def test_economic_provider_is_registered_fail_closed_and_never_uses_price():
+    from parallax.economic_sources import EconomicObservation
+
     market = normalized_economic_market(
         "Will CPI inflation exceed 3 percent?", "Official CPI release rules."
     )
-    provider = EconomicsEvidenceProvider()
+    class OfflineSources:
+        def latest(self, _subtype):
+            return EconomicObservation("FRED", "CPIAUCSL", "2026-08-01", 3.2,
+                "2026-10-28T00:00:00+00:00", 0.0)
+
+    provider = EconomicsEvidenceProvider(OfflineSources())
     assert provider.supports(market)
     assert provider.assess(market) is None
     assert provider.last_reason.startswith("economic_probability_methodology_unvalidated:CPI_INFLATION")
