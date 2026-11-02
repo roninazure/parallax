@@ -1,0 +1,35 @@
+name: NFL odds research validation
+
+on:
+  push:
+    branches:
+      - fix/nfl-sportsbook-evidence-20261102
+  pull_request:
+    branches:
+      - fix/nfl-sportsbook-evidence-20261102
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+      - name: Use Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test runner
+        run: python -m pip install 'pytest>=8,<9'
+      - name: Compile isolated research modules
+        run: |
+          python -m py_compile sports/nfl_evidence.py sports/nfl_odds_v4.py scripts/nfl_sportsbook_capture.py scripts/nfl_forward_market_evaluation.py
+      - name: Run research and NFL regression tests
+        env:
+          TZ: UTC
+        run: |
+          python -m pytest -q tests/test_nfl_sportsbook_evidence.py tests/test_nfl_sportsbook_capture.py tests/test_nfl_odds_v4.py tests/test_nfl_forward_market_evaluation.py tests/test_nfl_evidence_integrity.py tests/test_sports_fair_value.py tests/test_sports_odds_provider.py tests/test_parallax_nfl.py
