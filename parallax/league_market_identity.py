@@ -31,11 +31,11 @@ _PMUS_RULE_CURRENT = re.compile(
     r"(?P<home_name>[A-Za-z0-9 ]+?) professional basketball game scheduled for "
     r"(?P<date>[A-Z][a-z]+ [0-9]{1,2}, [0-9]{4}) at "
     r"(?P<time>[0-9]{1,2}:[0-9]{2}[AP]M) ET "
-    r"\\(as of the listing of the event's first instrument\\)\\. "
-    r"Overtime is included if played\\. If the game is delayed, postponed, "
+    r"\(as of the listing of the event's first instrument\)\. "
+    r"Overtime is included if played\. If the game is delayed, postponed, "
     r"suspended or otherwise rescheduled to a date and time not within two days "
     r"of the originally scheduled date and time, the market will settle to the "
-    r"last fair market price\\. Outcome sourced from the relevant governing body\\.$",
+    r"last fair market price\. Outcome sourced from the relevant governing body\.$",
     re.ASCII,
 )
 _PMUS_CODES = {"GSW": "GS", "NYK": "NY", "SAS": "SA"}
