@@ -211,16 +211,29 @@ def selected_yes_team(
     if not match or rules != market.resolution_rules:
         return None
     identity = match.groupdict()
-    # Current US descriptions use short team names (e.g. "Celtics"),
-    # while marketSides.team.name may contain "Boston Celtics". Only
-    # accept the exact declared outcome label, not an invented team alias.
+    # The observed US settlement text uses "OKC Thunder" while the side
+    # label/team name uses "Oklahoma City Thunder". Anchor nickname expansion
+    # to the independent fixture city and exact team abbreviation; never
+    # accept an arbitrary fuzzy team name or a generic market-rule match.
     for order, code, name in (
         ("home", hc, identity["home_name"]),
         ("away", ac, identity["away_name"]),
     ):
+        if _team(identity[f"{order}_code"]) != code:
+            return None
         side = ordered[order]
-        expected_name = side["description"] if current else side["team"]["name"]
-        if _team(identity[f"{order}_code"]) != code or _name(name) != _name(expected_name):
+        if current:
+            nickname = _name(name)
+            label = _name(side["description"])
+            city = _name(
+                fixture.venue_home_name if order == "home"
+                else fixture.venue_away_name
+            )
+            if not nickname or not (
+                label == nickname or (city and label == f"{city} {nickname}")
+            ):
+                return None
+        elif _name(name) != _name(side["team"]["name"]):
             return None
     try:
         scheduled = datetime.strptime(
