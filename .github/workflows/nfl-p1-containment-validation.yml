@@ -1,0 +1,30 @@
+name: NFL P1 containment validation
+
+on:
+  push:
+    branches:
+      - fix/p1-nfl-buy-publication-hold-20261102
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nfl-publication-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      TZ: America/New_York
+    steps:
+      - name: Checkout isolated candidate
+        uses: actions/checkout@v4
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install project and test requirements
+        run: python -m pip install -e . pytest
+      - name: Compile changed production and test modules
+        run: python -m py_compile parallax/nfl_publication_control.py parallax/public_feed.py scripts/nfl_live_scan.py tests/test_parallax_nfl.py tests/test_parallax_public_feed.py
+      - name: Run NFL and public-feed regression suites
+        run: python -m pytest -q tests/test_parallax_nfl.py tests/test_parallax_public_feed.py
