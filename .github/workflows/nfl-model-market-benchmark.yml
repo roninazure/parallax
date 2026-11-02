@@ -43,6 +43,15 @@ jobs:
             --csv validation-output/nflverse-games.csv \
             --season 2025 --min-paired 100 \
             --output validation-output/nfl-market-benchmark-2025.json
+      - name: Measure corrected playoff and tie semantics as an offline challenger
+        env:
+          TZ: UTC
+        run: |
+          python scripts/nfl_market_benchmark.py \
+            --csv validation-output/nflverse-games.csv \
+            --season 2025 --min-paired 100 \
+            --variant postseason_and_tie_corrected \
+            --output validation-output/nfl-market-challenger-2025.json
       - name: Save reproducible source and result together
         if: always()
         uses: actions/upload-artifact@v4
