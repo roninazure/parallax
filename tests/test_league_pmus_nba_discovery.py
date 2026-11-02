@@ -25,6 +25,19 @@ DESCRIPTION = (
 )
 
 
+# Sanitized November 1 live US API settlement shape. Keep the alternate
+# postponement payout clause explicit: this is not a generic text match.
+CURRENT_DESCRIPTION = (
+    "This market will settle to the winner of the GS Warriors vs DEN Nuggets "
+    "professional basketball game scheduled for October 26, 2026 at 10:00PM ET "
+    "(as of the listing of the event's first instrument). Overtime is included "
+    "if played. If the game is delayed, postponed, suspended or otherwise "
+    "rescheduled to a date and time not within two days of the originally "
+    "scheduled date and time, the market will settle to the last fair market "
+    "price. Outcome sourced from the relevant governing body."
+)
+
+
 def fixture(i=0):
     return ShadowFixture(
         "NBA", f"bdl:{i+1}", 2026, TIP + timedelta(days=i),
@@ -231,3 +244,35 @@ def test_explicit_pmus_us_v2_moneyline_type_remains_supported():
     assert len(rows) == 1
     assert diag["coverage"]["identity_verified"] == 1
     assert diag["fixture_diagnostics"][0]["book_state"] == "NOT_CHECKED"
+
+
+def test_current_observed_us_rules_match_exact_full_game_contract():
+    observed = market(description=CURRENT_DESCRIPTION,
+                      sportsMarketTypeV2="SPORTS_MARKET_TYPE_MONEYLINE")
+    # Current US sides may carry a city+nickname name while settlement text
+    # uses the short outcome label. Team code and ordering still must match.
+    observed["raw"]["marketSides"][0]["team"]["name"] = "Golden State Warriors"
+    observed["raw"]["marketSides"][1]["team"]["name"] = "Denver Nuggets"
+    rows, diag = _discover_nba_pmus(
+        NOW, Acquisition(), Provider([observed]), [fixture()],
+    )
+    assert len(rows) == 1
+    assert diag["coverage"]["identity_verified"] == 1
+
+
+def test_current_us_rules_fail_closed_on_settlement_or_identity_drift():
+    mutations = (
+        CURRENT_DESCRIPTION.replace("Overtime is included", "Overtime is excluded"),
+        CURRENT_DESCRIPTION.replace("last fair market price", "original market price"),
+        CURRENT_DESCRIPTION.replace("October 26", "October 27"),
+        CURRENT_DESCRIPTION.replace("10:00PM", "9:00PM"),
+        CURRENT_DESCRIPTION.replace("GS Warriors", "LAL Lakers"),
+        CURRENT_DESCRIPTION.replace("within two days", "within three days"),
+        CURRENT_DESCRIPTION.replace("Outcome sourced from the relevant governing body.", ""),
+    )
+    for rules in mutations:
+        rows, diag = _discover_nba_pmus(
+            NOW, Acquisition(), Provider([market(description=rules)]), [fixture()],
+        )
+        assert rows == []
+        assert diag["fixture_diagnostics"][0]["discovery_state"] == "IDENTITY_REJECTED"
