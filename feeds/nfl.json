@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-02T01:13:25.938633+00:00",
+  "generated_at": "2026-11-02T01:18:04.147075+00:00",
   "lane": "NFL",
   "plays": [
     {
       "contract_side": "YES",
-      "edge_pp": 33.72015054,
+      "edge_pp": 33.47015054,
       "market_id": "1545108",
       "matchup": "PHI at WAS",
       "model_probability": 0.642201505440642,
-      "price": 0.305,
+      "price": 0.3075,
       "sport": "NFL",
       "start_time": "2026-11-02T01:20:00+00:00",
       "venue": "POLYMARKET"
@@ -47,26 +47,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 12.69658802,
-      "market_id": "KXNFLGAME-26NOV08DENCAR-CAR",
+      "contract_side": "YES",
+      "edge_pp": 11.94658802,
+      "market_id": "1785080",
       "matchup": "DEN at CAR",
       "model_probability": 0.7169658802373331,
-      "price": 0.59,
+      "price": 0.5975,
       "sport": "NFL",
       "start_time": "2026-11-08T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 10.43056161,
-      "market_id": "KXNFLGAME-26NOV08DETMIA-MIA",
-      "matchup": "DET at MIA",
-      "model_probability": 0.3443056161263436,
-      "price": 0.24,
-      "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -78,11 +67,22 @@
       "sport": "NFL",
       "start_time": "2026-11-08T18:00:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 17.6336679,
+      "market_id": "KXNFLGAME-26NOV08HOULAC-LAC",
+      "matchup": "HOU at LAC",
+      "model_probability": 0.5563366789975239,
+      "price": 0.38,
+      "sport": "NFL",
+      "start_time": "2026-11-08T21:05:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-02T01:12:38.103287+00:00",
+  "source_feed_generated_at": "2026-11-02T01:17:55.155493+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
