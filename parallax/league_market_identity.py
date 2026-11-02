@@ -174,9 +174,27 @@ def selected_yes_team(
         if (
             _team(team.get("abbreviation")) != code
             or not _name(team.get("name"))
-            or _name(side.get("description")) != _name(team.get("name"))
         ):
             return None
+        # Current US contracts may use "Boston Celtics" as the team name
+        # and "Celtics" as the outcome label. Require the exact fixture city
+        # plus the exact outcome label, and only for the observed new rules.
+        label = _name(side.get("description"))
+        team_name = _name(team.get("name"))
+        if not label:
+            return None
+        if label != team_name:
+            city = _name(
+                fixture.venue_home_name if order == "home"
+                else fixture.venue_away_name
+            )
+            rules = raw.get("description")
+            if not (
+                city and isinstance(rules, str)
+                and _PMUS_RULE_CURRENT.fullmatch(rules)
+                and team_name == f"{city} {label}"
+            ):
+                return None
         ordered[order] = side
     if set(ordered) != {"home", "away"}:
         return None
