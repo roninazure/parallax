@@ -1,91 +1,13 @@
 {
-  "generated_at": "2026-11-02T03:20:38.391452+00:00",
+  "generated_at": "2026-11-02T03:26:23.415574+00:00",
   "lane": "NFL",
-  "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 9.92195075,
-      "market_id": "1581715",
-      "matchup": "CHI at SEA",
-      "model_probability": 0.7142195075074612,
-      "price": 0.615,
-      "sport": "NFL",
-      "start_time": "2026-11-03T01:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 7.89883261,
-      "market_id": "1785074",
-      "matchup": "CIN at ATL",
-      "model_probability": 0.46648832610155455,
-      "price": 0.3875,
-      "sport": "NFL",
-      "start_time": "2026-11-08T14:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 20.96651557,
-      "market_id": "1785075",
-      "matchup": "DAL at IND",
-      "model_probability": 0.5096651556831409,
-      "price": 0.3,
-      "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 13.19658802,
-      "market_id": "1785080",
-      "matchup": "DEN at CAR",
-      "model_probability": 0.7169658802373331,
-      "price": 0.585,
-      "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 8.68056161,
-      "market_id": "1785079",
-      "matchup": "DET at MIA",
-      "model_probability": 0.3443056161263436,
-      "price": 0.2575,
-      "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 35.98626319,
-      "market_id": "1785081",
-      "matchup": "NYG at PHI",
-      "model_probability": 0.7998626318760493,
-      "price": 0.44,
-      "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 19.8836679,
-      "market_id": "1785083",
-      "matchup": "HOU at LAC",
-      "model_probability": 0.5563366789975239,
-      "price": 0.3575,
-      "sport": "NFL",
-      "start_time": "2026-11-08T21:05:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-02T03:20:26.667607+00:00",
-  "source_schedule_state": "INCOMPLETE",
-  "state": "LIVE",
+  "source_feed_generated_at": "2026-11-02T03:26:24.141565+00:00",
+  "source_schedule_state": "STALE",
+  "state": "STALE",
   "summary": {
-    "buy": 7
+    "buy": 0
   }
 }
