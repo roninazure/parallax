@@ -25,6 +25,19 @@ _PMUS_RULE = re.compile(
     r"(?P<time>[0-9]{1,2}:[0-9]{2}[AP]M) ET\. Overtime is included if played\.",
     re.ASCII,
 )
+_PMUS_RULE_CURRENT = re.compile(
+    r"^This market will settle to the winner of the (?P<away_code>[A-Z]{2,4}) "
+    r"(?P<away_name>[A-Za-z0-9 ]+?) vs (?P<home_code>[A-Z]{2,4}) "
+    r"(?P<home_name>[A-Za-z0-9 ]+?) professional basketball game scheduled for "
+    r"(?P<date>[A-Z][a-z]+ [0-9]{1,2}, [0-9]{4}) at "
+    r"(?P<time>[0-9]{1,2}:[0-9]{2}[AP]M) ET "
+    r"\\(as of the listing of the event's first instrument\\)\\. "
+    r"Overtime is included if played\\. If the game is delayed, postponed, "
+    r"suspended or otherwise rescheduled to a date and time not within two days "
+    r"of the originally scheduled date and time, the market will settle to the "
+    r"last fair market price\\. Outcome sourced from the relevant governing body\\.$",
+    re.ASCII,
+)
 _PMUS_CODES = {"GSW": "GS", "NYK": "NY", "SAS": "SA"}
 
 
@@ -175,20 +188,26 @@ def selected_yes_team(
         if _name(market.outcomes.get(outcome)) != _name(side["description"]):
             return None
     rules = raw.get("description")
-    match = _PMUS_RULE.match(rules) if isinstance(rules, str) else None
+    current = _PMUS_RULE_CURRENT.fullmatch(rules) if isinstance(rules, str) else None
+    match = current or (_PMUS_RULE.match(rules) if isinstance(rules, str) else None)
     if not match or rules != market.resolution_rules:
         return None
     identity = match.groupdict()
-    if (
-        _team(identity["home_code"]) != hc
-        or _team(identity["away_code"]) != ac
-        or _name(identity["home_name"]) != _name(ordered["home"]["team"]["name"])
-        or _name(identity["away_name"]) != _name(ordered["away"]["team"]["name"])
+    # Current US descriptions use short team names (e.g. "Celtics"),
+    # while marketSides.team.name may contain "Boston Celtics". Only
+    # accept the exact declared outcome label, not an invented team alias.
+    for order, code, name in (
+        ("home", hc, identity["home_name"]),
+        ("away", ac, identity["away_name"]),
     ):
-        return None
+        side = ordered[order]
+        expected_name = side["description"] if current else side["team"]["name"]
+        if _team(identity[f"{order}_code"]) != code or _name(name) != _name(expected_name):
+            return None
     try:
         scheduled = datetime.strptime(
-            f"{identity['date']} {identity['time']}", "%b %d, %Y %I:%M%p"
+            f"{identity['date']} {identity['time']}",
+            "%B %d, %Y %I:%M%p" if current else "%b %d, %Y %I:%M%p",
         ).replace(tzinfo=_ET)
     except ValueError:
         return None
