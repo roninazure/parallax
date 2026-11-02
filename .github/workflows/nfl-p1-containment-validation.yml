@@ -13,6 +13,8 @@ jobs:
   nfl-publication-regression:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      TZ: America/New_York
     steps:
       - name: Checkout isolated candidate
         uses: actions/checkout@v4
