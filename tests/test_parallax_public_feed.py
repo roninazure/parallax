@@ -1300,3 +1300,38 @@ def test_unvalidated_or_ambiguous_mlb_postseason_buy_is_withheld(path, value):
 
     assert result["buy_publication_eligible"] is False
     assert result["summary"]["buy"] == 0
+
+
+@pytest.mark.parametrize("setting", ["1", "true", "YES", "bad-operator-value"])
+def test_p1_nfl_publication_hold_withholds_certified_live_buy(monkeypatch, setting):
+    """LIVE must not surface a BUY even if prior scanner output was certified."""
+    stdout = json.dumps({
+        "slate": nfl_slate_for(),
+        "summary": {"rows": [eligible_nfl_buy(market_id="KXNFLGAME-P1-HOLD")]},
+    })
+
+    monkeypatch.delenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", raising=False)
+    before = sanitize_completed_scan("nfl", stdout, generated_at=NOW)
+    assert before["buy_publication_eligible"] is True
+    assert before["summary"]["buy"] == 1
+
+    monkeypatch.setenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", setting)
+    after = sanitize_completed_scan("nfl", stdout, generated_at=NOW)
+    assert after["buy_publication_eligible"] is False
+    assert after["summary"]["buy"] == 0
+    assert all(play["action"] != "BUY" for play in after["plays"])
+
+    # Other sports' published BUY rules are deliberately unchanged.
+    mlb = sanitize_completed_scan("mlb", completed_mlb_stdout(), generated_at=NOW)
+    assert mlb["summary"]["buy"] == 1
+
+
+@pytest.mark.parametrize("setting", ["0", "false", "NO", "off", ""])
+def test_p1_nfl_publication_hold_explicit_disable_preserves_baseline(monkeypatch, setting):
+    stdout = json.dumps({
+        "slate": nfl_slate_for(),
+        "summary": {"rows": [eligible_nfl_buy(market_id="KXNFLGAME-P1-BASELINE")]},
+    })
+    monkeypatch.setenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", setting)
+    result = sanitize_completed_scan("nfl", stdout, generated_at=NOW)
+    assert result["summary"]["buy"] == 1
