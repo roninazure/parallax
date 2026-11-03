@@ -26,7 +26,7 @@ jobs:
       - name: Compile isolated research and existing supervisor
         run: |
           python -m compileall -q scripts/nfl_sportsbook_capture.py sports/nfl_odds_v4.py sports/nfl_evidence.py sports/nfl_research_fair_value.py scripts/parallax_unattended.py
-      - name: NFL research, supervisor and operational regression tests
+      - name: Research-only and supervisor tests under UTC
         env:
           TZ: UTC
         run: |
@@ -36,7 +36,12 @@ jobs:
             tests/test_nfl_sportsbook_evidence.py \
             tests/test_nfl_odds_v4.py \
             tests/test_nfl_sportsbook_capture.py \
-            tests/test_parallax_unattended.py \
+            tests/test_parallax_unattended.py
+      - name: Unchanged production league regressions in production Eastern timezone
+        env:
+          TZ: America/New_York
+        run: |
+          python -m pytest -q \
             tests/test_parallax_nfl.py \
             tests/test_parallax_live_mlb.py \
             tests/test_parallax_live_cfb.py
