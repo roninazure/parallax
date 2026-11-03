@@ -8,6 +8,7 @@ import json
 import urllib.request
 from datetime import UTC, datetime
 from urllib.parse import urlencode
+from collections.abc import Callable
 
 from .fair_value import BookMoneyline
 from .odds_provider import OddsQuota, OddsResponse, SportsEvent, _quote_age_seconds
@@ -64,9 +65,15 @@ def parse_nfl_v4(payload: object, *, now: datetime, headers: object) -> OddsResp
         None, header_int("x-requests-used"), header_int("x-requests-remaining"), None))
 
 
-def fetch_nfl_v4_once(*, api_key: str, now: datetime, timeout: float = 20) -> OddsResponse:
+def fetch_nfl_v4_once(
+    *, api_key: str, now: datetime, timeout: float = 20,
+    response_clock: Callable[[], datetime] | None = None,
+) -> OddsResponse:
+    """Fetch once and age quotes against response receipt, not request start."""
     if not api_key:
         raise ValueError("api_key required")
+    if now.tzinfo is None:
+        raise ValueError("now must be timezone aware")
     url = NFL_ODDS_ENDPOINT + "?" + urlencode({
         "apiKey": api_key, "regions": "us", "markets": "h2h", "oddsFormat": "american",
     })
@@ -74,4 +81,6 @@ def fetch_nfl_v4_once(*, api_key: str, now: datetime, timeout: float = 20) -> Od
     with urllib.request.urlopen(request, timeout=timeout) as response:
         if response.status != 200:
             raise RuntimeError("NFL odds provider returned non-200 status")
-        return parse_nfl_v4(json.load(response), now=now, headers=response.headers)
+        payload = json.load(response)
+        received_at = (response_clock or (lambda: datetime.now(UTC)))()
+        return parse_nfl_v4(payload, now=received_at, headers=response.headers)
