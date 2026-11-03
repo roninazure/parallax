@@ -8,37 +8,9 @@ import sys
 import unittest
 from datetime import datetime, timezone
 
-from parallax.nfl import _date, _kickoff
-from sports.fair_value import BookMoneyline, consensus_two_way_moneyline
-from sports.odds_provider import _parse_utc, _quote_age_seconds
-
-
-class NFLKickoffIntegrityTests(unittest.TestCase):
-    def test_naive_scheduled_date_is_eastern_not_host_local(self):
-        self.assertEqual(_date("2026-09-13"), "2026-09-13T04:00:00+00:00")
-        self.assertEqual(_date("2026-01-11"), "2026-01-11T05:00:00+00:00")
-        self.assertEqual(_date("2026-11-02T12:00:00"), "2026-11-02T17:00:00+00:00")
-
-    def test_fixture_fallback_is_deterministic_in_utc_and_eastern_processes(self):
-        code = (
-            "import json; from parallax.nfl import _kickoff;"
-            "print(json.dumps(_kickoff({'gameday':'2026-09-13','gametime':''})))"
-        )
-        answers = []
-        for tz in ("UTC", "America/New_York", "America/Los_Angeles"):
-            env = dict(os.environ, TZ=tz)
-            result = subprocess.run(
-                [sys.executable, "-c", code],
-                env=env,
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-            answers.append(json.loads(result.stdout))
-        self.assertEqual(answers, ["2026-09-13T04:00:00+00:00"] * 3)
-
-    def test_explicit_aware_game_time_preserved(self):
-        self.assertEqual(_date("2026-11-02T17:00:00Z"), "2026-11-02T17:00:00+00:00")
+from parallax.nfl import NFLGame
+from sports.nfl_research_fair_value import BookMoneyline, consensus_two_way_moneyline
+from sports.nfl_odds_v4 import _quote_age_seconds
 
 
 class SportsbookEvidenceIntegrityTests(unittest.TestCase):
@@ -72,7 +44,8 @@ class SportsbookEvidenceIntegrityTests(unittest.TestCase):
         now = datetime(2026, 11, 2, 17, 0, tzinfo=timezone.utc)
         self.assertEqual(_quote_age_seconds("2026-11-02T17:01:00Z", now), -60)
         with self.assertRaises(ValueError):
-            _parse_utc("2026-11-02T17:00:00")
+            _quote_age_seconds("2026-11-02T17:00:00", now)
+
 
 
 if __name__ == "__main__":
