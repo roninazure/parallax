@@ -201,10 +201,17 @@ def main() -> int:
     schedule.add_argument("--games-csv", type=Path)
     schedule.add_argument("--fetch-schedule", action="store_true",
                           help="Fetch the official nflverse schedule once")
-    parser.add_argument("--snapshots", type=Path, nargs="+", required=True)
+    snapshot_source = parser.add_mutually_exclusive_group(required=True)
+    snapshot_source.add_argument("--snapshots", type=Path, nargs="+")
+    snapshot_source.add_argument("--snapshots-dir", type=Path)
     parser.add_argument("--min-scored", type=int, default=100)
     args = parser.parse_args()
-    snapshots = [json.loads(path.read_text(encoding="utf-8")) for path in args.snapshots]
+    snapshot_paths = (
+        sorted(args.snapshots_dir.glob("*.json"))
+        if args.snapshots_dir is not None
+        else args.snapshots
+    )
+    snapshots = [json.loads(path.read_text(encoding="utf-8")) for path in snapshot_paths]
     games = fetch_games() if args.fetch_schedule else parse_games(
         args.games_csv.read_text(encoding="utf-8")
     )
