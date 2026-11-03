@@ -797,3 +797,69 @@ def test_nfl_sportsbook_no_eligible_games_is_a_clean_skip_without_capture_succes
     assert health["lanes"]["nfl_sportsbook_research"]["eligible_games"] == 0
     assert health["recent_errors"] == []
     assert health["state"] == "RUNNING"
+
+
+def test_enabling_nfl_sportsbook_research_later_starts_fresh_one_hour_grace_period(
+    tmp_path, monkeypatch
+):
+    runtime_env = tmp_path / "runtime.env"
+    runtime_env.write_text(
+        "PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=0\n", encoding="utf-8"
+    )
+    now = [0.0]
+    calls = []
+    monkeypatch.setattr(
+        "parallax_unattended.export_completed_scan",
+        lambda lane, stdout, state_dir: None,
+    )
+
+    def clock():
+        return (datetime(2026, 11, 3, tzinfo=UTC) + timedelta(seconds=now[0])).isoformat()
+
+    def runner(command, **kwargs):
+        calls.append(command)
+        if command[1].endswith("nfl_sportsbook_capture.py"):
+            return subprocess.CompletedProcess(
+                command, 0,
+                json.dumps({
+                    "status": "CAPTURED",
+                    "schema_version": "nfl-sportsbook-research-v1",
+                    "research_only": True,
+                    "buy_publication_eligible": False,
+                    "output": command[command.index("--output") + 1],
+                    "events_seen": 16,
+                    "events_accepted": 16,
+                }),
+                "",
+            )
+        if command[1].endswith("nfl_live_scan.py"):
+            output = json.dumps({"slate": {"market_data_complete": True}})
+        else:
+            output = "{}"
+        return subprocess.CompletedProcess(command, 0, output, "")
+
+    scheduler = UnattendedScheduler(
+        root=tmp_path / "release",
+        state_dir=tmp_path / "state",
+        runtime_env=runtime_env,
+        runner=runner,
+        clock=clock,
+        monotonic=lambda: now[0],
+    )
+    scheduler.next_due["nba"] = scheduler.next_due["nhl"] = float("inf")
+
+    now[0] = 7200.0
+    runtime_env.write_text(
+        "PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1\n", encoding="utf-8"
+    )
+    scheduler.run_cycle()
+    assert scheduler.next_due["nfl_sportsbook_research"] == 10800.0
+    assert not any(c[1].endswith("nfl_sportsbook_capture.py") for c in calls)
+
+    now[0] = 10799.0
+    scheduler.run_cycle()
+    assert not any(c[1].endswith("nfl_sportsbook_capture.py") for c in calls)
+
+    now[0] = 10800.0
+    scheduler.run_cycle()
+    assert len([c for c in calls if c[1].endswith("nfl_sportsbook_capture.py")]) == 1
