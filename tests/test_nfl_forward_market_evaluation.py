@@ -60,9 +60,20 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
         self.assertEqual(result["interpretation"], "CHALLENGER_IMPROVEMENT_SUPPORTED")
 
     def test_paired_bootstrap_is_deterministic(self):
-        rows = [{"home_win": i % 2, "elo": .55, "market": .60} for i in range(40)]
+        rows = [{"home_win": i % 2, "elo": .55, "market": .60,
+                 "kickoff": (KICKOFF + timedelta(days=7 * (i % 8))).isoformat()}
+                for i in range(40)]
         self.assertEqual(_paired_bootstrap(rows, "market", "log_loss"),
                          _paired_bootstrap(rows, "market", "log_loss"))
+
+    def test_bootstrap_resamples_calendar_weeks_as_clusters(self):
+        rows = [{"home_win": 1, "elo": .40, "market": .80,
+                 "kickoff": (KICKOFF + timedelta(days=7 * i)).isoformat()}
+                for i in range(8)]
+        result = _paired_bootstrap(rows, "market", "brier")
+        self.assertEqual(result["n"], 8)
+        self.assertEqual(result["clusters"], 8)
+        self.assertEqual(result["resampling_unit"], "calendar_week_cluster")
 
 
 if __name__ == "__main__":
