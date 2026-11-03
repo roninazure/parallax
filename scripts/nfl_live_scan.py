@@ -420,6 +420,9 @@ def _dispatch_buy_alert(
 def _dispatch_eligible_buy_alerts(dispatcher, candidates) -> dict[str, int]:
     """Dispatch one already-validated canonical BUY per economic position."""
     summary = {"sent": 0, "deduplicated": 0, "failed": 0, "withheld": 0}
+    if nfl_buy_publication_hold_active():
+        summary["withheld"] = len(candidates)
+        return summary
     for candidate in candidates:
         play, market, mapping, detected_at, economic_key, selected_team = candidate
         try:
