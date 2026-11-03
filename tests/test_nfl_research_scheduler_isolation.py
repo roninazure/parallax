@@ -7,7 +7,8 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from scripts.parallax_unattended import (
-    LANES, SPORTS_LANES, STARTUP_OFFSETS_SECONDS, UnattendedScheduler,
+    LANES, SPORTS_LANES, STARTUP_OFFSETS_SECONDS,
+    NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS, UnattendedScheduler,
 )
 
 class NFLResearchSchedulerIsolationTests(unittest.TestCase):
@@ -31,6 +32,7 @@ class NFLResearchSchedulerIsolationTests(unittest.TestCase):
             self.assertNotIn("nfl_sportsbook_research", SPORTS_LANES)
             self.assertIn("nfl", commands)
             self.assertEqual(STARTUP_OFFSETS_SECONDS["nfl_sportsbook_research"], 3600)
+            self.assertEqual(NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS, 86400)
 
     def test_enabled_collects_only_under_external_research_state(self):
         with TemporaryDirectory() as tmp:
