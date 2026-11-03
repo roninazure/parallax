@@ -132,7 +132,7 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
         self.assertLess(vs_elo["ci95"][1], 0)
         self.assertGreater(vs_market["ci95"][0], 0)
         self.assertEqual(vs_market["baseline"], "market")
-        self.assertEqual(vs_market["interpretation"], "ELO_IMPROVEMENT_SUPPORTED")
+        self.assertEqual(vs_market["interpretation"], "BASELINE_IMPROVEMENT_SUPPORTED")
         self.assertEqual(vs_market["challenger"], "fixed_blend")
 
     def test_market_baseline_gate_is_research_only(self):
