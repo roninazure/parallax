@@ -1,8 +1,14 @@
+import json
 import unittest
+from contextlib import redirect_stdout
 from datetime import UTC, datetime, timedelta
+from io import StringIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from parallax.nfl import NFLGame
-from scripts.nfl_forward_market_evaluation import _paired_bootstrap, evaluate
+from scripts.nfl_forward_market_evaluation import _paired_bootstrap, evaluate, main
 
 
 KICKOFF = datetime(2026, 11, 8, 18, tzinfo=UTC)
@@ -71,6 +77,35 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
         self.assertEqual(_paired_bootstrap(rows, "market", "log_loss"),
                          _paired_bootstrap(rows, "market", "log_loss"))
 
+
+    def test_cli_fetches_official_schedule_without_manual_csv(self):
+        with TemporaryDirectory() as directory:
+            snapshot_path = Path(directory) / "snapshot.json"
+            snapshot_path.write_text(
+                json.dumps(snapshot(KICKOFF - timedelta(hours=2))),
+                encoding="utf-8",
+            )
+            stdout = StringIO()
+            argv = [
+                "nfl_forward_market_evaluation",
+                "--fetch-schedule",
+                "--snapshots", str(snapshot_path),
+            ]
+            with (
+                patch("sys.argv", argv),
+                patch(
+                    "scripts.nfl_forward_market_evaluation.fetch_games",
+                    return_value=[GAME],
+                ) as fetch_schedule,
+                redirect_stdout(stdout),
+            ):
+                result = main()
+            report = json.loads(stdout.getvalue())
+            fetch_schedule.assert_called_once_with()
+            self.assertEqual(result, 2)
+            self.assertEqual(report["status"], "INSUFFICIENT_FORWARD_SAMPLE")
+            self.assertFalse(report["buy_publication_eligible"])
+            self.assertTrue(report["research_only"])
 
     def test_hundred_games_in_one_week_do_not_pass_week_breadth_gate(self):
         games = []
