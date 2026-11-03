@@ -701,13 +701,17 @@ def test_nfl_sportsbook_research_lane_is_opt_in_and_hourly_isolated(
 
 
 def test_nfl_sportsbook_research_lane_failure_does_not_block_other_lanes(
-    tmp_path,
+    tmp_path, monkeypatch
 ):
     runtime_env = tmp_path / "runtime.env"
     runtime_env.write_text(
         "PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1\n", encoding="utf-8"
     )
     calls = []
+    monkeypatch.setattr(
+        "parallax_unattended.export_completed_scan",
+        lambda lane, stdout, state_dir: None,
+    )
 
     def runner(command, **kwargs):
         calls.append(command)
