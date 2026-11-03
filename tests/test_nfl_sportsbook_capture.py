@@ -1,10 +1,13 @@
 import unittest
+from contextlib import redirect_stdout
 from datetime import UTC, datetime, timedelta
+from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from scripts.nfl_sportsbook_capture import (
-    capture, capture_games, eligible_capture_games, quota_headroom_verified,
+    capture, capture_games, eligible_capture_games, main, quota_headroom_verified,
     reserve_capture_attempt, update_capture_state,
 )
 from parallax.nfl import NFLGame, parse_games
@@ -75,6 +78,38 @@ class NFLOddsCaptureTests(unittest.TestCase):
         ]
         eligible = eligible_capture_games(games, now=NOW)
         self.assertEqual([game.game_id for game in eligible], ["lower-bound", "upper-bound"])
+
+    def test_no_eligible_games_skips_before_quota_or_odds_api(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "snapshot.json"
+            capture_state = root / "capture-state.json"
+            argv = [
+                "nfl_sportsbook_capture",
+                "--fetch-schedule",
+                "--quota-state", str(root / "missing-quota.json"),
+                "--capture-state", str(capture_state),
+                "--output", str(output),
+                "--fetch-once",
+            ]
+            far_future = NFLGame(
+                "far-future", 2030, "REG", "2030-01-01T20:00:00+00:00",
+                "JAX", "IND", None, None,
+            )
+            stdout = StringIO()
+            with (
+                patch("sys.argv", argv),
+                patch("scripts.nfl_sportsbook_capture.fetch_games", return_value=[far_future]),
+                patch("scripts.nfl_sportsbook_capture.load_quota_state", side_effect=AssertionError("quota read")),
+                patch("scripts.nfl_sportsbook_capture.fetch_nfl_v4_once", side_effect=AssertionError("odds request")),
+                redirect_stdout(stdout),
+            ):
+                result = main()
+            payload = __import__("json").loads(stdout.getvalue())
+            self.assertEqual(result, 0)
+            self.assertEqual(payload["status"], "SKIPPED_NO_ELIGIBLE_GAMES")
+            self.assertFalse(output.exists())
+            self.assertFalse(capture_state.exists())
 
     def test_capture_window_rejects_naive_clock(self):
         with self.assertRaisesRegex(ValueError, "timezone-aware"):
