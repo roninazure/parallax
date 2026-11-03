@@ -28,6 +28,12 @@ def reconcile_files(*, primary: Path, secondary: Path, sport: str) -> dict[str, 
         raise ValueError("primary and secondary source files have identical SHA-256")
     primary_games = [g for g in load_final_games_csv(primary) if g.sport == sport]
     secondary_games = [g for g in load_final_games_csv(secondary) if g.sport == sport]
+    # The attested file digests must match the bytes actually evaluated.
+    # Fail closed if a source was replaced or modified during parsing.
+    if hashlib.sha256(primary.read_bytes()).hexdigest() != primary_sha:
+        raise ValueError("primary source changed during reconciliation")
+    if hashlib.sha256(secondary.read_bytes()).hexdigest() != secondary_sha:
+        raise ValueError("secondary source changed during reconciliation")
     if not primary_games or not secondary_games:
         raise ValueError(f"{sport} results missing from one or both source files")
     primary_fingerprint = reconcile_independent_history(
