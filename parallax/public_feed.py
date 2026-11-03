@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 
 import fcntl
 
+from .nfl_publication_control import nfl_buy_publication_hold_active
 from .nfl import NFL_TEAM_NAMES
 from .cfb import MODEL_VERSION as CFB_MODEL_VERSION, VALIDATION_ECE as CFB_VALIDATION_ECE, VALIDATION_REFERENCE as CFB_VALIDATION_REFERENCE, _canonical_team
 from .mlb import DIVISION_SERIES_VALIDATION_ECE, SOURCE_ID as MLB_SOURCE_ID, _team_key as _mlb_team_key, mlb_target_model_version, mlb_target_validation_reference
@@ -466,6 +467,8 @@ def _public_slate(
 
 def _nfl_buy_certificate_valid(row: Mapping[str, Any]) -> bool:
     """Cross-check the immutable parts of an NFL BUY certificate."""
+    if nfl_buy_publication_hold_active():
+        return False
     if (
         row.get("publication_eligible") is not True
         or _action(row) != "BUY"

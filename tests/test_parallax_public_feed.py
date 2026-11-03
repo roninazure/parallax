@@ -1348,3 +1348,32 @@ def test_explicit_synthetic_certified_league_buy_passes_feed_gate(lane):
     assert public["summary"]["buy"] == 1
     assert public["buy_publication_eligible"] is True
     assert public["plays"][0]["action"] == "BUY"
+
+
+@pytest.mark.parametrize("setting", ["1", "TRUE", "yes", "bad-value"])
+def test_active_candidate_nfl_hold_strips_certified_buy(monkeypatch, setting):
+    stdout = json.dumps({
+        "slate": nfl_slate_for(),
+        "summary": {"rows": [eligible_nfl_buy(market_id="KXNFLGAME-P1-HOLD")]},
+    })
+    monkeypatch.setenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", "0")
+    before = sanitize_completed_scan("nfl", stdout, generated_at=NOW)
+    assert before["summary"]["buy"] == 1
+    monkeypatch.setenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", setting)
+    result = sanitize_completed_scan("nfl", stdout, generated_at=NOW)
+    assert result["buy_publication_eligible"] is False
+    assert result["summary"]["buy"] == 0
+    assert all(play["action"] != "BUY" for play in result["plays"])
+    mlb = sanitize_completed_scan("mlb", completed_mlb_stdout(), generated_at=NOW)
+    assert mlb["summary"]["buy"] == 1
+
+
+@pytest.mark.parametrize("setting", ["0", "false", "no", "off", ""])
+def test_active_candidate_explicit_disable_preserves_nfl_baseline(monkeypatch, setting):
+    stdout = json.dumps({
+        "slate": nfl_slate_for(),
+        "summary": {"rows": [eligible_nfl_buy(market_id="KXNFLGAME-P1-BASELINE")]},
+    })
+    monkeypatch.setenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", setting)
+    result = sanitize_completed_scan("nfl", stdout, generated_at=NOW)
+    assert result["summary"]["buy"] == 1
