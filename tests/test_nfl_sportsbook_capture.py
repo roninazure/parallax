@@ -226,6 +226,76 @@ class NFLOddsCaptureTests(unittest.TestCase):
             self.assertEqual(state["status"], "FAILED")
             self.assertEqual(state["last_error_type"], "RuntimeError")
 
+    def test_insufficient_free_quota_never_reaches_paid_odds(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            csv_path = root / "games.csv"
+            csv_path.write_text(CSV, encoding="utf-8")
+            quota_path = root / "research-quota.json"
+            capture_state = root / "capture-state.json"
+            output = root / "snapshot.json"
+            argv = [
+                "nfl_sportsbook_capture",
+                "--games-csv", str(csv_path),
+                "--quota-state", str(quota_path),
+                "--capture-state", str(capture_state),
+                "--output", str(output),
+                "--fetch-once",
+            ]
+            with (
+                patch("sys.argv", argv),
+                patch.dict("os.environ", {"THE_ODDS_API_KEY": "TEST_KEY"}),
+                patch("scripts.nfl_sportsbook_capture.eligible_capture_games",
+                      return_value=parse_games(CSV)),
+                patch("scripts.nfl_sportsbook_capture.fetch_free_usage_snapshot",
+                      return_value={
+                          "remaining": 10,
+                          "used": 490,
+                          "limit": 500,
+                          "captured_at_utc": datetime.now(UTC).isoformat(),
+                      }),
+                patch("scripts.nfl_sportsbook_capture.fetch_nfl_v4_once",
+                      side_effect=AssertionError("paid odds request must not happen")),
+            ):
+                with self.assertRaises(SystemExit) as raised:
+                    main()
+            self.assertNotEqual(raised.exception.code, 0)
+            self.assertFalse(capture_state.exists())
+            self.assertFalse(output.exists())
+            self.assertEqual(__import__("json").loads(
+                quota_path.read_text(encoding="utf-8")
+            )["remaining"], 10)
+
+    def test_free_quota_failure_never_reaches_paid_odds(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            csv_path = root / "games.csv"
+            csv_path.write_text(CSV, encoding="utf-8")
+            output = root / "snapshot.json"
+            argv = [
+                "nfl_sportsbook_capture",
+                "--games-csv", str(csv_path),
+                "--quota-state", str(root / "quota.json"),
+                "--capture-state", str(root / "capture-state.json"),
+                "--output", str(output),
+                "--fetch-once",
+            ]
+            with (
+                patch("sys.argv", argv),
+                patch.dict("os.environ", {"THE_ODDS_API_KEY": "TEST_KEY"}),
+                patch("scripts.nfl_sportsbook_capture.eligible_capture_games",
+                      return_value=parse_games(CSV)),
+                patch("scripts.nfl_sportsbook_capture.fetch_free_usage_snapshot",
+                      side_effect=RuntimeError("FREE_QUOTA_ENDPOINT_UNAVAILABLE")),
+                patch("scripts.nfl_sportsbook_capture.fetch_nfl_v4_once",
+                      side_effect=AssertionError("paid odds request must not happen")),
+            ):
+                with self.assertRaises(SystemExit) as raised:
+                    main()
+            self.assertNotIn("FREE_QUOTA_ENDPOINT_UNAVAILABLE", str(raised.exception))
+            self.assertFalse(output.exists())
+            self.assertFalse((root / "capture-state.json").exists())
+
     def test_capture_window_rejects_naive_clock(self):
         with self.assertRaisesRegex(ValueError, "timezone-aware"):
             eligible_capture_games([], now=NOW.replace(tzinfo=None))
