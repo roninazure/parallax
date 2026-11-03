@@ -4,7 +4,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from scripts.nfl_sportsbook_capture import (
-    capture, capture_games, quota_headroom_verified, reserve_capture_attempt, update_capture_state,
+    capture, capture_games, eligible_capture_games, quota_headroom_verified,
+    reserve_capture_attempt, update_capture_state,
 )
 from parallax.nfl import NFLGame, parse_games
 from sports.fair_value import BookMoneyline
