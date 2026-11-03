@@ -8,7 +8,8 @@ from unittest.mock import patch
 
 from scripts.nfl_sportsbook_capture import (
     capture, capture_games, eligible_capture_games, main, quota_headroom_verified,
-    reserve_capture_attempt, update_capture_state,
+    reserve_capture_attempt, update_capture_state, resolve_odds_api_key,
+    fetch_free_usage_snapshot,
 )
 from parallax.nfl import NFLGame, parse_games
 from sports.fair_value import BookMoneyline
@@ -57,6 +58,85 @@ class NFLOddsCaptureTests(unittest.TestCase):
         self.assertEqual(report["events_accepted"], 1)
         self.assertFalse(report["buy_publication_eligible"])
 
+    def test_free_quota_preflight_reads_zero_credit_provider_headers(self):
+        class FakeResponse:
+            status = 200
+            headers = {
+                "x-requests-remaining": "497",
+                "x-requests-used": "3",
+                "x-requests-last": "0",
+            }
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self):
+                return b"[]"
+
+        with patch("scripts.nfl_sportsbook_capture.urlopen", return_value=FakeResponse()) as opened:
+            snapshot = fetch_free_usage_snapshot(api_key="TEST_SECRET", now=NOW)
+        self.assertEqual(snapshot["remaining"], 497)
+        self.assertEqual(snapshot["limit"], 500)
+        self.assertEqual(snapshot["source"], "ZERO_COST_SPORTS_ENDPOINT")
+        request = opened.call_args.args[0]
+        self.assertIn("/v4/sports/", request.full_url)
+        self.assertNotIn("americanfootball_nfl/odds", request.full_url)
+
+    def test_free_quota_preflight_fails_closed_and_redacts_secret(self):
+        class FakeResponse:
+            status = 200
+            headers = {
+                "x-requests-remaining": "497",
+                "x-requests-used": "3",
+                "x-requests-last": "1",
+            }
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self):
+                return b"[]"
+
+        with patch("scripts.nfl_sportsbook_capture.urlopen", return_value=FakeResponse()):
+            with self.assertRaisesRegex(RuntimeError, "refusing paid odds request") as raised:
+                fetch_free_usage_snapshot(api_key="TOP_SECRET", now=NOW)
+        self.assertNotIn("TOP_SECRET", str(raised.exception))
+        with patch("scripts.nfl_sportsbook_capture.urlopen",
+                   side_effect=RuntimeError("URL contained TOP_SECRET")):
+            with self.assertRaises(RuntimeError) as raised:
+                fetch_free_usage_snapshot(api_key="TOP_SECRET", now=NOW)
+        self.assertNotIn("TOP_SECRET", str(raised.exception))
+
+    def test_keychain_fallback_is_mac_only_and_never_prints_secret(self):
+        from subprocess import CompletedProcess
+        with (
+            patch.dict("os.environ", {"THE_ODDS_API_KEY": ""}),
+            patch("scripts.nfl_sportsbook_capture.sys.platform", "darwin"),
+            patch("scripts.nfl_sportsbook_capture.getuser", return_value="scottsteele"),
+            patch("scripts.nfl_sportsbook_capture.subprocess.run",
+                  return_value=CompletedProcess([], 0, "KEYCHAIN_SECRET\n", "")) as run,
+        ):
+            self.assertEqual(resolve_odds_api_key(), "KEYCHAIN_SECRET")
+        self.assertEqual(
+            run.call_args.args[0],
+            ["/usr/bin/security", "find-generic-password", "-w",
+             "-s", "swarmaxis-the-odds-api", "-a", "scottsteele"],
+        )
+        self.assertTrue(run.call_args.kwargs["capture_output"])
+        with (
+            patch.dict("os.environ", {"THE_ODDS_API_KEY": ""}),
+            patch("scripts.nfl_sportsbook_capture.sys.platform", "linux"),
+            patch("scripts.nfl_sportsbook_capture.subprocess.run",
+                  side_effect=AssertionError("non-mac must not access keychain")),
+        ):
+            self.assertIsNone(resolve_odds_api_key())
+
     def test_naive_capture_timestamp_rejected(self):
         with self.assertRaises(ValueError):
             capture(OddsResponse((), OddsQuota(None, None, None, None)), CSV,
@@ -100,7 +180,7 @@ class NFLOddsCaptureTests(unittest.TestCase):
             with (
                 patch("sys.argv", argv),
                 patch("scripts.nfl_sportsbook_capture.fetch_games", return_value=[far_future]),
-                patch("scripts.nfl_sportsbook_capture.load_quota_state", side_effect=AssertionError("quota read")),
+                patch("scripts.nfl_sportsbook_capture.fetch_free_usage_snapshot", side_effect=AssertionError("quota read")),
                 patch("scripts.nfl_sportsbook_capture.fetch_nfl_v4_once", side_effect=AssertionError("odds request")),
                 redirect_stdout(stdout),
             ):
@@ -130,10 +210,9 @@ class NFLOddsCaptureTests(unittest.TestCase):
                 patch("sys.argv", argv),
                 patch.dict("os.environ", {"THE_ODDS_API_KEY": "TEST_KEY"}),
                 patch(
-                    "scripts.nfl_sportsbook_capture.load_quota_state",
+                    "scripts.nfl_sportsbook_capture.fetch_free_usage_snapshot",
                     return_value={"remaining": 100, "captured_at_utc": datetime.now(UTC).isoformat()},
                 ),
-                patch("scripts.nfl_sportsbook_capture.quota_allows_request", return_value=True),
                 patch("scripts.nfl_sportsbook_capture.eligible_capture_games", return_value=parse_games(CSV)),
                 patch(
                     "scripts.nfl_sportsbook_capture.fetch_nfl_v4_once",
