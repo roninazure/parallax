@@ -12,6 +12,10 @@ import json
 import os
 import sys
 import tempfile
+import subprocess
+from getpass import getuser
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 from dataclasses import asdict
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -20,12 +24,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from parallax.nfl import NFLGame, fetch_games, parse_games
-from scripts.sports_scan import load_quota_state, persist_quota_state, quota_allows_request
 from sports.nfl_evidence import match_nfl_evidence
 from sports.odds_provider import OddsResponse
 from sports.nfl_odds_v4 import fetch_nfl_v4_once
 
 MINIMUM_CAPTURE_INTERVAL_SECONDS = 3600
+FREE_USAGE_ENDPOINT = "https://api.the-odds-api.com/v4/sports/"
+KEYCHAIN_SERVICE = "swarmaxis-the-odds-api"
 
 
 def capture_games(response: OddsResponse, games: list[NFLGame], *, observed_at: datetime) -> dict:
@@ -84,6 +89,58 @@ def quota_headroom_verified(
     if age < 0 or age > max_age_seconds:
         return False
     return remaining > reserve
+
+
+def resolve_odds_api_key() -> str | None:
+    """Use the existing operator Keychain; never log a credential."""
+    provided = os.environ.get("THE_ODDS_API_KEY", "").strip()
+    if provided:
+        return provided
+    if sys.platform != "darwin":
+        return None
+    try:
+        result = subprocess.run(
+            ["/usr/bin/security", "find-generic-password", "-w",
+             "-s", KEYCHAIN_SERVICE, "-a", getuser()],
+            text=True, capture_output=True, timeout=10, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return result.stdout.strip() if result.returncode == 0 and result.stdout.strip() else None
+
+
+def fetch_free_usage_snapshot(*, api_key: str, now: datetime) -> dict:
+    """Read account credits with the zero-cost sports endpoint.
+
+    Reject absent/invalid headers, transport failures, or any unexpected
+    nonzero cost; never include the credential-bearing URL in errors.
+    """
+    if not api_key or now.tzinfo is None:
+        raise ValueError("valid API credential and aware UTC clock required")
+    request = Request(
+        FREE_USAGE_ENDPOINT + "?" + urlencode({"apiKey": api_key}),
+        headers={"Accept": "application/json", "User-Agent": "parallax-research/1"},
+    )
+    try:
+        with urlopen(request, timeout=15) as response:
+            if response.status != 200:
+                raise ValueError("unexpected free quota status")
+            remaining = int(response.headers["x-requests-remaining"])
+            used = int(response.headers["x-requests-used"])
+            last = int(response.headers["x-requests-last"])
+            if remaining < 0 or used < 0 or last != 0:
+                raise ValueError("invalid zero-cost quota response")
+            response.read()
+    except Exception:
+        raise RuntimeError("free quota check unavailable; refusing paid odds request") from None
+    return {
+        "captured_at_utc": now.astimezone(UTC).isoformat(),
+        "limit": used + remaining,
+        "used": used,
+        "remaining": remaining,
+        "reset_epoch": None,
+        "source": "ZERO_COST_SPORTS_ENDPOINT",
+    }
 
 
 def _atomic_write_json(path: Path, payload: dict) -> None:
@@ -244,14 +301,16 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     if args.output.exists():
         parser.error("refusing to overwrite existing snapshot")
-    state = load_quota_state(args.quota_state)
-    if not quota_headroom_verified(state, reserve=args.min_quota_reserve, now=now):
-        parser.error("missing known quota headroom: refusing provider request")
-    if not quota_allows_request(state, now=now, reserve=args.min_quota_reserve):
-        parser.error("quota reserve reached: refusing provider request")
-    api_key = os.environ.get("THE_ODDS_API_KEY")
+    api_key = resolve_odds_api_key()
     if not api_key:
-        parser.error("THE_ODDS_API_KEY unavailable")
+        parser.error("Odds API credential unavailable in runtime or operator Keychain")
+    try:
+        state = fetch_free_usage_snapshot(api_key=api_key, now=now)
+    except RuntimeError:
+        parser.error("free quota check failed; refusing paid odds request")
+    _atomic_write_json(args.quota_state, state)
+    if not quota_headroom_verified(state, reserve=args.min_quota_reserve, now=now):
+        parser.error("quota reserve reached: refusing paid odds request")
 
     try:
         reserve_capture_attempt(
@@ -269,7 +328,15 @@ def main() -> int:
             games, now=observed_at, min_lead_minutes=args.min_lead_minutes,
             max_lookback_hours=args.max_lookback_hours,
         )
-        persist_quota_state(args.quota_state, response, observed_at)
+        if response.quota.remaining is not None and response.quota.used is not None:
+            _atomic_write_json(args.quota_state, {
+                "captured_at_utc": observed_at.isoformat(),
+                "limit": response.quota.limit,
+                "used": response.quota.used,
+                "remaining": response.quota.remaining,
+                "reset_epoch": response.quota.reset_epoch,
+                "source": "NFL_ODDS_RESPONSE",
+            })
         report = capture_games(response, eligible_at_response, observed_at=observed_at)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         with args.output.open("x", encoding="utf-8") as target:
