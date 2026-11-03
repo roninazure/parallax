@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-03T13:16:20.985324+00:00",
+  "generated_at": "2026-11-03T14:17:38.006004+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 36.15734482,
+      "edge_pp": 36.65734482,
       "market_id": "1644345",
       "matchup": "Ohio at Akron",
       "model_probability": 0.5365734482260771,
-      "price": 0.175,
+      "price": 0.17,
       "sport": "CFB",
       "start_time": "2026-11-04T00:00:00+00:00",
       "venue": "POLYMARKET"
@@ -16,7 +16,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-03T13:15:13.494084+00:00",
+  "source_feed_generated_at": "2026-11-03T14:16:38.491787+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
