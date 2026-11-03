@@ -19,6 +19,23 @@ It owns the NFL, optional CFB, MLB, and prospective-reconciliation schedules. Ea
 The optional `nfl_sportsbook_research` lane is disabled unless `PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1` is set in the runtime environment. When enabled, it performs at most one NFL research capture per hour, persists its attempt throttle under external state, requires known Odds API quota headroom above the configured reserve, and writes research snapshots outside the public-feed directory. It is not a customer publisher and never sets BUY publication eligibility.
 
 
+
+## Forward-only NFL market evaluation
+
+After the research capture lane has accumulated pregame snapshots, run the offline evaluator from the repository root:
+
+```bash
+python scripts/nfl_forward_market_evaluation.py \
+  --fetch-schedule \
+  --snapshots "$PARALLAX_STATE_DIR"/research/nfl_sportsbook/snapshots/*.json
+```
+
+The evaluator uses the same fixed observation window as capture: no later than 60 minutes before kickoff and no older than 24 hours. It compares Elo, de-vig sportsbook consensus, and a fixed 50/50 research-only blend using Brier score, log loss, and paired calendar-week cluster bootstrap intervals.
+
+No improvement is certified unless there are at least 100 matched completed games across at least 12 distinct calendar weeks and both Brier and log-loss confidence intervals support improvement. Otherwise the report remains `INSUFFICIENT_FORWARD_SAMPLE` or `IMPROVEMENT_NOT_ESTABLISHED`. Exit status 2 means the evidence gate is not met; it is not a production incident.
+
+The evaluator is offline apart from fetching the official schedule, does not call the Odds API, does not tune or promote a model, and never authorizes customer BUY publication or makes profitability claims.
+
 ## Optional NFL sportsbook research capture
 
 Enable only after the operator confirms the provider plan and quota budget:
