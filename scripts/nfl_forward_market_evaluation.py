@@ -94,8 +94,8 @@ def _paired_bootstrap(rows: list[dict], challenger: str, metric: str, *,
 
 def evaluate(games: list[NFLGame], snapshots: list[dict], *,
              min_lead_minutes: int = 60, max_lookback_hours: int = 24,
-             min_scored: int = 100) -> dict:
-    if min_lead_minutes < 0 or max_lookback_hours < 1 or min_scored < 1:
+             min_scored: int = 100, min_week_clusters: int = 12) -> dict:
+    if min_lead_minutes < 0 or max_lookback_hours < 1 or min_scored < 1 or min_week_clusters < 1:
         raise ValueError("invalid predeclared evaluation policy")
     by_game: dict[str, list[tuple[datetime, float]]] = {}
     for snapshot in snapshots:
@@ -156,7 +156,11 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
         index = end
 
     outcomes = [row["home_win"] for row in rows]
-    enough = len(rows) >= min_scored
+    week_clusters = {
+        (kickoff := _aware_utc(row["kickoff"])).date() - timedelta(days=kickoff.weekday())
+        for row in rows if _aware_utc(row["kickoff"]) is not None
+    }
+    enough = len(rows) >= min_scored and len(week_clusters) >= min_week_clusters
     status = "SUFFICIENT_FORWARD_SAMPLE" if enough else "INSUFFICIENT_FORWARD_SAMPLE"
     paired = {}
     for model in ("market", "fixed_blend"):
@@ -165,7 +169,7 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
             for metric in ("brier", "log_loss")
         }
         paired[model]["evidence_gate"] = (
-            "MINIMUM_SAMPLE_NOT_MET" if not enough else
+            "MINIMUM_GAME_OR_WEEK_SAMPLE_NOT_MET" if not enough else
             "BOTH_METRICS_IMPROVE" if all(
                 paired[model][metric]["ci95"][1] < 0 for metric in ("brier", "log_loss")
             ) else "IMPROVEMENT_NOT_ESTABLISHED"
@@ -174,6 +178,8 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
         "status": status,
         "matched_completed_games": len(rows),
         "min_required_games": min_scored,
+        "matched_calendar_weeks": len(week_clusters),
+        "min_required_calendar_weeks": min_week_clusters,
         "decision_cutoff_minutes_before_kickoff": min_lead_minutes,
         "max_quote_lookback_hours": max_lookback_hours,
         "elo": _scores([row["elo"] for row in rows], outcomes),
