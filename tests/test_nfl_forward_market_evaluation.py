@@ -1,0 +1,262 @@
+import json
+import unittest
+from contextlib import redirect_stdout
+from datetime import UTC, datetime, timedelta
+from io import StringIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
+
+from parallax.nfl import NFLGame
+from scripts.nfl_forward_market_evaluation import _paired_bootstrap, evaluate, main
+
+
+KICKOFF = datetime(2026, 11, 8, 18, tzinfo=UTC)
+GAME = NFLGame("2026_09_IND_JAX", 2026, "REG", KICKOFF.isoformat(), "JAX", "IND", 24, 17)
+
+
+def snapshot(observed, probability=.65, *, buy=False):
+    return {"schema_version": "nfl-sportsbook-research-v1", "research_only": True,
+            "buy_publication_eligible": buy,
+            "captured_at_utc": observed.isoformat(), "evidence": [{
+                "game_id": GAME.game_id, "observed_at": observed.isoformat(),
+                "kickoff": GAME.kickoff,
+                "home_probability": probability, "away_probability": 1-probability,
+                "bookmaker_count": 4,
+                "independent_books": ["Book A", "Book B", "Book C", "Book D"]}]}
+
+
+class NFLForwardMarketEvaluationTests(unittest.TestCase):
+    def test_valid_pregame_observation_scored(self):
+        result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))],
+                          min_scored=1, min_week_clusters=1)
+        self.assertEqual(result["status"], "SUFFICIENT_FORWARD_SAMPLE")
+        self.assertEqual(result["matched_completed_games"], 1)
+        self.assertFalse(result["buy_publication_eligible"])
+        self.assertIn("paired_comparisons_vs_elo", result)
+        self.assertEqual(result["paired_comparisons_vs_elo"]["market"]["brier"]["n"], 1)
+
+    def test_after_cutoff_and_postkickoff_rejected(self):
+        for observed in (KICKOFF-timedelta(minutes=30), KICKOFF+timedelta(minutes=5)):
+            result = evaluate([GAME], [snapshot(observed)], min_scored=1)
+            self.assertEqual(result["matched_completed_games"], 0)
+
+    def test_old_observation_rejected(self):
+        result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=30))], min_scored=1)
+        self.assertEqual(result["matched_completed_games"], 0)
+
+    def test_latest_eligible_observation_selected(self):
+        result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=3), .25),
+                                   snapshot(KICKOFF-timedelta(hours=2), .75)], min_scored=1)
+        self.assertAlmostEqual(result["market"]["brier"], .0625)
+
+    def test_buy_flag_or_invalid_probability_rejected(self):
+        for item in (snapshot(KICKOFF-timedelta(hours=2), buy=True),
+                     snapshot(KICKOFF-timedelta(hours=2), probability=float("nan"))):
+            self.assertEqual(evaluate([GAME], [item], min_scored=1)["matched_completed_games"], 0)
+
+    def test_evidence_with_mismatched_official_kickoff_is_rejected(self):
+        item = snapshot(KICKOFF - timedelta(hours=2))
+        item["evidence"][0]["kickoff"] = (KICKOFF + timedelta(hours=1)).isoformat()
+        result = evaluate([GAME], [item], min_scored=1)
+        self.assertEqual(result["matched_completed_games"], 0)
+
+    def test_evidence_requires_unique_bookmaker_identities_and_matching_count(self):
+        invalid_book_sets = (
+            (["Book A", "book a", "Book B", "Book C"], 4),
+            (["Book A", "Book B", "Book C"], 4),
+        )
+        for books, count in invalid_book_sets:
+            item = snapshot(KICKOFF - timedelta(hours=2))
+            item["evidence"][0]["independent_books"] = books
+            item["evidence"][0]["bookmaker_count"] = count
+            result = evaluate([GAME], [item], min_scored=1)
+            self.assertEqual(result["matched_completed_games"], 0)
+
+    def test_insufficient_sample_does_not_certify(self):
+        result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))], min_scored=100)
+        self.assertEqual(result["status"], "INSUFFICIENT_FORWARD_SAMPLE")
+        self.assertEqual(result["paired_comparisons_vs_elo"]["market"]["evidence_gate"],
+                         "MINIMUM_GAME_OR_WEEK_SAMPLE_NOT_MET")
+        self.assertEqual(result["matched_calendar_weeks"], 1)
+        self.assertEqual(result["min_required_calendar_weeks"], 12)
+
+    def test_sufficient_sample_alone_does_not_certify_improvement(self):
+        games = []
+        snapshots = []
+        for week in range(12):
+            kickoff = KICKOFF + timedelta(days=7 * week)
+            observed = kickoff - timedelta(hours=2)
+            for index in range(10):
+                game_id = f"W{week:02d}_G{index:02d}"
+                game = NFLGame(
+                    game_id, 2026, "REG", kickoff.isoformat(),
+                    f"HOME{week}_{index}", f"AWAY{week}_{index}", 24, 17,
+                )
+                games.append(game)
+                snapshots.append({
+                    "schema_version": "nfl-sportsbook-research-v1",
+                    "research_only": True,
+                    "buy_publication_eligible": False,
+                    "captured_at_utc": observed.isoformat(),
+                    "evidence": [{
+                        "game_id": game_id,
+                        "observed_at": observed.isoformat(),
+                        "kickoff": game.kickoff,
+                        "home_probability": .5,
+                        "away_probability": .5,
+                        "bookmaker_count": 2,
+                        "independent_books": ["Book A", "Book B"],
+                    }],
+                })
+        result = evaluate(games, snapshots, min_scored=100, min_week_clusters=12)
+        self.assertEqual(result["status"], "SUFFICIENT_FORWARD_SAMPLE")
+        self.assertEqual(result["matched_completed_games"], 120)
+        self.assertEqual(
+            result["paired_comparisons_vs_elo"]["market"]["evidence_gate"],
+            "IMPROVEMENT_NOT_ESTABLISHED",
+        )
+
+    def test_replacement_must_beat_market_not_only_elo(self):
+        # Market (.8) is closer to the realized outcome than Elo (.4).
+        # The midpoint blend (.6) beats Elo but is WORSE than market.
+        rows = [{
+            "home_win": 1, "elo": .40, "market": .80,
+            "fixed_blend": .60,
+            "kickoff": (KICKOFF + timedelta(days=7 * (i % 12))).isoformat(),
+        } for i in range(120)]
+        vs_elo = _paired_bootstrap(rows, "fixed_blend", "brier")
+        vs_market = _paired_bootstrap(
+            rows, "fixed_blend", "brier", baseline="market"
+        )
+        self.assertLess(vs_elo["ci95"][1], 0)
+        self.assertGreater(vs_market["ci95"][0], 0)
+        self.assertEqual(vs_market["baseline"], "market")
+        self.assertEqual(vs_market["interpretation"], "BASELINE_IMPROVEMENT_SUPPORTED")
+        self.assertEqual(vs_market["challenger"], "fixed_blend")
+
+    def test_market_baseline_gate_is_research_only(self):
+        result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))],
+                          min_scored=1, min_week_clusters=1)
+        self.assertEqual(
+            result["fixed_blend_vs_independent_market"]["evidence_gate"],
+            "IMPROVEMENT_NOT_ESTABLISHED",
+        )
+        self.assertFalse(result["model_promotion_authorized"])
+        self.assertFalse(result["buy_publication_eligible"])
+        self.assertTrue(result["research_only"])
+
+    def test_paired_bootstrap_reports_challenger_improvement_when_consistent(self):
+        rows = [{"home_win": 1, "elo": .40, "market": .80,
+                 "kickoff": (KICKOFF + timedelta(days=7 * (i % 12))).isoformat()}
+                for i in range(120)]
+        result = _paired_bootstrap(rows, "market", "brier")
+        self.assertLess(result["delta"], 0)
+        self.assertLess(result["ci95"][1], 0)
+        self.assertEqual(result["interpretation"], "CHALLENGER_IMPROVEMENT_SUPPORTED")
+
+    def test_paired_bootstrap_is_deterministic(self):
+        rows = [{"home_win": i % 2, "elo": .55, "market": .60,
+                 "kickoff": (KICKOFF + timedelta(days=7 * (i % 8))).isoformat()}
+                for i in range(40)]
+        self.assertEqual(_paired_bootstrap(rows, "market", "log_loss"),
+                         _paired_bootstrap(rows, "market", "log_loss"))
+
+
+    def test_cli_fetches_official_schedule_without_manual_csv(self):
+        with TemporaryDirectory() as directory:
+            snapshot_path = Path(directory) / "snapshot.json"
+            snapshot_path.write_text(
+                json.dumps(snapshot(KICKOFF - timedelta(hours=2))),
+                encoding="utf-8",
+            )
+            stdout = StringIO()
+            argv = [
+                "nfl_forward_market_evaluation",
+                "--fetch-schedule",
+                "--snapshots", str(snapshot_path),
+            ]
+            with (
+                patch("sys.argv", argv),
+                patch(
+                    "scripts.nfl_forward_market_evaluation.fetch_games",
+                    return_value=[GAME],
+                ) as fetch_schedule,
+                redirect_stdout(stdout),
+            ):
+                result = main()
+            report = json.loads(stdout.getvalue())
+            fetch_schedule.assert_called_once_with()
+            self.assertEqual(result, 2)
+            self.assertEqual(report["status"], "INSUFFICIENT_FORWARD_SAMPLE")
+            self.assertFalse(report["buy_publication_eligible"])
+            self.assertTrue(report["research_only"])
+
+    def test_cli_empty_snapshot_directory_returns_insufficient_sample(self):
+        with TemporaryDirectory() as directory:
+            snapshots_dir = Path(directory) / "snapshots"
+            snapshots_dir.mkdir()
+            stdout = StringIO()
+            argv = [
+                "nfl_forward_market_evaluation",
+                "--fetch-schedule",
+                "--snapshots-dir", str(snapshots_dir),
+            ]
+            with (
+                patch("sys.argv", argv),
+                patch(
+                    "scripts.nfl_forward_market_evaluation.fetch_games",
+                    return_value=[GAME],
+                ),
+                redirect_stdout(stdout),
+            ):
+                result = main()
+            report = json.loads(stdout.getvalue())
+            self.assertEqual(result, 2)
+            self.assertEqual(report["status"], "INSUFFICIENT_FORWARD_SAMPLE")
+            self.assertEqual(report["matched_completed_games"], 0)
+
+    def test_hundred_games_in_one_week_do_not_pass_week_breadth_gate(self):
+        games = []
+        snapshots = []
+        observed = KICKOFF - timedelta(hours=2)
+        for index in range(100):
+            game_id = f"GAME_{index:03d}"
+            games.append(NFLGame(game_id, 2026, "REG", KICKOFF.isoformat(),
+                                 f"HOME{index}", f"AWAY{index}", 24, 17))
+            snapshots.append({
+                "schema_version": "nfl-sportsbook-research-v1",
+                "research_only": True,
+                "buy_publication_eligible": False,
+                "captured_at_utc": observed.isoformat(),
+                "evidence": [{
+                    "game_id": game_id,
+                    "observed_at": observed.isoformat(),
+                    "kickoff": KICKOFF.isoformat(),
+                    "independent_books": ["Book A", "Book B", "Book C", "Book D"],
+                    "home_probability": .65,
+                    "away_probability": .35,
+                    "bookmaker_count": 4,
+                }],
+            })
+        result = evaluate(games, snapshots, min_scored=100, min_week_clusters=12)
+        self.assertEqual(result["matched_completed_games"], 100)
+        self.assertEqual(result["matched_calendar_weeks"], 1)
+        self.assertEqual(result["status"], "INSUFFICIENT_FORWARD_SAMPLE")
+        self.assertEqual(
+            result["paired_comparisons_vs_elo"]["market"]["evidence_gate"],
+            "MINIMUM_GAME_OR_WEEK_SAMPLE_NOT_MET",
+        )
+
+    def test_bootstrap_resamples_calendar_weeks_as_clusters(self):
+        rows = [{"home_win": 1, "elo": .40, "market": .80,
+                 "kickoff": (KICKOFF + timedelta(days=7 * i)).isoformat()}
+                for i in range(8)]
+        result = _paired_bootstrap(rows, "market", "brier")
+        self.assertEqual(result["n"], 8)
+        self.assertEqual(result["clusters"], 8)
+        self.assertEqual(result["resampling_unit"], "calendar_week_cluster")
+
+
+if __name__ == "__main__":
+    unittest.main()
