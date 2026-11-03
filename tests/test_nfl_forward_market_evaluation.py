@@ -117,6 +117,35 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
             "IMPROVEMENT_NOT_ESTABLISHED",
         )
 
+    def test_replacement_must_beat_market_not_only_elo(self):
+        # Market (.8) is closer to the realized outcome than Elo (.4).
+        # The midpoint blend (.6) beats Elo but is WORSE than market.
+        rows = [{
+            "home_win": 1, "elo": .40, "market": .80,
+            "fixed_blend": .60,
+            "kickoff": (KICKOFF + timedelta(days=7 * (i % 12))).isoformat(),
+        } for i in range(120)]
+        vs_elo = _paired_bootstrap(rows, "fixed_blend", "brier")
+        vs_market = _paired_bootstrap(
+            rows, "fixed_blend", "brier", baseline="market"
+        )
+        self.assertLess(vs_elo["ci95"][1], 0)
+        self.assertGreater(vs_market["ci95"][0], 0)
+        self.assertEqual(vs_market["baseline"], "market")
+        self.assertEqual(vs_market["interpretation"], "ELO_IMPROVEMENT_SUPPORTED")
+        self.assertEqual(vs_market["challenger"], "fixed_blend")
+
+    def test_market_baseline_gate_is_research_only(self):
+        result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))],
+                          min_scored=1, min_week_clusters=1)
+        self.assertEqual(
+            result["fixed_blend_vs_independent_market"]["evidence_gate"],
+            "IMPROVEMENT_NOT_ESTABLISHED",
+        )
+        self.assertFalse(result["model_promotion_authorized"])
+        self.assertFalse(result["buy_publication_eligible"])
+        self.assertTrue(result["research_only"])
+
     def test_paired_bootstrap_reports_challenger_improvement_when_consistent(self):
         rows = [{"home_win": 1, "elo": .40, "market": .80,
                  "kickoff": (KICKOFF + timedelta(days=7 * (i % 12))).isoformat()}
