@@ -12,7 +12,7 @@ from scripts.nfl_sportsbook_capture import (
     fetch_free_usage_snapshot,
 )
 from parallax.nfl import NFLGame, parse_games
-from sports.fair_value import BookMoneyline
+from sports.nfl_research_fair_value import BookMoneyline
 from sports.odds_provider import OddsQuota, OddsResponse, SportsEvent
 
 
