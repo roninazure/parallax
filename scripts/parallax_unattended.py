@@ -165,6 +165,7 @@ class UnattendedScheduler:
         self.next_due: dict[str, float] = {
             lane: startup + STARTUP_OFFSETS_SECONDS[lane] for lane in LANES
         }
+        self._nfl_sportsbook_research_was_enabled = False
         self.recent_errors: list[str] = []
 
     @property
@@ -181,7 +182,15 @@ class UnattendedScheduler:
 
     def _nfl_sportsbook_research_enabled(self) -> bool:
         value = self._environment().get("PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED", "").strip().casefold()
-        return value in {"1", "true", "yes", "on"}
+        enabled = value in {"1", "true", "yes", "on"}
+        if enabled and not self._nfl_sportsbook_research_was_enabled:
+            # Enabling research after a long-running daemon must not trigger an
+            # immediate provider request. Start a fresh one-hour grace period.
+            self.next_due["nfl_sportsbook_research"] = (
+                self.monotonic() + NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS
+            )
+        self._nfl_sportsbook_research_was_enabled = enabled
+        return enabled
 
     def commands(self) -> dict[str, list[str]]:
         commands = {
