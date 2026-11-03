@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 
 from parallax.nfl import NFLGame, _team_key
 
-from .fair_value import consensus_two_way_moneyline
+from .nfl_research_fair_value import consensus_two_way_moneyline
 from .odds_provider import SportsEvent
 
 
