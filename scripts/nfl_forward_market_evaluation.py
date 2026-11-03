@@ -42,8 +42,9 @@ def _scores(probabilities: list[float], outcomes: list[int]) -> dict:
 
 
 def _paired_bootstrap(rows: list[dict], challenger: str, metric: str, *,
-                      iterations: int = 2000, seed: int = 20261103) -> dict:
-    """Paired week-cluster bootstrap of challenger-minus-Elo loss.
+                      iterations: int = 2000, seed: int = 20261103,
+                      baseline: str = "elo") -> dict:
+    """Paired week-cluster bootstrap of challenger-minus-baseline loss.
 
     All games from a calendar week are resampled together to reduce the
     independence assumption across games sharing weekly conditions. Negative
@@ -61,7 +62,7 @@ def _paired_bootstrap(rows: list[dict], challenger: str, metric: str, *,
         week_start = (kickoff.date() - timedelta(days=kickoff.weekday())).isoformat()
         clusters.setdefault(week_start, []).append(
             _loss(row[challenger], row["home_win"], metric)
-            - _loss(row["elo"], row["home_win"], metric)
+            - _loss(row[baseline], row["home_win"], metric)
         )
     if not clusters:
         return {"n": 0, "clusters": 0, "delta": None, "ci95": [None, None],
@@ -85,7 +86,9 @@ def _paired_bootstrap(rows: list[dict], challenger: str, metric: str, *,
         "interpretation": "CHALLENGER_IMPROVEMENT_SUPPORTED" if high < 0 else (
             "ELO_IMPROVEMENT_SUPPORTED" if low > 0 else "NO_CLEAR_DIFFERENCE"
         ),
-        "delta_definition": "mean challenger loss minus mean Elo loss; negative favors challenger",
+        "delta_definition": f"mean {challenger} loss minus mean {baseline} loss; negative favors challenger",
+        "baseline": baseline,
+        "challenger": challenger,
         "resampling_unit": "calendar_week_cluster",
         "bootstrap_iterations": iterations,
         "seed": seed,
@@ -193,6 +196,21 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
                 paired[model][metric]["ci95"][1] < 0 for metric in ("brier", "log_loss")
             ) else "IMPROVEMENT_NOT_ESTABLISHED"
         )
+    # A proposed replacement must beat the independent market baseline, not
+    # merely the weaker Elo model. This comparison never authorizes BUYs.
+    blend_vs_market = {
+        metric: _paired_bootstrap(
+            rows, "fixed_blend", metric, baseline="market"
+        )
+        for metric in ("brier", "log_loss")
+    }
+    blend_vs_market["evidence_gate"] = (
+        "MINIMUM_GAME_OR_WEEK_SAMPLE_NOT_MET" if not enough else
+        "BOTH_METRICS_IMPROVE" if all(
+            blend_vs_market[metric]["ci95"][1] < 0
+            for metric in ("brier", "log_loss")
+        ) else "IMPROVEMENT_NOT_ESTABLISHED"
+    )
     return {
         "status": status,
         "matched_completed_games": len(rows),
@@ -205,12 +223,15 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
         "market": _scores([row["market"] for row in rows], outcomes),
         "fixed_blend_research_only": _scores([row["fixed_blend"] for row in rows], outcomes),
         "paired_comparisons_vs_elo": paired,
+        "fixed_blend_vs_independent_market": blend_vs_market,
+        "model_promotion_authorized": False,
         "research_only": True,
         "buy_publication_eligible": False,
         "limits": ["Snapshots must have been captured before a fixed kickoff cutoff.",
                    "Week-cluster bootstrap intervals quantify sampling uncertainty, not causal proof.",
                    "No execution prices, betting profitability, or BUY eligibility inferred.",
-                   "Experimental blend is not fitted, selected, or production-certified."],
+                   "Experimental blend is not fitted, selected, or production-certified.",
+                   "A challenger must beat the independent market, not just Elo; this report never authorizes deployment."],
     }
 
 
