@@ -20,8 +20,10 @@ def snapshot(observed, probability=.65, *, buy=False):
             "buy_publication_eligible": buy,
             "captured_at_utc": observed.isoformat(), "evidence": [{
                 "game_id": GAME.game_id, "observed_at": observed.isoformat(),
+                "kickoff": GAME.kickoff,
                 "home_probability": probability, "away_probability": 1-probability,
-                "bookmaker_count": 4}]}
+                "bookmaker_count": 4,
+                "independent_books": ["Book A", "Book B", "Book C", "Book D"]}]}
 
 
 class NFLForwardMarketEvaluationTests(unittest.TestCase):
@@ -52,6 +54,24 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
         for item in (snapshot(KICKOFF-timedelta(hours=2), buy=True),
                      snapshot(KICKOFF-timedelta(hours=2), probability=float("nan"))):
             self.assertEqual(evaluate([GAME], [item], min_scored=1)["matched_completed_games"], 0)
+
+    def test_evidence_with_mismatched_official_kickoff_is_rejected(self):
+        item = snapshot(KICKOFF - timedelta(hours=2))
+        item["evidence"][0]["kickoff"] = (KICKOFF + timedelta(hours=1)).isoformat()
+        result = evaluate([GAME], [item], min_scored=1)
+        self.assertEqual(result["matched_completed_games"], 0)
+
+    def test_evidence_requires_unique_bookmaker_identities_and_matching_count(self):
+        invalid_book_sets = (
+            (["Book A", "book a", "Book B", "Book C"], 4),
+            (["Book A", "Book B", "Book C"], 4),
+        )
+        for books, count in invalid_book_sets:
+            item = snapshot(KICKOFF - timedelta(hours=2))
+            item["evidence"][0]["independent_books"] = books
+            item["evidence"][0]["bookmaker_count"] = count
+            result = evaluate([GAME], [item], min_scored=1)
+            self.assertEqual(result["matched_completed_games"], 0)
 
     def test_insufficient_sample_does_not_certify(self):
         result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))], min_scored=100)
@@ -147,6 +167,8 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
                 "evidence": [{
                     "game_id": game_id,
                     "observed_at": observed.isoformat(),
+                    "kickoff": KICKOFF.isoformat(),
+                    "independent_books": ["Book A", "Book B", "Book C", "Book D"],
                     "home_probability": .65,
                     "away_probability": .35,
                     "bookmaker_count": 4,
