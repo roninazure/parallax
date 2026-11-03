@@ -98,6 +98,7 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
     if min_lead_minutes < 0 or max_lookback_hours < 1 or min_scored < 1 or min_week_clusters < 1:
         raise ValueError("invalid predeclared evaluation policy")
     by_game: dict[str, list[tuple[datetime, float]]] = {}
+    game_by_id = {game.game_id: game for game in games}
     for snapshot in snapshots:
         if snapshot.get("schema_version") != "nfl-sportsbook-research-v1":
             continue
@@ -109,13 +110,31 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
         for evidence in snapshot.get("evidence", []):
             if not isinstance(evidence, dict) or _aware_utc(evidence.get("observed_at")) != captured:
                 continue
+            game_id = evidence.get("game_id")
+            game = game_by_id.get(game_id) if isinstance(game_id, str) else None
+            if game is None or evidence.get("kickoff") != game.kickoff:
+                continue
+            books = evidence.get("independent_books")
+            if (
+                not isinstance(books, list)
+                or len(books) < 2
+                or any(not isinstance(book, str) or not book.strip() for book in books)
+            ):
+                continue
+            normalized_books = [book.strip().casefold() for book in books]
+            if len(set(normalized_books)) != len(normalized_books):
+                continue
             p = evidence.get("home_probability")
             away_p = evidence.get("away_probability")
             if not isinstance(p, (float, int)) or isinstance(p, bool) or not math.isfinite(p) or not 0 < p < 1:
                 continue
             if not isinstance(away_p, (float, int)) or isinstance(away_p, bool) or not math.isfinite(away_p):
                 continue
-            if not isinstance(evidence.get("bookmaker_count"), int) or evidence["bookmaker_count"] < 2:
+            if (
+                not isinstance(evidence.get("bookmaker_count"), int)
+                or evidence["bookmaker_count"] != len(books)
+                or evidence["bookmaker_count"] < 2
+            ):
                 continue
             if abs(p + away_p - 1) > 1e-6:
                 continue
