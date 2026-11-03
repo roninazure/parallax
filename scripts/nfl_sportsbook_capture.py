@@ -227,6 +227,7 @@ def main() -> int:
         }, sort_keys=True))
         return 0
 
+    args.output.parent.mkdir(parents=True, exist_ok=True)
     if args.output.exists():
         parser.error("refusing to overwrite existing snapshot")
     state = load_quota_state(args.quota_state)
