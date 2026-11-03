@@ -107,6 +107,30 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
             self.assertFalse(report["buy_publication_eligible"])
             self.assertTrue(report["research_only"])
 
+    def test_cli_empty_snapshot_directory_returns_insufficient_sample(self):
+        with TemporaryDirectory() as directory:
+            snapshots_dir = Path(directory) / "snapshots"
+            snapshots_dir.mkdir()
+            stdout = StringIO()
+            argv = [
+                "nfl_forward_market_evaluation",
+                "--fetch-schedule",
+                "--snapshots-dir", str(snapshots_dir),
+            ]
+            with (
+                patch("sys.argv", argv),
+                patch(
+                    "scripts.nfl_forward_market_evaluation.fetch_games",
+                    return_value=[GAME],
+                ),
+                redirect_stdout(stdout),
+            ):
+                result = main()
+            report = json.loads(stdout.getvalue())
+            self.assertEqual(result, 2)
+            self.assertEqual(report["status"], "INSUFFICIENT_FORWARD_SAMPLE")
+            self.assertEqual(report["matched_completed_games"], 0)
+
     def test_hundred_games_in_one_week_do_not_pass_week_breadth_gate(self):
         games = []
         snapshots = []
