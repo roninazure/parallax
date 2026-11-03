@@ -16,6 +16,22 @@ scripts/parallax_unattended.py
 
 It owns the NFL, optional CFB, MLB, and prospective-reconciliation schedules. Each lane keeps its own business logic; the unattended scheduler owns only cadence, isolation, locking, health state, and child-process execution.
 
+The optional `nfl_sportsbook_research` lane is disabled unless `PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1` is set in the runtime environment. When enabled, it performs at most one NFL research capture per hour, persists its attempt throttle under external state, requires known Odds API quota headroom above the configured reserve, and writes research snapshots outside the public-feed directory. It is not a customer publisher and never sets BUY publication eligibility.
+
+
+## Optional NFL sportsbook research capture
+
+Enable only after the operator confirms the provider plan and quota budget:
+
+```text
+PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1
+THE_ODDS_API_KEY=<configured in the protected runtime environment>
+```
+
+The feature is disabled by default. The scheduler delays its first attempt for one hour after startup and invokes the capture lane no more than hourly. The capture script independently enforces a persistent minimum 3,600-second interval across restarts and failed requests. It reserves the attempt before calling the Odds API, makes no retries, refuses unknown/malformed quota state, and requires the shared quota snapshot to remain above the reserve.
+
+Snapshots and capture state are written beneath the external state directory at `research/nfl_sportsbook/`; they are not exported to customer feeds. Every snapshot is hard-coded `research_only=true` and `buy_publication_eligible=false`. No model, scanner, notification, or customer BUY behavior is changed.
+
 ## Release layout
 
 Production releases are immutable and named by full Git SHA:
