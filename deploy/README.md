@@ -25,6 +25,7 @@ The optional `nfl_sportsbook_research` lane is disabled unless `PARALLAX_NFL_SPO
 After the research capture lane has accumulated pregame snapshots, run the offline evaluator from the repository root:
 
 ```bash
+: "${PARALLAX_STATE_DIR:?Set PARALLAX_STATE_DIR to the external SwarmEdge state directory}"
 python scripts/nfl_forward_market_evaluation.py \
   --fetch-schedule \
   --snapshots "$PARALLAX_STATE_DIR"/research/nfl_sportsbook/snapshots/*.json
