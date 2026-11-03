@@ -266,7 +266,11 @@ def main() -> int:
             status="FAILED",
             last_error_type=type(exc).__name__,
         )
-        raise
+        # The Odds API key is sent in the provider URL query string. Never let
+        # transport exceptions or request URLs reach supervisor health logs.
+        raise RuntimeError(
+            f"NFL sportsbook capture failed: {type(exc).__name__}"
+        ) from None
 
     print(json.dumps({
         "status": "CAPTURED",
