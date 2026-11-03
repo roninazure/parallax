@@ -10,9 +10,16 @@ from datetime import UTC, datetime
 from urllib.parse import urlencode
 from collections.abc import Callable
 
-from .fair_value import BookMoneyline
-from .odds_provider import OddsQuota, OddsResponse, SportsEvent, _quote_age_seconds
+from .nfl_research_fair_value import BookMoneyline
+from .odds_provider import OddsQuota, OddsResponse, SportsEvent
 from .devig import american_to_decimal
+
+
+def _quote_age_seconds(updated_at: str, now: datetime) -> float:
+    parsed = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
+    if parsed.tzinfo is None or now.tzinfo is None:
+        raise ValueError("research quote timestamps must be timezone aware")
+    return (now.astimezone(UTC) - parsed.astimezone(UTC)).total_seconds()
 
 
 NFL_ODDS_ENDPOINT = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/"
