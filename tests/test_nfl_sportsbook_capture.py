@@ -111,6 +111,39 @@ class NFLOddsCaptureTests(unittest.TestCase):
             self.assertFalse(output.exists())
             self.assertFalse(capture_state.exists())
 
+    def test_provider_exception_is_sanitized_before_supervisor_logging(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            games_csv = root / "games.csv"
+            games_csv.write_text(CSV, encoding="utf-8")
+            output = root / "snapshot.json"
+            capture_state = root / "capture-state.json"
+            argv = [
+                "nfl_sportsbook_capture",
+                "--games-csv", str(games_csv),
+                "--quota-state", str(root / "quota.json"),
+                "--capture-state", str(capture_state),
+                "--output", str(output),
+                "--fetch-once",
+            ]
+            with (
+                patch("sys.argv", argv),
+                patch.dict("os.environ", {"THE_ODDS_API_KEY": "TEST_KEY"}),
+                patch("scripts.nfl_sportsbook_capture.load_quota_state", return_value={"remaining": 100}),
+                patch("scripts.nfl_sportsbook_capture.quota_allows_request", return_value=True),
+                patch("scripts.nfl_sportsbook_capture.eligible_capture_games", return_value=parse_games(CSV)),
+                patch(
+                    "scripts.nfl_sportsbook_capture.fetch_nfl_v4_once",
+                    side_effect=RuntimeError("request URL contained SHOULD_NOT_LEAK"),
+                ),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "capture failed: RuntimeError") as raised:
+                    main()
+            self.assertNotIn("SHOULD_NOT_LEAK", str(raised.exception))
+            state = __import__("json").loads(capture_state.read_text(encoding="utf-8"))
+            self.assertEqual(state["status"], "FAILED")
+            self.assertEqual(state["last_error_type"], "RuntimeError")
+
     def test_capture_window_rejects_naive_clock(self):
         with self.assertRaisesRegex(ValueError, "timezone-aware"):
             eligible_capture_games([], now=NOW.replace(tzinfo=None))
