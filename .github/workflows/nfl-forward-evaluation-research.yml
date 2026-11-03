@@ -1,0 +1,31 @@
+name: NFL forward evaluation research tests
+
+on:
+  push:
+    branches:
+      - research/nfl-forward-market-evaluation-20261102
+  pull_request:
+    branches:
+      - fix/nfl-sportsbook-evidence-20261102
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  forward-evaluation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install 'pytest>=8,<9'
+      - name: Compile research modules
+        run: python -m py_compile scripts/nfl_forward_market_evaluation.py
+      - name: Run forward evaluator and NFL regressions
+        env:
+          TZ: UTC
+        run: python -m pytest -q tests/test_nfl_forward_market_evaluation.py tests/test_nfl_sportsbook_evidence.py tests/test_nfl_sportsbook_capture.py tests/test_nfl_odds_v4.py tests/test_nfl_evidence_integrity.py tests/test_sports_fair_value.py tests/test_sports_odds_provider.py tests/test_parallax_nfl.py
