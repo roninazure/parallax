@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-11-03T22:22:04.336414+00:00",
+  "generated_at": "2026-11-03T23:24:51.247116+00:00",
   "lane": "CFB",
   "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 46.56702061,
+      "market_id": "1839339",
+      "matchup": "Toledo at Sacramento State",
+      "model_probability": 0.5206702060610618,
+      "price": 0.055,
+      "sport": "CFB",
+      "start_time": "2026-11-05T00:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "NO",
       "edge_pp": 35.65734482,
@@ -11,6 +22,17 @@
       "price": 0.18,
       "sport": "CFB",
       "start_time": "2026-11-04T00:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 30.55543077,
+      "market_id": "1644344",
+      "matchup": "Buffalo at Miami (OH)",
+      "model_probability": 0.605554307723817,
+      "price": 0.3,
+      "sport": "CFB",
+      "start_time": "2026-11-04T01:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -27,10 +49,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-03T22:21:48.874106+00:00",
+  "source_feed_generated_at": "2026-11-03T23:24:25.102483+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 2
+    "buy": 4
   }
 }
