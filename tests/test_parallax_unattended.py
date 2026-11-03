@@ -725,15 +725,17 @@ def test_nfl_sportsbook_research_lane_failure_does_not_block_other_lanes(
             output = "{}"
         return subprocess.CompletedProcess(command, 0, output, "")
 
+    now = [0.0]
     scheduler = UnattendedScheduler(
         root=tmp_path / "release",
         state_dir=tmp_path / "state",
         runtime_env=runtime_env,
         runner=runner,
         clock=lambda: "2026-11-03T00:00:00+00:00",
-        monotonic=lambda: 3600.0,
+        monotonic=lambda: now[0],
     )
     scheduler.next_due["nba"] = scheduler.next_due["nhl"] = float("inf")
+    now[0] = 3600.0
     health = scheduler.run_cycle()
 
     assert any(c[1].endswith("nfl_sportsbook_capture.py") for c in calls)
