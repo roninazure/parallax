@@ -868,3 +868,125 @@ def test_enabling_nfl_sportsbook_research_later_starts_fresh_one_hour_grace_peri
     now[0] = 10800.0
     scheduler.run_cycle()
     assert len([c for c in calls if c[1].endswith("nfl_sportsbook_capture.py")]) == 1
+
+
+def test_daily_forward_evaluation_waits_for_sample_without_degrading_scheduler(
+    tmp_path, monkeypatch
+):
+    runtime_env = tmp_path / "runtime.env"
+    runtime_env.write_text(
+        "PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1\n", encoding="utf-8"
+    )
+    now = [0.0]
+    monkeypatch.setattr(
+        "parallax_unattended.export_completed_scan",
+        lambda lane, stdout, state_dir: None,
+    )
+
+    def clock():
+        return (datetime(2026, 11, 3, tzinfo=UTC) + timedelta(seconds=now[0])).isoformat()
+
+    report = {
+        "status": "INSUFFICIENT_FORWARD_SAMPLE",
+        "research_only": True,
+        "buy_publication_eligible": False,
+        "matched_completed_games": 0,
+        "min_required_games": 100,
+        "matched_calendar_weeks": 0,
+        "min_required_calendar_weeks": 12,
+        "paired_comparisons_vs_elo": {
+            "market": {"evidence_gate": "MINIMUM_GAME_OR_WEEK_SAMPLE_NOT_MET"},
+            "fixed_blend": {"evidence_gate": "MINIMUM_GAME_OR_WEEK_SAMPLE_NOT_MET"},
+        },
+    }
+    calls = []
+
+    def runner(command, **kwargs):
+        calls.append(command)
+        if command[1].endswith("nfl_forward_market_evaluation.py"):
+            report_path = Path(command[command.index("--output") + 1])
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(json.dumps(report), encoding="utf-8")
+            return subprocess.CompletedProcess(command, 2, json.dumps(report), "")
+        return subprocess.CompletedProcess(command, 0, "{}", "")
+
+    scheduler = UnattendedScheduler(
+        root=tmp_path / "release",
+        state_dir=tmp_path / "state",
+        runtime_env=runtime_env,
+        runner=runner,
+        clock=clock,
+        monotonic=lambda: now[0],
+    )
+    for lane in ("nfl", "mlb", "nba", "nhl", "nfl_sportsbook_research", "reconciliation"):
+        scheduler.next_due[lane] = float("inf")
+    now[0] = 7200.0
+    health = scheduler.run_cycle()
+
+    assert any(c[1].endswith("nfl_forward_market_evaluation.py") for c in calls)
+    lane = health["lanes"]["nfl_forward_evaluation"]
+    assert lane["state"] == "WAITING_FOR_SAMPLE"
+    assert lane["matched_completed_games"] == 0
+    assert lane["research_only"] is True
+    assert lane["buy_publication_eligible"] is False
+    assert Path(lane["report_path"]).is_file()
+    assert health["last_successful_nfl_forward_evaluation"] == clock()
+    assert health["recent_errors"] == []
+    assert health["state"] == "RUNNING"
+    assert scheduler.next_due["nfl_forward_evaluation"] == 93600.0
+
+
+def test_forward_evaluation_research_signal_never_becomes_customer_buy(
+    tmp_path, monkeypatch
+):
+    runtime_env = tmp_path / "runtime.env"
+    runtime_env.write_text(
+        "PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1\n", encoding="utf-8"
+    )
+    now = [0.0]
+    monkeypatch.setattr(
+        "parallax_unattended.export_completed_scan",
+        lambda lane, stdout, state_dir: None,
+    )
+    report = {
+        "status": "SUFFICIENT_FORWARD_SAMPLE",
+        "research_only": True,
+        "buy_publication_eligible": False,
+        "matched_completed_games": 120,
+        "min_required_games": 100,
+        "matched_calendar_weeks": 12,
+        "min_required_calendar_weeks": 12,
+        "paired_comparisons_vs_elo": {
+            "market": {"evidence_gate": "BOTH_METRICS_IMPROVE"},
+            "fixed_blend": {"evidence_gate": "IMPROVEMENT_NOT_ESTABLISHED"},
+        },
+    }
+
+    def runner(command, **kwargs):
+        if command[1].endswith("nfl_forward_market_evaluation.py"):
+            report_path = Path(command[command.index("--output") + 1])
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(json.dumps(report), encoding="utf-8")
+            return subprocess.CompletedProcess(command, 0, json.dumps(report), "")
+        return subprocess.CompletedProcess(command, 0, "{}", "")
+
+    scheduler = UnattendedScheduler(
+        root=tmp_path / "release",
+        state_dir=tmp_path / "state",
+        runtime_env=runtime_env,
+        runner=runner,
+        clock=lambda: "2026-11-03T02:00:00+00:00",
+        monotonic=lambda: now[0],
+    )
+    for lane in ("nfl", "mlb", "nba", "nhl", "nfl_sportsbook_research", "reconciliation"):
+        scheduler.next_due[lane] = float("inf")
+    now[0] = 7200.0
+    health = scheduler.run_cycle()
+
+    lane = health["lanes"]["nfl_forward_evaluation"]
+    assert lane["state"] == "RESEARCH_IMPROVEMENT_SUPPORTED"
+    assert lane["improvement_supported_models"] == ["market"]
+    assert lane["research_only"] is True
+    assert lane["buy_publication_eligible"] is False
+    assert health["recent_errors"] == []
+    assert health["state"] == "RUNNING"
