@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - codex/issue-57-nba-nhl-production
+      - feat/nfl-sportsbook-research-automation-20261103
+  pull_request:
+    branches:
+      - codex/issue-57-nba-nhl-production
   workflow_dispatch:
 
 permissions:
@@ -30,9 +34,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e . 'pytest>=8,<9'
-      - name: Compile NBA/NHL readiness modules
+      - name: Compile production and research modules
         run: |
-          python -m compileall -q scripts/league_evidence_preflight.py scripts/diagnose_league_runtime.py scripts/collect_league_evidence.py scripts/train_league_models.py scripts/reconcile_league_results.py scripts/nba_elo_calibration_candidate.py scripts/freeze_nba_nov2_research.py parallax/nba_elo_calibration_candidate.py parallax/league_model_v2.py
+          python -m compileall -q scripts/league_evidence_preflight.py scripts/diagnose_league_runtime.py scripts/collect_league_evidence.py scripts/train_league_models.py scripts/reconcile_league_results.py scripts/nba_elo_calibration_candidate.py scripts/freeze_nba_nov2_research.py parallax/nba_elo_calibration_candidate.py parallax/league_model_v2.py parallax/nfl.py sports/fair_value.py sports/odds_provider.py sports/nfl_evidence.py sports/nfl_odds_v4.py scripts/nfl_sportsbook_capture.py scripts/parallax_unattended.py
       - name: Run NBA/NHL focused regression suite
         run: |
           python -m pytest -q \
@@ -51,13 +55,25 @@ jobs:
             tests/test_parallax_public_feed.py \
             tests/test_parallax_buy_alerts.py
       - name: Guard existing NFL, MLB and CFB lanes
-        # NFL date-only fixture parsing currently uses the host local zone.
-        # Match the Mac mini's ET operating environment without touching
-        # production NFL code in this NBA/NHL-scoped PR.
+        # NFL date-only schedule semantics are explicit Eastern time and must
+        # remain identical on the Mac mini and UTC CI runners.
         env:
-          TZ: America/New_York
+          TZ: UTC
         run: |
           python -m pytest -q \
             tests/test_parallax_nfl.py \
             tests/test_parallax_live_mlb.py \
             tests/test_parallax_live_cfb.py
+
+      - name: Run NFL sportsbook research and unattended scheduler regressions
+        env:
+          TZ: UTC
+        run: |
+          python -m pytest -q \
+            tests/test_nfl_evidence_integrity.py \
+            tests/test_nfl_sportsbook_evidence.py \
+            tests/test_nfl_odds_v4.py \
+            tests/test_nfl_sportsbook_capture.py \
+            tests/test_sports_fair_value.py \
+            tests/test_sports_odds_provider.py
+
