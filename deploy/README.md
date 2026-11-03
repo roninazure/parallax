@@ -28,7 +28,7 @@ After the research capture lane has accumulated pregame snapshots, run the offli
 : "${PARALLAX_STATE_DIR:?Set PARALLAX_STATE_DIR to the external SwarmEdge state directory}"
 python scripts/nfl_forward_market_evaluation.py \
   --fetch-schedule \
-  --snapshots "$PARALLAX_STATE_DIR"/research/nfl_sportsbook/snapshots/*.json
+  --snapshots-dir "$PARALLAX_STATE_DIR"/research/nfl_sportsbook/snapshots
 ```
 
 The evaluator uses the same fixed observation window as capture: no later than 60 minutes before kickoff and no older than 24 hours. It compares Elo, de-vig sportsbook consensus, and a fixed 50/50 research-only blend using Brier score, log loss, and paired calendar-week cluster bootstrap intervals.
