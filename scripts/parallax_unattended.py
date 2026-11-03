@@ -203,6 +203,8 @@ class UnattendedScheduler:
                 "--quota-state", str(self.state_dir / "reports" / "sports_quota_state.json"),
                 "--capture-state", str(research_dir / "capture_state.json"),
                 "--min-interval-seconds", str(NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS),
+                "--min-lead-minutes", "60",
+                "--max-lookback-hours", "24",
                 "--min-quota-reserve", "10",
                 "--output", str(research_dir / "snapshots" / f"{stamp}.json"),
                 "--fetch-once",
@@ -301,12 +303,31 @@ class UnattendedScheduler:
                         raise RuntimeError("invalid NFL sportsbook research output") from exc
                     if (
                         not isinstance(decoded_output, dict)
-                        or decoded_output.get("status") != "CAPTURED"
-                        or decoded_output.get("schema_version") != "nfl-sportsbook-research-v1"
+                        or decoded_output.get("status") not in {"CAPTURED", "SKIPPED_NO_ELIGIBLE_GAMES"}
                         or decoded_output.get("research_only") is not True
                         or decoded_output.get("buy_publication_eligible") is not False
                     ):
                         raise RuntimeError("NFL sportsbook research output failed its read-only contract")
+                    if decoded_output.get("status") == "CAPTURED" and (
+                        decoded_output.get("schema_version") != "nfl-sportsbook-research-v1"
+                    ):
+                        raise RuntimeError("NFL sportsbook snapshot schema is invalid")
+                    if decoded_output.get("status") == "SKIPPED_NO_ELIGIBLE_GAMES" and (
+                        decoded_output.get("eligible_games") != 0
+                    ):
+                        raise RuntimeError("NFL sportsbook skip output has eligible fixtures")
+                if lane == "nfl_sportsbook_research" and decoded_output.get("status") == "SKIPPED_NO_ELIGIBLE_GAMES":
+                    successful += 1
+                    self.lane_health[lane] = {
+                        "state": "SKIPPED",
+                        "last_checked_at": self.clock(),
+                        "reason": "NO_ELIGIBLE_GAMES_IN_EVALUATION_WINDOW",
+                        "schedule_games": decoded_output.get("schedule_games"),
+                        "eligible_games": 0,
+                        "research_only": True,
+                        "buy_publication_eligible": False,
+                    }
+                    continue
                 if lane == "nfl" and isinstance(decoded_output, dict):
                     self.nfl_provider_state = {
                         "scan_mode": decoded_output.get("scan_mode"),
