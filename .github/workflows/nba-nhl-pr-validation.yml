@@ -5,6 +5,9 @@ on:
     branches:
       - codex/issue-57-nba-nhl-production
       - feat/nfl-sportsbook-research-automation-20261103
+  pull_request:
+    branches:
+      - codex/issue-57-nba-nhl-production
   workflow_dispatch:
 
 permissions:
