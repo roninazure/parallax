@@ -20,7 +20,8 @@ def snapshot(observed, probability=.65, *, buy=False):
 
 class NFLForwardMarketEvaluationTests(unittest.TestCase):
     def test_valid_pregame_observation_scored(self):
-        result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))], min_scored=1)
+        result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))],
+                          min_scored=1, min_week_clusters=1)
         self.assertEqual(result["status"], "SUFFICIENT_FORWARD_SAMPLE")
         self.assertEqual(result["matched_completed_games"], 1)
         self.assertFalse(result["buy_publication_eligible"])
