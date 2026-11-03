@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import random
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from statistics import mean
@@ -23,14 +24,56 @@ def _aware_utc(value: str) -> datetime | None:
         return None
 
 
+def _loss(probability: float, outcome: int, metric: str) -> float:
+    if metric == "brier":
+        return (probability - outcome) ** 2
+    clipped = min(max(probability, 1e-12), 1 - 1e-12)
+    return -(outcome * math.log(clipped) + (1 - outcome) * math.log(1 - clipped))
+
+
 def _scores(probabilities: list[float], outcomes: list[int]) -> dict:
     if not outcomes:
         return {"n": 0, "brier": None, "log_loss": None}
     return {
         "n": len(outcomes),
         "brier": round(mean((p - y) ** 2 for p, y in zip(probabilities, outcomes)), 8),
-        "log_loss": round(mean(-(y * math.log(p) + (1 - y) * math.log(1 - p))
-                               for p, y in zip(probabilities, outcomes)), 8),
+        "log_loss": round(mean(_loss(p, y, "log_loss") for p, y in zip(probabilities, outcomes)), 8),
+    }
+
+
+def _paired_bootstrap(rows: list[dict], challenger: str, metric: str, *,
+                      iterations: int = 2000, seed: int = 20261103) -> dict:
+    """Paired game-level bootstrap of challenger-minus-Elo loss.
+
+    Negative deltas favor the challenger. Resampling is paired by game so both
+    models are evaluated on exactly the same outcomes. This is uncertainty
+    quantification, not a substitute for a predeclared untouched holdout.
+    """
+    if not rows:
+        return {"n": 0, "delta": None, "ci95": [None, None], "interpretation": "NO_DATA"}
+    deltas = [
+        _loss(row[challenger], row["home_win"], metric)
+        - _loss(row["elo"], row["home_win"], metric)
+        for row in rows
+    ]
+    point = mean(deltas)
+    rng = random.Random(seed)
+    samples = sorted(
+        mean(deltas[rng.randrange(len(deltas))] for _ in range(len(deltas)))
+        for _ in range(iterations)
+    )
+    low = samples[int(0.025 * (iterations - 1))]
+    high = samples[int(0.975 * (iterations - 1))]
+    return {
+        "n": len(deltas),
+        "delta": round(point, 8),
+        "ci95": [round(low, 8), round(high, 8)],
+        "interpretation": "CHALLENGER_IMPROVEMENT_SUPPORTED" if high < 0 else (
+            "ELO_IMPROVEMENT_SUPPORTED" if low > 0 else "NO_CLEAR_DIFFERENCE"
+        ),
+        "delta_definition": "mean challenger loss minus mean Elo loss; negative favors challenger",
+        "bootstrap_iterations": iterations,
+        "seed": seed,
     }
 
 
@@ -98,7 +141,20 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
         index = end
 
     outcomes = [row["home_win"] for row in rows]
-    status = "SUFFICIENT_FORWARD_SAMPLE" if len(rows) >= min_scored else "INSUFFICIENT_FORWARD_SAMPLE"
+    enough = len(rows) >= min_scored
+    status = "SUFFICIENT_FORWARD_SAMPLE" if enough else "INSUFFICIENT_FORWARD_SAMPLE"
+    paired = {}
+    for model in ("market", "fixed_blend"):
+        paired[model] = {
+            metric: _paired_bootstrap(rows, model, metric)
+            for metric in ("brier", "log_loss")
+        }
+        paired[model]["evidence_gate"] = (
+            "MINIMUM_SAMPLE_NOT_MET" if not enough else
+            "BOTH_METRICS_IMPROVE" if all(
+                paired[model][metric]["ci95"][1] < 0 for metric in ("brier", "log_loss")
+            ) else "IMPROVEMENT_NOT_ESTABLISHED"
+        )
     return {
         "status": status,
         "matched_completed_games": len(rows),
@@ -108,9 +164,11 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
         "elo": _scores([row["elo"] for row in rows], outcomes),
         "market": _scores([row["market"] for row in rows], outcomes),
         "fixed_blend_research_only": _scores([row["fixed_blend"] for row in rows], outcomes),
+        "paired_comparisons_vs_elo": paired,
         "research_only": True,
         "buy_publication_eligible": False,
         "limits": ["Snapshots must have been captured before a fixed kickoff cutoff.",
+                   "Paired bootstrap intervals quantify sampling uncertainty, not causal proof.",
                    "No execution prices, betting profitability, or BUY eligibility inferred.",
                    "Experimental blend is not fitted, selected, or production-certified."],
     }
