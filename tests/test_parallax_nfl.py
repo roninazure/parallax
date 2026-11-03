@@ -3372,3 +3372,12 @@ def test_p1_active_candidate_holds_nfl_buy_and_ntfy(monkeypatch):
     assert nfl_live_scan._dispatch_eligible_buy_alerts(object(), result) == {
         "sent": 0, "deduplicated": 0, "failed": 0, "withheld": 0,
     }
+
+
+def test_p1_direct_dispatch_cannot_bypass_hold(monkeypatch):
+    """Defense in depth: stale caller may not deliver an eligible BUY via ntfy."""
+    now = datetime(2026, 10, 3, 11, 12, tzinfo=UTC)
+    candidate = _publication_candidate(now)
+    monkeypatch.setenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", "1")
+    result = nfl_live_scan._dispatch_eligible_buy_alerts(object(), [candidate])
+    assert result == {"sent": 0, "deduplicated": 0, "failed": 0, "withheld": 1}
