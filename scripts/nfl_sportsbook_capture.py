@@ -29,6 +29,7 @@ from sports.odds_provider import OddsResponse
 from sports.nfl_odds_v4 import fetch_nfl_v4_once
 
 MINIMUM_CAPTURE_INTERVAL_SECONDS = 3600
+MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS = 100
 FREE_USAGE_ENDPOINT = "https://api.the-odds-api.com/v4/sports/"
 KEYCHAIN_SERVICE = "swarmaxis-the-odds-api"
 
@@ -195,9 +196,37 @@ def reserve_capture_attempt(
                 elapsed = (now.astimezone(UTC) - previous_at.astimezone(UTC)).total_seconds()
                 if elapsed < min_interval_seconds:
                     raise RuntimeError("NFL sportsbook capture throttled by persistent one-hour minimum interval")
+            month = now.astimezone(UTC).strftime("%Y-%m")
+            prior_month = state.get("attempt_month_utc")
+            prior_count = state.get("attempt_count_month_utc")
+            if (prior_month is None) != (prior_count is None):
+                raise RuntimeError("monthly capture budget state is incomplete; refusing provider request")
+            if prior_month is not None:
+                if (
+                    not isinstance(prior_month, str)
+                    or len(prior_month) != 7
+                    or prior_month[4] != "-"
+                    or not prior_month[:4].isdigit()
+                    or not prior_month[5:].isdigit()
+                    or not 1 <= int(prior_month[5:]) <= 12
+                    or prior_month > month
+                    or isinstance(prior_count, bool)
+                    or not isinstance(prior_count, int)
+                    or not 0 <= prior_count <= MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS
+                ):
+                    raise RuntimeError("monthly capture budget state is invalid; refusing provider request")
+            elif previous:
+                # An existing reservation without a reliable monthly count
+                # cannot prove remaining research budget.
+                raise RuntimeError("legacy capture state has no monthly budget; refusing provider request")
+            count = prior_count if prior_month == month else 0
+            if count >= MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS:
+                raise RuntimeError("NFL research monthly 100-attempt safety budget exhausted")
             reserved = {
                 **state,
                 "last_attempt_at_utc": now.astimezone(UTC).isoformat(),
+                "attempt_month_utc": month,
+                "attempt_count_month_utc": count + 1,
                 "status": "REQUEST_RESERVED",
             }
             _atomic_write_json(path, reserved)
