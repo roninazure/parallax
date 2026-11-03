@@ -2,7 +2,7 @@ import unittest
 from datetime import UTC, datetime, timedelta
 
 from parallax.nfl import NFLGame
-from sports.fair_value import BookMoneyline
+from sports.nfl_research_fair_value import BookMoneyline
 from sports.nfl_evidence import match_nfl_evidence
 from sports.odds_provider import SportsEvent
 
