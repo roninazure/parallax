@@ -1,0 +1,42 @@
+name: NFL research isolated candidate
+
+on:
+  push:
+    branches:
+      - fix/nfl-sportsbook-research-isolated-20261103
+  pull_request:
+    branches:
+      - baseline/nfl-research-20261103
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-nfl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install project and pytest
+        run: python -m pip install -e . 'pytest>=8,<9'
+      - name: Compile isolated research and existing supervisor
+        run: |
+          python -m compileall -q scripts/nfl_sportsbook_capture.py sports/nfl_odds_v4.py sports/nfl_evidence.py sports/nfl_research_fair_value.py scripts/parallax_unattended.py
+      - name: NFL research, supervisor and operational regression tests
+        env:
+          TZ: UTC
+        run: |
+          python -m pytest -q \
+            tests/test_nfl_research_scheduler_isolation.py \
+            tests/test_nfl_evidence_integrity.py \
+            tests/test_nfl_sportsbook_evidence.py \
+            tests/test_nfl_odds_v4.py \
+            tests/test_nfl_sportsbook_capture.py \
+            tests/test_parallax_unattended.py \
+            tests/test_parallax_nfl.py \
+            tests/test_parallax_live_mlb.py \
+            tests/test_parallax_live_cfb.py
