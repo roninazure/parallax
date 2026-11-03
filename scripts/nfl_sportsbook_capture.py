@@ -18,18 +18,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from parallax.nfl import parse_games
+from parallax.nfl import NFLGame, fetch_games, parse_games
 from scripts.sports_scan import load_quota_state, persist_quota_state, quota_allows_request
 from sports.nfl_evidence import match_nfl_evidence
 from sports.odds_provider import OddsResponse
 from sports.nfl_odds_v4 import fetch_nfl_v4_once
 
 
-def capture(response: OddsResponse, games_csv: str, *, observed_at: datetime) -> dict:
+def capture_games(response: OddsResponse, games: list[NFLGame], *, observed_at: datetime) -> dict:
     """Pure offline conversion; no network, notification, or publication."""
     if observed_at.tzinfo is None:
         raise ValueError("capture requires timezone-aware observed_at")
-    games = parse_games(games_csv)
     matched = []
     for event in response.events:
         evidence = match_nfl_evidence(event, games, observed_at=observed_at)
@@ -51,6 +50,11 @@ def capture(response: OddsResponse, games_csv: str, *, observed_at: datetime) ->
     }
 
 
+def capture(response: OddsResponse, games_csv: str, *, observed_at: datetime) -> dict:
+    """Compatibility wrapper for deterministic offline CSV-based tests."""
+    return capture_games(response, parse_games(games_csv), observed_at=observed_at)
+
+
 def quota_headroom_verified(state: dict | None, *, reserve: int) -> bool:
     """Unknown or malformed quota means zero authorized requests."""
     if not isinstance(state, dict) or reserve < 1:
@@ -64,7 +68,10 @@ def quota_headroom_verified(state: dict | None, *, reserve: int) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--games-csv", required=True, type=Path)
+    schedule = parser.add_mutually_exclusive_group(required=True)
+    schedule.add_argument("--games-csv", type=Path)
+    schedule.add_argument("--fetch-schedule", action="store_true",
+                          help="Fetch the existing nflverse official schedule once")
     parser.add_argument("--quota-state", type=Path, default=Path("reports/sports_quota_state.json"))
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--min-quota-reserve", type=int, default=10)
@@ -88,12 +95,18 @@ def main() -> int:
         parser.error("THE_ODDS_API_KEY unavailable")
 
     # No retries; avoid a remote request if the supplied schedule is invalid.
-    games_csv = args.games_csv.read_text(encoding="utf-8")
-    if not parse_games(games_csv):
+    if args.fetch_schedule:
+        try:
+            games = fetch_games()
+        except Exception as exc:
+            parser.error(f"official NFL schedule fetch failed: {type(exc).__name__}")
+    else:
+        games = parse_games(args.games_csv.read_text(encoding="utf-8"))
+    if not games:
         parser.error("empty or invalid official NFL schedule")
     response = fetch_nfl_v4_once(api_key=api_key, now=now)
     persist_quota_state(args.quota_state, response, now)
-    report = capture(response, games_csv, observed_at=now)
+    report = capture_games(response, games, observed_at=now)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x", encoding="utf-8") as target:
         json.dump(report, target, indent=2, sort_keys=True)
