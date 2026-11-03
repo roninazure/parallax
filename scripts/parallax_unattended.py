@@ -24,7 +24,7 @@ from parallax.public_feed import export_completed_scan
 
 HEALTH_FILENAME = "parallax_unattended_health.json"
 LOCK_FILENAME = "parallax_unattended.lock"
-LANES = ("nfl", "cfb", "mlb", "nba", "nhl", "reconciliation")
+LANES = ("nfl", "cfb", "mlb", "nba", "nhl", "nfl_sportsbook_research", "reconciliation")
 SPORTS_LANES = ("nfl", "cfb", "mlb", "nba", "nhl")
 SPORTS_INTERVAL_SECONDS = {
     "nfl": 45,
@@ -34,6 +34,7 @@ SPORTS_INTERVAL_SECONDS = {
     "nhl": 3600,
 }
 RECONCILIATION_INTERVAL_SECONDS = 300
+NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS = 3600
 # Keep the first unattended cycle bounded after launch. Subsequent cadence is
 # unchanged; CFB's first request is delayed a full hour to preserve its quota.
 STARTUP_OFFSETS_SECONDS = {
@@ -43,6 +44,7 @@ STARTUP_OFFSETS_SECONDS = {
     "cfb": 3600,
     "nba": 7200,
     "nhl": 10800,
+    "nfl_sportsbook_research": 3600,
 }
 
 
@@ -177,6 +179,10 @@ class UnattendedScheduler:
         value = self._environment().get("PARALLAX_CFB_ENABLED", "").strip().casefold()
         return value in {"1", "true", "yes", "on"}
 
+    def _nfl_sportsbook_research_enabled(self) -> bool:
+        value = self._environment().get("PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED", "").strip().casefold()
+        return value in {"1", "true", "yes", "on"}
+
     def commands(self) -> dict[str, list[str]]:
         commands = {
             "nfl": [sys.executable, str(self.root / "scripts/nfl_live_scan.py")],
@@ -184,6 +190,23 @@ class UnattendedScheduler:
         if self._cfb_enabled():
             commands["cfb"] = [sys.executable, str(self.root / "scripts/cfb_live_scan.py")]
         commands["mlb"] = [sys.executable, "-m", "parallax", "scan", "--limit", "6"]
+        if self._nfl_sportsbook_research_enabled():
+            captured_at = datetime.fromisoformat(self.clock().replace("Z", "+00:00"))
+            if captured_at.tzinfo is None:
+                raise RuntimeError("scheduler clock must be timezone-aware for research capture naming")
+            stamp = captured_at.astimezone(UTC).strftime("%Y%m%dT%H%M%SZ")
+            research_dir = self.state_dir / "research" / "nfl_sportsbook"
+            commands["nfl_sportsbook_research"] = [
+                sys.executable,
+                str(self.root / "scripts/nfl_sportsbook_capture.py"),
+                "--fetch-schedule",
+                "--quota-state", str(self.state_dir / "reports" / "sports_quota_state.json"),
+                "--capture-state", str(research_dir / "capture_state.json"),
+                "--min-interval-seconds", str(NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS),
+                "--min-quota-reserve", "10",
+                "--output", str(research_dir / "snapshots" / f"{stamp}.json"),
+                "--fetch-once",
+            ]
         for league in ("nba", "nhl"):
             commands[league] = [sys.executable, str(self.root / f"scripts/{league}_live_scan.py")]
         commands["reconciliation"] = [
@@ -211,6 +234,7 @@ class UnattendedScheduler:
             "last_heartbeat": heartbeat,
             "last_successful_nfl_scan": self.last_success["nfl"],
             "last_successful_nfl_refresh": self.last_nfl_refresh,
+            "last_successful_nfl_sportsbook_capture": self.last_success["nfl_sportsbook_research"],
             "nfl_provider_state": self.nfl_provider_state,
             "lanes": self.lane_health,
             "last_successful_cfb_scan": self.last_success["cfb"],
@@ -232,11 +256,14 @@ class UnattendedScheduler:
             default_due = float("inf") if lane in {"nba", "nhl"} else now
             if now < self.next_due.get(lane, default_due):
                 continue
-            self.next_due[lane] = now + (
+            interval = (
                 SPORTS_INTERVAL_SECONDS[lane]
                 if lane in SPORTS_LANES
+                else NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS
+                if lane == "nfl_sportsbook_research"
                 else RECONCILIATION_INTERVAL_SECONDS
             )
+            self.next_due[lane] = now + interval
             due_count += 1
             try:
                 completed = self.runner(
@@ -264,6 +291,19 @@ class UnattendedScheduler:
                     if lane in {"nba", "nhl"} and decoded_output.get("scan_status") == "FAILED":
                         failure_type = decoded_output.get("failure_type", "UnknownError")
                         raise RuntimeError(f"{lane.upper()} scanner reported {failure_type}")
+                elif lane == "nfl_sportsbook_research":
+                    try:
+                        decoded_output = json.loads(completed.stdout)
+                    except (TypeError, json.JSONDecodeError) as exc:
+                        raise RuntimeError("invalid NFL sportsbook research output") from exc
+                    if (
+                        not isinstance(decoded_output, dict)
+                        or decoded_output.get("status") != "CAPTURED"
+                        or decoded_output.get("schema_version") != "nfl-sportsbook-research-v1"
+                        or decoded_output.get("research_only") is not True
+                        or decoded_output.get("buy_publication_eligible") is not False
+                    ):
+                        raise RuntimeError("NFL sportsbook research output failed its read-only contract")
                 if lane == "nfl" and isinstance(decoded_output, dict):
                     self.nfl_provider_state = {
                         "scan_mode": decoded_output.get("scan_mode"),
@@ -292,11 +332,22 @@ class UnattendedScheduler:
                         else None
                     ) or self.last_success[lane]
                 successful += 1
-                self.lane_health[lane] = {
-                    "state": "DEGRADED" if partial else "RUNNING",
-                    "last_successful_scan": self.last_success[lane],
-                    **(self._coverage_diagnostics(decoded_output) if partial else {}),
-                }
+                if lane == "nfl_sportsbook_research":
+                    self.lane_health[lane] = {
+                        "state": "RUNNING",
+                        "last_successful_capture": self.last_success[lane],
+                        "snapshot": decoded_output.get("output"),
+                        "events_seen": decoded_output.get("events_seen"),
+                        "events_accepted": decoded_output.get("events_accepted"),
+                        "research_only": True,
+                        "buy_publication_eligible": False,
+                    }
+                else:
+                    self.lane_health[lane] = {
+                        "state": "DEGRADED" if partial else "RUNNING",
+                        "last_successful_scan": self.last_success[lane],
+                        **(self._coverage_diagnostics(decoded_output) if partial else {}),
+                    }
             except Exception as exc:  # Each lane must not prevent later lanes.
                 message = f"{lane}: {type(exc).__name__}: {exc}"
                 errors.append(message)
