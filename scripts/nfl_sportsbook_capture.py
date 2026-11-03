@@ -262,8 +262,15 @@ def main() -> int:
 
     try:
         response = fetch_nfl_v4_once(api_key=api_key, now=now)
-        persist_quota_state(args.quota_state, response, now)
-        report = capture_games(response, eligible_games, observed_at=now)
+        observed_at = datetime.now(UTC)
+        # A request can cross the 60-minute cutoff. Re-evaluate the official
+        # fixtures at response receipt, matching the quote-age reference clock.
+        eligible_at_response = eligible_capture_games(
+            games, now=observed_at, min_lead_minutes=args.min_lead_minutes,
+            max_lookback_hours=args.max_lookback_hours,
+        )
+        persist_quota_state(args.quota_state, response, observed_at)
+        report = capture_games(response, eligible_at_response, observed_at=observed_at)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         with args.output.open("x", encoding="utf-8") as target:
             json.dump(report, target, indent=2, sort_keys=True)
@@ -271,7 +278,7 @@ def main() -> int:
         update_capture_state(
             args.capture_state,
             status="SUCCESS",
-            last_success_at_utc=now.isoformat(),
+            last_success_at_utc=observed_at.isoformat(),
             last_snapshot_path=str(args.output),
             last_events_seen=report["events_seen"],
             last_events_accepted=report["events_accepted"],
