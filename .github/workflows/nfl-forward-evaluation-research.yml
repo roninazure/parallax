@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - research/nfl-forward-market-evaluation-20261102
+  pull_request:
+    branches:
+      - fix/nfl-sportsbook-evidence-20261102
   workflow_dispatch:
 
 permissions:
