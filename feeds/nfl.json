@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-03T19:26:59.394605+00:00",
+  "generated_at": "2026-11-03T19:33:50.853539+00:00",
   "lane": "NFL",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 45.92188989,
+      "edge_pp": 46.17188989,
       "market_id": "1672727",
       "matchup": "JAX at BAL",
       "model_probability": 0.6542188988906608,
-      "price": 0.195,
+      "price": 0.1925,
       "sport": "NFL",
       "start_time": "2026-11-06T01:15:00+00:00",
       "venue": "POLYMARKET"
@@ -104,8 +104,8 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-03T19:25:58.927175+00:00",
-  "source_schedule_state": "COMPLETE",
+  "source_feed_generated_at": "2026-11-03T19:33:26.025381+00:00",
+  "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
     "buy": 9
