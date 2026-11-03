@@ -5,9 +5,11 @@ on:
     branches:
       - codex/issue-57-nba-nhl-production
       - feat/nfl-sportsbook-research-automation-20261103
+      - research/nfl-forward-market-evaluation-active-20261103
   pull_request:
     branches:
       - codex/issue-57-nba-nhl-production
+      - feat/nfl-sportsbook-research-automation-20261103
   workflow_dispatch:
 
 permissions:
@@ -36,7 +38,7 @@ jobs:
           python -m pip install -e . 'pytest>=8,<9'
       - name: Compile production and research modules
         run: |
-          python -m compileall -q scripts/league_evidence_preflight.py scripts/diagnose_league_runtime.py scripts/collect_league_evidence.py scripts/train_league_models.py scripts/reconcile_league_results.py scripts/nba_elo_calibration_candidate.py scripts/freeze_nba_nov2_research.py parallax/nba_elo_calibration_candidate.py parallax/league_model_v2.py parallax/nfl.py sports/fair_value.py sports/odds_provider.py sports/nfl_evidence.py sports/nfl_odds_v4.py scripts/nfl_sportsbook_capture.py scripts/parallax_unattended.py
+          python -m compileall -q scripts/league_evidence_preflight.py scripts/diagnose_league_runtime.py scripts/collect_league_evidence.py scripts/train_league_models.py scripts/reconcile_league_results.py scripts/nba_elo_calibration_candidate.py scripts/freeze_nba_nov2_research.py parallax/nba_elo_calibration_candidate.py parallax/league_model_v2.py parallax/nfl.py sports/fair_value.py sports/odds_provider.py sports/nfl_evidence.py sports/nfl_odds_v4.py scripts/nfl_sportsbook_capture.py scripts/nfl_forward_market_evaluation.py scripts/parallax_unattended.py
       - name: Run NBA/NHL focused regression suite
         run: |
           python -m pytest -q \
@@ -74,6 +76,7 @@ jobs:
             tests/test_nfl_sportsbook_evidence.py \
             tests/test_nfl_odds_v4.py \
             tests/test_nfl_sportsbook_capture.py \
+            tests/test_nfl_forward_market_evaluation.py \
             tests/test_sports_fair_value.py \
             tests/test_sports_odds_provider.py
 
