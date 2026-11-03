@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import tempfile
+import time
 import subprocess
 from getpass import getuser
 from urllib.parse import urlencode
@@ -297,6 +298,13 @@ def main() -> int:
         parser.error("minimum capture interval cannot be less than 3600 seconds")
     if args.min_lead_minutes < 0 or args.max_lookback_hours < 1:
         parser.error("invalid capture evaluation window")
+
+    # The production NFL parser's date-only fallback uses the host timezone.
+    # This isolated child must interpret NFL schedule dates as Eastern
+    # regardless of macOS host settings; never modify the live scanner.
+    if hasattr(time, "tzset"):
+        os.environ["TZ"] = "America/New_York"
+        time.tzset()
 
     # Fetch the official schedule before quota checks. If no game can qualify
     # for the pregame evaluation window, do not spend an Odds API request.
