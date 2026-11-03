@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 from scripts.nfl_sportsbook_capture import (
     capture, capture_games, quota_headroom_verified, reserve_capture_attempt, update_capture_state,
 )
-from parallax.nfl import parse_games
+from parallax.nfl import NFLGame, parse_games
 from sports.fair_value import BookMoneyline
 from sports.odds_provider import OddsQuota, OddsResponse, SportsEvent
 
@@ -58,6 +58,26 @@ class NFLOddsCaptureTests(unittest.TestCase):
             capture(OddsResponse((), OddsQuota(None, None, None, None)), CSV,
                     observed_at=NOW.replace(tzinfo=None))
 
+
+    def test_capture_window_matches_forward_evaluation_cutoffs(self):
+        games = [
+            NFLGame("too-soon", 2026, "REG", (NOW + timedelta(minutes=59)).isoformat(),
+                    "JAX", "IND", None, None),
+            NFLGame("lower-bound", 2026, "REG", (NOW + timedelta(minutes=60)).isoformat(),
+                    "JAX", "IND", None, None),
+            NFLGame("upper-bound", 2026, "REG", (NOW + timedelta(hours=24)).isoformat(),
+                    "JAX", "IND", None, None),
+            NFLGame("too-far", 2026, "REG", (NOW + timedelta(hours=24, seconds=1)).isoformat(),
+                    "JAX", "IND", None, None),
+            NFLGame("already-final", 2026, "REG", (NOW + timedelta(hours=2)).isoformat(),
+                    "JAX", "IND", 24, 17),
+        ]
+        eligible = eligible_capture_games(games, now=NOW)
+        self.assertEqual([game.game_id for game in eligible], ["lower-bound", "upper-bound"])
+
+    def test_capture_window_rejects_naive_clock(self):
+        with self.assertRaisesRegex(ValueError, "timezone-aware"):
+            eligible_capture_games([], now=NOW.replace(tzinfo=None))
 
     def test_persistent_capture_throttle_survives_process_restart(self):
         with TemporaryDirectory() as directory:
