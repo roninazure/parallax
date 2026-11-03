@@ -1,7 +1,11 @@
 import unittest
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from scripts.nfl_sportsbook_capture import capture, capture_games, quota_headroom_verified
+from scripts.nfl_sportsbook_capture import (
+    capture, capture_games, quota_headroom_verified, reserve_capture_attempt, update_capture_state,
+)
 from parallax.nfl import parse_games
 from sports.fair_value import BookMoneyline
 from sports.odds_provider import OddsQuota, OddsResponse, SportsEvent
@@ -53,6 +57,38 @@ class NFLOddsCaptureTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             capture(OddsResponse((), OddsQuota(None, None, None, None)), CSV,
                     observed_at=NOW.replace(tzinfo=None))
+
+
+    def test_persistent_capture_throttle_survives_process_restart(self):
+        with TemporaryDirectory() as directory:
+            state = Path(directory) / "capture-state.json"
+            reserve_capture_attempt(state, now=NOW)
+            with self.assertRaisesRegex(RuntimeError, "one-hour minimum"):
+                reserve_capture_attempt(state, now=NOW + timedelta(seconds=3599))
+            reserve_capture_attempt(state, now=NOW + timedelta(seconds=3600))
+
+    def test_failed_attempt_still_consumes_one_hour_reservation(self):
+        with TemporaryDirectory() as directory:
+            state = Path(directory) / "capture-state.json"
+            reserve_capture_attempt(state, now=NOW)
+            update_capture_state(state, status="FAILED", last_error_type="TimeoutError")
+            with self.assertRaisesRegex(RuntimeError, "one-hour minimum"):
+                reserve_capture_attempt(state, now=NOW + timedelta(minutes=30))
+
+    def test_corrupt_capture_state_fails_closed(self):
+        with TemporaryDirectory() as directory:
+            state = Path(directory) / "capture-state.json"
+            state.write_text('{"last_attempt_at_utc":"not-a-timestamp"}', encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "timestamp is invalid"):
+                reserve_capture_attempt(state, now=NOW + timedelta(hours=2))
+
+    def test_capture_throttle_rejects_naive_time_and_sub_hour_interval(self):
+        with TemporaryDirectory() as directory:
+            state = Path(directory) / "capture-state.json"
+            with self.assertRaisesRegex(ValueError, "timezone-aware"):
+                reserve_capture_attempt(state, now=NOW.replace(tzinfo=None))
+            with self.assertRaisesRegex(ValueError, "less than one hour"):
+                reserve_capture_attempt(state, now=NOW, min_interval_seconds=3599)
 
     def test_missing_or_malformed_quota_is_blocked(self):
         for state in (None, {}, {"remaining": None}, {"remaining": "unknown"},
