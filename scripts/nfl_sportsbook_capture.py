@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Explicit, one-shot NFL odds research capture. Never publishes BUY signals.
+"""One-shot NFL sportsbook evidence capture with persistent fail-closed throttling.
 
-This is deliberately NOT installed as a scheduled production lane. A capture
-requires a known quota state, an explicit sport key, and an explicit output.
-No retry on any provider error. Future runs must be separately authorized.
+Research only: never publishes BUY signals, changes forecasts, or calls the
+production scanner. The scheduler invokes this as an optional isolated lane.
 """
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import os
 import sys
+import tempfile
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,6 +24,8 @@ from scripts.sports_scan import load_quota_state, persist_quota_state, quota_all
 from sports.nfl_evidence import match_nfl_evidence
 from sports.odds_provider import OddsResponse
 from sports.nfl_odds_v4 import fetch_nfl_v4_once
+
+MINIMUM_CAPTURE_INTERVAL_SECONDS = 3600
 
 
 def capture_games(response: OddsResponse, games: list[NFLGame], *, observed_at: datetime) -> dict:
@@ -44,6 +47,7 @@ def capture_games(response: OddsResponse, games: list[NFLGame], *, observed_at: 
         "evidence": matched,
         "limitations": [
             "Captured timestamps are retrieval times, not guaranteed provider quote observation times.",
+            "Provider quote ages use market-level last_update timestamps.",
             "Consensus is market evidence, not independently validated model alpha.",
             "No customer BUY publication, historical execution claims, or live forecast modification.",
         ],
@@ -66,6 +70,80 @@ def quota_headroom_verified(state: dict | None, *, reserve: int) -> bool:
     return remaining > reserve
 
 
+def _atomic_write_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", delete=False
+    ) as handle:
+        os.chmod(handle.name, 0o600)
+        json.dump(payload, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+        temporary = Path(handle.name)
+    os.replace(temporary, path)
+    os.chmod(path, 0o600)
+
+
+def _read_capture_state(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError("capture state is unreadable; refusing provider request") from exc
+    if not isinstance(value, dict) or not isinstance(value.get("last_attempt_at_utc"), str):
+        raise RuntimeError("capture state is malformed; refusing provider request")
+    return value
+
+
+def reserve_capture_attempt(
+    path: Path, *, now: datetime, min_interval_seconds: int = MINIMUM_CAPTURE_INTERVAL_SECONDS
+) -> dict:
+    """Persist a request reservation before HTTP; survive restarts and failures."""
+    if now.tzinfo is None:
+        raise ValueError("capture reservation requires timezone-aware time")
+    if min_interval_seconds < MINIMUM_CAPTURE_INTERVAL_SECONDS:
+        raise ValueError("NFL capture interval cannot be less than one hour")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_name(path.name + ".lock")
+    with lock_path.open("a+", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            state = _read_capture_state(path)
+            previous = state.get("last_attempt_at_utc")
+            if previous:
+                try:
+                    previous_at = datetime.fromisoformat(previous.replace("Z", "+00:00"))
+                    if previous_at.tzinfo is None:
+                        raise ValueError("naive capture state timestamp")
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError("capture state timestamp is invalid; refusing provider request") from exc
+                elapsed = (now.astimezone(UTC) - previous_at.astimezone(UTC)).total_seconds()
+                if elapsed < min_interval_seconds:
+                    raise RuntimeError("NFL sportsbook capture throttled by persistent one-hour minimum interval")
+            reserved = {
+                **state,
+                "last_attempt_at_utc": now.astimezone(UTC).isoformat(),
+                "status": "REQUEST_RESERVED",
+            }
+            _atomic_write_json(path, reserved)
+            return reserved
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+def update_capture_state(path: Path, **updates: object) -> None:
+    lock_path = path.with_name(path.name + ".lock")
+    with lock_path.open("a+", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            state = _read_capture_state(path)
+            _atomic_write_json(path, {**state, **updates})
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     schedule = parser.add_mutually_exclusive_group(required=True)
@@ -73,8 +151,10 @@ def main() -> int:
     schedule.add_argument("--fetch-schedule", action="store_true",
                           help="Fetch the existing nflverse official schedule once")
     parser.add_argument("--quota-state", type=Path, default=Path("reports/sports_quota_state.json"))
+    parser.add_argument("--capture-state", type=Path, default=Path("reports/nfl_sportsbook_capture_state.json"))
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--min-quota-reserve", type=int, default=10)
+    parser.add_argument("--min-interval-seconds", type=int, default=MINIMUM_CAPTURE_INTERVAL_SECONDS)
     parser.add_argument("--fetch-once", action="store_true", help="Explicitly authorize one odds request")
     args = parser.parse_args()
 
@@ -84,6 +164,8 @@ def main() -> int:
         parser.error("refusing to overwrite existing snapshot")
     if args.min_quota_reserve < 1:
         parser.error("quota reserve must be positive")
+    if args.min_interval_seconds < MINIMUM_CAPTURE_INTERVAL_SECONDS:
+        parser.error("minimum capture interval cannot be less than 3600 seconds")
     state = load_quota_state(args.quota_state)
     if not quota_headroom_verified(state, reserve=args.min_quota_reserve):
         parser.error("missing known quota headroom: refusing provider request")
@@ -94,7 +176,8 @@ def main() -> int:
     if not api_key:
         parser.error("THE_ODDS_API_KEY unavailable")
 
-    # No retries; avoid a remote request if the supplied schedule is invalid.
+    # Fetch and validate the authoritative fixture list before reserving the
+    # scarce Odds API request. The schedule source is not the Odds API quota.
     if args.fetch_schedule:
         try:
             games = fetch_games()
@@ -104,14 +187,47 @@ def main() -> int:
         games = parse_games(args.games_csv.read_text(encoding="utf-8"))
     if not games:
         parser.error("empty or invalid official NFL schedule")
-    response = fetch_nfl_v4_once(api_key=api_key, now=now)
-    persist_quota_state(args.quota_state, response, now)
-    report = capture_games(response, games, observed_at=now)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    with args.output.open("x", encoding="utf-8") as target:
-        json.dump(report, target, indent=2, sort_keys=True)
-        target.write("\n")
-    print(json.dumps({"output": str(args.output), "events_accepted": report["events_accepted"]}))
+
+    try:
+        reserve_capture_attempt(
+            args.capture_state, now=now, min_interval_seconds=args.min_interval_seconds
+        )
+    except RuntimeError as exc:
+        parser.error(str(exc))
+
+    try:
+        response = fetch_nfl_v4_once(api_key=api_key, now=now)
+        persist_quota_state(args.quota_state, response, now)
+        report = capture_games(response, games, observed_at=now)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        with args.output.open("x", encoding="utf-8") as target:
+            json.dump(report, target, indent=2, sort_keys=True)
+            target.write("\n")
+        update_capture_state(
+            args.capture_state,
+            status="SUCCESS",
+            last_success_at_utc=now.isoformat(),
+            last_snapshot_path=str(args.output),
+            last_events_seen=report["events_seen"],
+            last_events_accepted=report["events_accepted"],
+        )
+    except Exception as exc:
+        update_capture_state(
+            args.capture_state,
+            status="FAILED",
+            last_error_type=type(exc).__name__,
+        )
+        raise
+
+    print(json.dumps({
+        "status": "CAPTURED",
+        "schema_version": report["schema_version"],
+        "research_only": report["research_only"],
+        "buy_publication_eligible": report["buy_publication_eligible"],
+        "output": str(args.output),
+        "events_seen": report["events_seen"],
+        "events_accepted": report["events_accepted"],
+    }, sort_keys=True))
     return 0
 
 
