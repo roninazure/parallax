@@ -685,6 +685,8 @@ def test_nfl_sportsbook_research_lane_is_opt_in_and_hourly_isolated(
     assert len(research_calls) == 1
     assert "--fetch-once" in research_calls[0]
     assert "--fetch-schedule" in research_calls[0]
+    assert research_calls[0][research_calls[0].index("--min-lead-minutes") + 1] == "60"
+    assert research_calls[0][research_calls[0].index("--max-lookback-hours") + 1] == "24"
     assert "THE_ODDS_API_KEY" not in research_calls[0]
     assert first["last_successful_nfl_sportsbook_capture"] == clock()
     assert first["lanes"]["nfl_sportsbook_research"]["state"] == "RUNNING"
@@ -739,3 +741,57 @@ def test_nfl_sportsbook_research_lane_failure_does_not_block_other_lanes(
     assert health["last_successful_mlb_scan"] is not None
     assert health["lanes"]["nfl_sportsbook_research"]["state"] == "FAILED"
     assert health["state"] == "DEGRADED"
+
+
+def test_nfl_sportsbook_no_eligible_games_is_a_clean_skip_without_capture_success(
+    tmp_path, monkeypatch
+):
+    runtime_env = tmp_path / "runtime.env"
+    runtime_env.write_text(
+        "PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(
+        "parallax_unattended.export_completed_scan",
+        lambda lane, stdout, state_dir: None,
+    )
+    calls = []
+
+    def runner(command, **kwargs):
+        calls.append(command)
+        if command[1].endswith("nfl_sportsbook_capture.py"):
+            return subprocess.CompletedProcess(
+                command, 0,
+                json.dumps({
+                    "status": "SKIPPED_NO_ELIGIBLE_GAMES",
+                    "research_only": True,
+                    "buy_publication_eligible": False,
+                    "schedule_games": 272,
+                    "eligible_games": 0,
+                    "min_lead_minutes": 60,
+                    "max_lookback_hours": 24,
+                }),
+                "",
+            )
+        if command[1].endswith("nfl_live_scan.py"):
+            output = json.dumps({"slate": {"market_data_complete": True}})
+        else:
+            output = "{}"
+        return subprocess.CompletedProcess(command, 0, output, "")
+
+    scheduler = UnattendedScheduler(
+        root=tmp_path / "release",
+        state_dir=tmp_path / "state",
+        runtime_env=runtime_env,
+        runner=runner,
+        clock=lambda: "2026-11-03T00:00:00+00:00",
+        monotonic=lambda: 3600.0,
+    )
+    scheduler.next_due["nba"] = scheduler.next_due["nhl"] = float("inf")
+    health = scheduler.run_cycle()
+
+    assert any(c[1].endswith("nfl_sportsbook_capture.py") for c in calls)
+    assert health["last_successful_nfl_sportsbook_capture"] is None
+    assert health["lanes"]["nfl_sportsbook_research"]["state"] == "SKIPPED"
+    assert health["lanes"]["nfl_sportsbook_research"]["eligible_games"] == 0
+    assert health["recent_errors"] == []
+    assert health["state"] == "RUNNING"
