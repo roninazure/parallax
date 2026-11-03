@@ -1,7 +1,8 @@
 import unittest
 from datetime import UTC, datetime, timedelta
 
-from scripts.nfl_sportsbook_capture import capture, quota_headroom_verified
+from scripts.nfl_sportsbook_capture import capture, capture_games, quota_headroom_verified
+from parallax.nfl import parse_games
 from sports.fair_value import BookMoneyline
 from sports.odds_provider import OddsQuota, OddsResponse, SportsEvent
 
@@ -32,6 +33,21 @@ class NFLOddsCaptureTests(unittest.TestCase):
         self.assertEqual(report["events_seen"], 2)
         self.assertEqual(report["events_accepted"], 1)
         self.assertEqual(report["evidence"][0]["bookmaker_count"], 2)
+
+    def test_capture_games_accepts_existing_official_schedule_objects(self):
+        kickoff = datetime(2026, 11, 1, 19, tzinfo=UTC)
+        event = SportsEvent("e1", "americanfootball_nfl", "NFL",
+                            "Jacksonville Jaguars", "Indianapolis Colts",
+                            kickoff.isoformat(), (
+                                BookMoneyline("A", 1.8, 2.1, 20),
+                                BookMoneyline("B", 1.85, 2.05, 30),
+                            ))
+        report = capture_games(
+            OddsResponse((event,), OddsQuota(100, 2, 98, None)),
+            parse_games(CSV), observed_at=NOW,
+        )
+        self.assertEqual(report["events_accepted"], 1)
+        self.assertFalse(report["buy_publication_eligible"])
 
     def test_naive_capture_timestamp_rejected(self):
         with self.assertRaises(ValueError):
