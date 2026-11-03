@@ -209,7 +209,7 @@ class UnattendedScheduler:
                 sys.executable,
                 str(self.root / "scripts/nfl_sportsbook_capture.py"),
                 "--fetch-schedule",
-                "--quota-state", str(self.state_dir / "reports" / "sports_quota_state.json"),
+                "--quota-state", str(research_dir / "quota_state.json"),
                 "--capture-state", str(research_dir / "capture_state.json"),
                 "--min-interval-seconds", str(NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS),
                 "--min-lead-minutes", "60",
