@@ -671,6 +671,7 @@ def test_nfl_sportsbook_research_lane_is_opt_in_and_hourly_isolated(
         monotonic=lambda: now[0],
     )
     scheduler.next_due["nba"] = scheduler.next_due["nhl"] = float("inf")
+    scheduler.next_due["nfl_forward_evaluation"] = float("inf")
 
     initial = scheduler.run_cycle()
     assert initial["last_successful_nfl_sportsbook_capture"] is None
