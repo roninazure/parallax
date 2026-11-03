@@ -50,10 +50,14 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
         result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))], min_scored=100)
         self.assertEqual(result["status"], "INSUFFICIENT_FORWARD_SAMPLE")
         self.assertEqual(result["paired_comparisons_vs_elo"]["market"]["evidence_gate"],
-                         "MINIMUM_SAMPLE_NOT_MET")
+                         "MINIMUM_GAME_OR_WEEK_SAMPLE_NOT_MET")
+        self.assertEqual(result["matched_calendar_weeks"], 1)
+        self.assertEqual(result["min_required_calendar_weeks"], 12)
 
     def test_paired_bootstrap_reports_challenger_improvement_when_consistent(self):
-        rows = [{"home_win": 1, "elo": .40, "market": .80} for _ in range(100)]
+        rows = [{"home_win": 1, "elo": .40, "market": .80,
+                 "kickoff": (KICKOFF + timedelta(days=7 * (i % 12))).isoformat()}
+                for i in range(120)]
         result = _paired_bootstrap(rows, "market", "brier")
         self.assertLess(result["delta"], 0)
         self.assertLess(result["ci95"][1], 0)
