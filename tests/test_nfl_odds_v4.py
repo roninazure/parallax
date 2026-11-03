@@ -1,7 +1,9 @@
 import unittest
+import json
+from unittest.mock import patch
 from datetime import UTC, datetime, timedelta
 
-from sports.nfl_odds_v4 import parse_nfl_v4
+from sports.nfl_odds_v4 import fetch_nfl_v4_once, parse_nfl_v4
 
 
 NOW = datetime(2026, 11, 1, 15, tzinfo=UTC)
@@ -37,6 +39,29 @@ class NFLOddsV4Tests(unittest.TestCase):
     def test_non_v4_shape_is_rejected(self):
         with self.assertRaises(ValueError):
             parse_nfl_v4({"data": []}, now=NOW, headers={})
+
+    def test_fetch_ages_quotes_at_response_receipt_not_request_start(self):
+        class FakeResponse:
+            status = 200
+            headers = {"x-requests-remaining": "92", "x-requests-used": "8"}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self):
+                return json.dumps(payload(updated=NOW.isoformat())).encode("utf-8")
+
+        received = NOW + timedelta(seconds=17)
+        with patch("urllib.request.urlopen", return_value=FakeResponse()):
+            response = fetch_nfl_v4_once(
+                api_key="TEST_KEY",
+                now=NOW,
+                response_clock=lambda: received,
+            )
+        self.assertEqual(response.events[0].moneylines[0].age_seconds, 17)
 
 
 if __name__ == "__main__":
