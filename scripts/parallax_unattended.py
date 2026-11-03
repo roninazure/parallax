@@ -165,7 +165,7 @@ class UnattendedScheduler:
         self.next_due: dict[str, float] = {
             lane: startup + STARTUP_OFFSETS_SECONDS[lane] for lane in LANES
         }
-        self._nfl_sportsbook_research_was_enabled = False
+        self._nfl_sportsbook_research_was_enabled = self._environment().get("PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED", "").strip().casefold() in ("1", "true", "yes", "on")
         self.recent_errors: list[str] = []
 
     @property
