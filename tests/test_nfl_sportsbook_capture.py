@@ -316,6 +316,46 @@ class NFLOddsCaptureTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "one-hour minimum"):
                 reserve_capture_attempt(state, now=NOW + timedelta(minutes=30))
 
+    def test_hard_monthly_budget_counts_failed_and_successful_attempts(self):
+        import json
+        with TemporaryDirectory() as directory:
+            state = Path(directory) / "capture-state.json"
+            for number in range(100):
+                when = NOW + timedelta(hours=number)
+                reserve_capture_attempt(state, now=when)
+                if number == 0:
+                    update_capture_state(state, status="FAILED", last_error_type="TimeoutError")
+            payload = json.loads(state.read_text(encoding="utf-8"))
+            self.assertEqual(payload["attempt_month_utc"], "2026-11")
+            self.assertEqual(payload["attempt_count_month_utc"], 100)
+            with self.assertRaisesRegex(RuntimeError, "monthly 100-attempt"):
+                reserve_capture_attempt(state, now=NOW + timedelta(hours=100))
+            self.assertEqual(
+                json.loads(state.read_text(encoding="utf-8"))["attempt_count_month_utc"], 100,
+            )
+            rolled = reserve_capture_attempt(state, now=datetime(2026, 12, 1, tzinfo=UTC))
+            self.assertEqual(rolled["attempt_month_utc"], "2026-12")
+            self.assertEqual(rolled["attempt_count_month_utc"], 1)
+
+    def test_corrupt_or_legacy_monthly_budget_never_allows_request(self):
+        import json
+        for month_state in (
+            {"attempt_month_utc": "2026-11"},
+            {"attempt_count_month_utc": 7},
+            {"attempt_month_utc": "2026-11", "attempt_count_month_utc": "7"},
+            {"attempt_month_utc": "2026-13", "attempt_count_month_utc": 7},
+            {"attempt_month_utc": "2026-12", "attempt_count_month_utc": 7},
+            {},
+        ):
+            with TemporaryDirectory() as directory:
+                state = Path(directory) / "capture-state.json"
+                state.write_text(json.dumps({
+                    "last_attempt_at_utc": (NOW - timedelta(days=2)).isoformat(),
+                    **month_state,
+                }), encoding="utf-8")
+                with self.assertRaisesRegex(RuntimeError, "budget"):
+                    reserve_capture_attempt(state, now=NOW)
+
     def test_corrupt_capture_state_fails_closed(self):
         with TemporaryDirectory() as directory:
             state = Path(directory) / "capture-state.json"
