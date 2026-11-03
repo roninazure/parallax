@@ -28,7 +28,7 @@ PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1
 THE_ODDS_API_KEY=<configured in the protected runtime environment>
 ```
 
-The feature is disabled by default. The scheduler delays its first attempt for one hour after startup and invokes the capture lane no more than hourly. The capture script independently enforces a persistent minimum 3,600-second interval across restarts and failed requests. It reserves the attempt before calling the Odds API, makes no retries, refuses unknown/malformed quota state, and requires the shared quota snapshot to remain above the reserve.
+The feature is disabled by default. The scheduler delays its first attempt for one hour after startup and invokes the capture lane no more than hourly. The capture script independently enforces a persistent minimum 3,600-second interval across restarts and failed requests. It reserves the attempt before calling the Odds API, makes no retries, refuses unknown/malformed quota state, and requires the shared quota snapshot to remain above the reserve. This is a separate NFL request in addition to the existing MLB Odds API lane; it does not reduce or alter MLB cadence. Confirm the provider's monthly allowance and current remaining quota before enabling it.
 
 Snapshots and capture state are written beneath the external state directory at `research/nfl_sportsbook/`; they are not exported to customer feeds. Every snapshot is hard-coded `research_only=true` and `buy_publication_eligible=false`. No model, scanner, notification, or customer BUY behavior is changed.
 
