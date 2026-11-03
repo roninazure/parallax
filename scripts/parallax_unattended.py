@@ -24,7 +24,7 @@ from parallax.public_feed import export_completed_scan
 
 HEALTH_FILENAME = "parallax_unattended_health.json"
 LOCK_FILENAME = "parallax_unattended.lock"
-LANES = ("nfl", "cfb", "mlb", "nba", "nhl", "nfl_sportsbook_research", "reconciliation")
+LANES = ("nfl", "cfb", "mlb", "nba", "nhl", "nfl_sportsbook_research", "nfl_forward_evaluation", "reconciliation")
 SPORTS_LANES = ("nfl", "cfb", "mlb", "nba", "nhl")
 SPORTS_INTERVAL_SECONDS = {
     "nfl": 45,
@@ -35,6 +35,7 @@ SPORTS_INTERVAL_SECONDS = {
 }
 RECONCILIATION_INTERVAL_SECONDS = 300
 NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS = 3600
+NFL_FORWARD_EVALUATION_INTERVAL_SECONDS = 86400
 # Keep the first unattended cycle bounded after launch. Subsequent cadence is
 # unchanged; CFB's first request is delayed a full hour to preserve its quota.
 STARTUP_OFFSETS_SECONDS = {
@@ -45,6 +46,7 @@ STARTUP_OFFSETS_SECONDS = {
     "nba": 7200,
     "nhl": 10800,
     "nfl_sportsbook_research": 3600,
+    "nfl_forward_evaluation": 7200,
 }
 
 
@@ -186,8 +188,12 @@ class UnattendedScheduler:
         if enabled and not self._nfl_sportsbook_research_was_enabled:
             # Enabling research after a long-running daemon must not trigger an
             # immediate provider request. Start a fresh one-hour grace period.
+            enabled_at = self.monotonic()
             self.next_due["nfl_sportsbook_research"] = (
-                self.monotonic() + NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS
+                enabled_at + NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS
+            )
+            self.next_due["nfl_forward_evaluation"] = (
+                enabled_at + 2 * NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS
             )
         self._nfl_sportsbook_research_was_enabled = enabled
         return enabled
@@ -218,6 +224,18 @@ class UnattendedScheduler:
                 "--output", str(research_dir / "snapshots" / f"{stamp}.json"),
                 "--fetch-once",
             ]
+            evaluation_stamp = datetime.fromisoformat(self.clock().replace("Z", "+00:00"))
+            if evaluation_stamp.tzinfo is None:
+                raise RuntimeError("scheduler clock must be timezone-aware for evaluation report naming")
+            evaluation_stamp = evaluation_stamp.astimezone(UTC).strftime("%Y%m%dT%H%M%SZ")
+            evaluation_dir = research_dir / "evaluations"
+            commands["nfl_forward_evaluation"] = [
+                sys.executable,
+                str(self.root / "scripts/nfl_forward_market_evaluation.py"),
+                "--fetch-schedule",
+                "--snapshots-dir", str(research_dir / "snapshots"),
+                "--output", str(evaluation_dir / f"nfl_forward_evaluation_{evaluation_stamp}.json"),
+            ]
         for league in ("nba", "nhl"):
             commands[league] = [sys.executable, str(self.root / f"scripts/{league}_live_scan.py")]
         commands["reconciliation"] = [
@@ -246,6 +264,7 @@ class UnattendedScheduler:
             "last_successful_nfl_scan": self.last_success["nfl"],
             "last_successful_nfl_refresh": self.last_nfl_refresh,
             "last_successful_nfl_sportsbook_capture": self.last_success["nfl_sportsbook_research"],
+            "last_successful_nfl_forward_evaluation": self.last_success["nfl_forward_evaluation"],
             "nfl_provider_state": self.nfl_provider_state,
             "lanes": self.lane_health,
             "last_successful_cfb_scan": self.last_success["cfb"],
@@ -272,6 +291,8 @@ class UnattendedScheduler:
                 if lane in SPORTS_LANES
                 else NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS
                 if lane == "nfl_sportsbook_research"
+                else NFL_FORWARD_EVALUATION_INTERVAL_SECONDS
+                if lane == "nfl_forward_evaluation"
                 else RECONCILIATION_INTERVAL_SECONDS
             )
             self.next_due[lane] = now + interval
@@ -286,7 +307,9 @@ class UnattendedScheduler:
                     timeout=self.timeout_seconds,
                     check=False,
                 )
-                if completed.returncode != 0:
+                if completed.returncode != 0 and not (
+                    lane == "nfl_forward_evaluation" and completed.returncode == 2
+                ):
                     detail = (completed.stderr or completed.stdout or "no output").strip().replace("\n", " ")
                     raise RuntimeError(
                         f"exit {completed.returncode}: "
@@ -305,6 +328,64 @@ class UnattendedScheduler:
                     if lane in {"nba", "nhl"} and decoded_output.get("scan_status") == "FAILED":
                         failure_type = decoded_output.get("failure_type", "UnknownError")
                         raise RuntimeError(f"{lane.upper()} scanner reported {failure_type}")
+                elif lane == "nfl_forward_evaluation":
+                    try:
+                        decoded_output = json.loads(completed.stdout)
+                    except (TypeError, json.JSONDecodeError) as exc:
+                        raise RuntimeError("invalid NFL forward evaluation output") from exc
+                    if (
+                        not isinstance(decoded_output, dict)
+                        or decoded_output.get("status") not in {
+                            "INSUFFICIENT_FORWARD_SAMPLE", "SUFFICIENT_FORWARD_SAMPLE"
+                        }
+                        or decoded_output.get("research_only") is not True
+                        or decoded_output.get("buy_publication_eligible") is not False
+                        or not isinstance(decoded_output.get("paired_comparisons_vs_elo"), dict)
+                    ):
+                        raise RuntimeError("NFL forward evaluation output failed its research-only contract")
+                    report_path = Path(command[command.index("--output") + 1])
+                    if not report_path.is_file():
+                        raise RuntimeError("NFL forward evaluation report was not persisted")
+                    try:
+                        persisted_report = json.loads(report_path.read_text(encoding="utf-8"))
+                    except (OSError, json.JSONDecodeError) as exc:
+                        raise RuntimeError("persisted NFL evaluation report is unreadable") from exc
+                    if persisted_report != decoded_output:
+                        raise RuntimeError("persisted NFL evaluation report differs from stdout")
+                    status = decoded_output["status"]
+                    if status == "INSUFFICIENT_FORWARD_SAMPLE":
+                        if completed.returncode != 2:
+                            raise RuntimeError("insufficient-sample evaluation returned an unexpected exit code")
+                        lane_state = "WAITING_FOR_SAMPLE"
+                        supported_models = []
+                    else:
+                        if completed.returncode != 0:
+                            raise RuntimeError("sufficient-sample evaluation returned an unexpected exit code")
+                        paired = decoded_output["paired_comparisons_vs_elo"]
+                        supported_models = [
+                            model for model in ("market", "fixed_blend")
+                            if isinstance(paired.get(model), dict)
+                            and paired[model].get("evidence_gate") == "BOTH_METRICS_IMPROVE"
+                        ]
+                        lane_state = (
+                            "RESEARCH_IMPROVEMENT_SUPPORTED"
+                            if supported_models else "NO_IMPROVEMENT_ESTABLISHED"
+                        )
+                    self.last_success[lane] = self.clock()
+                    self.lane_health[lane] = {
+                        "state": lane_state,
+                        "last_evaluation_at": self.last_success[lane],
+                        "report_path": str(report_path),
+                        "matched_completed_games": decoded_output.get("matched_completed_games"),
+                        "min_required_games": decoded_output.get("min_required_games"),
+                        "matched_calendar_weeks": decoded_output.get("matched_calendar_weeks"),
+                        "min_required_calendar_weeks": decoded_output.get("min_required_calendar_weeks"),
+                        "improvement_supported_models": supported_models,
+                        "research_only": True,
+                        "buy_publication_eligible": False,
+                    }
+                    successful += 1
+                    continue
                 elif lane == "nfl_sportsbook_research":
                     try:
                         decoded_output = json.loads(completed.stdout)
@@ -387,10 +468,9 @@ class UnattendedScheduler:
                 self.lane_health[lane] = {"state": "FAILED", "error": message, "last_successful_scan": self.last_success[lane]}
                 print(f"[WARN] {message}", file=sys.stderr, flush=True)
             finally:
-                if lane == "nfl_sportsbook_research":
-                    # The capture's persistent timestamp is written after its
-                    # schedule preflight. Measure the next interval from child
-                    # completion so a slow request cannot trip the throttle.
+                if lane in {"nfl_sportsbook_research", "nfl_forward_evaluation"}:
+                    # Measure research cadence from child completion so slow
+                    # schedule/API work cannot trip the persistent interval.
                     self.next_due[lane] = self.monotonic() + interval
 
         self.recent_errors.extend(errors)
