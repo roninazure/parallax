@@ -81,6 +81,42 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
         self.assertEqual(result["matched_calendar_weeks"], 1)
         self.assertEqual(result["min_required_calendar_weeks"], 12)
 
+    def test_sufficient_sample_alone_does_not_certify_improvement(self):
+        games = []
+        snapshots = []
+        for week in range(12):
+            kickoff = KICKOFF + timedelta(days=7 * week)
+            observed = kickoff - timedelta(hours=2)
+            for index in range(10):
+                game_id = f"W{week:02d}_G{index:02d}"
+                game = NFLGame(
+                    game_id, 2026, "REG", kickoff.isoformat(),
+                    f"HOME{week}_{index}", f"AWAY{week}_{index}", 24, 17,
+                )
+                games.append(game)
+                snapshots.append({
+                    "schema_version": "nfl-sportsbook-research-v1",
+                    "research_only": True,
+                    "buy_publication_eligible": False,
+                    "captured_at_utc": observed.isoformat(),
+                    "evidence": [{
+                        "game_id": game_id,
+                        "observed_at": observed.isoformat(),
+                        "kickoff": game.kickoff,
+                        "home_probability": .5,
+                        "away_probability": .5,
+                        "bookmaker_count": 2,
+                        "independent_books": ["Book A", "Book B"],
+                    }],
+                })
+        result = evaluate(games, snapshots, min_scored=100, min_week_clusters=12)
+        self.assertEqual(result["status"], "SUFFICIENT_FORWARD_SAMPLE")
+        self.assertEqual(result["matched_completed_games"], 120)
+        self.assertEqual(
+            result["paired_comparisons_vs_elo"]["market"]["evidence_gate"],
+            "IMPROVEMENT_NOT_ESTABLISHED",
+        )
+
     def test_paired_bootstrap_reports_challenger_improvement_when_consistent(self):
         rows = [{"home_win": 1, "elo": .40, "market": .80,
                  "kickoff": (KICKOFF + timedelta(days=7 * (i % 12))).isoformat()}
