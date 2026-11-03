@@ -277,7 +277,8 @@ class UnattendedScheduler:
                 )
                 if completed.returncode != 0:
                     detail = (completed.stderr or completed.stdout or "no output").strip().replace("\n", " ")
-                    raise RuntimeError(f"exit {completed.returncode}: {detail[:400]}")
+                    detail = detail[-800:] if lane == "cfb" else detail[:400]
+                    raise RuntimeError(f"exit {completed.returncode}: {detail}")
                 if completed.stdout:
                     print(f"[{lane}] {completed.stdout.strip()}", flush=True)
                 decoded_output = None
