@@ -71,6 +71,37 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
         self.assertEqual(_paired_bootstrap(rows, "market", "log_loss"),
                          _paired_bootstrap(rows, "market", "log_loss"))
 
+
+    def test_hundred_games_in_one_week_do_not_pass_week_breadth_gate(self):
+        games = []
+        snapshots = []
+        observed = KICKOFF - timedelta(hours=2)
+        for index in range(100):
+            game_id = f"GAME_{index:03d}"
+            games.append(NFLGame(game_id, 2026, "REG", KICKOFF.isoformat(),
+                                 f"HOME{index}", f"AWAY{index}", 24, 17))
+            snapshots.append({
+                "schema_version": "nfl-sportsbook-research-v1",
+                "research_only": True,
+                "buy_publication_eligible": False,
+                "captured_at_utc": observed.isoformat(),
+                "evidence": [{
+                    "game_id": game_id,
+                    "observed_at": observed.isoformat(),
+                    "home_probability": .65,
+                    "away_probability": .35,
+                    "bookmaker_count": 4,
+                }],
+            })
+        result = evaluate(games, snapshots, min_scored=100, min_week_clusters=12)
+        self.assertEqual(result["matched_completed_games"], 100)
+        self.assertEqual(result["matched_calendar_weeks"], 1)
+        self.assertEqual(result["status"], "INSUFFICIENT_FORWARD_SAMPLE")
+        self.assertEqual(
+            result["paired_comparisons_vs_elo"]["market"]["evidence_gate"],
+            "MINIMUM_GAME_OR_WEEK_SAMPLE_NOT_MET",
+        )
+
     def test_bootstrap_resamples_calendar_weeks_as_clusters(self):
         rows = [{"home_win": 1, "elo": .40, "market": .80,
                  "kickoff": (KICKOFF + timedelta(days=7 * i)).isoformat()}
