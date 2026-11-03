@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-11-03T14:04:33.516193+00:00",
+  "generated_at": "2026-11-03T14:05:41.875298+00:00",
   "lane": "NFL",
   "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 45.17188989,
+      "market_id": "1672727",
+      "matchup": "JAX at BAL",
+      "model_probability": 0.6542188988906608,
+      "price": 0.2025,
+      "sport": "NFL",
+      "start_time": "2026-11-06T01:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "NO",
       "edge_pp": 20.71651557,
@@ -37,6 +48,17 @@
     },
     {
       "contract_side": "NO",
+      "edge_pp": 8.02646922,
+      "market_id": "1785078",
+      "matchup": "NYJ at KC",
+      "model_probability": 0.8777646921960169,
+      "price": 0.7975,
+      "sport": "NFL",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
       "edge_pp": 21.6336679,
       "market_id": "1785083",
       "matchup": "HOU at LAC",
@@ -47,34 +69,34 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 45.17188989,
-      "market_id": "1672727",
-      "matchup": "JAX at BAL",
-      "model_probability": 0.6542188988906608,
-      "price": 0.2025,
+      "contract_side": "YES",
+      "edge_pp": 9.16553239,
+      "market_id": "1785086",
+      "matchup": "TB at CHI",
+      "model_probability": 0.36915532387249905,
+      "price": 0.2775,
       "sport": "NFL",
-      "start_time": "2026-11-06T01:15:00+00:00",
+      "start_time": "2026-11-09T01:20:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
-      "edge_pp": 8.02646922,
-      "market_id": "1785078",
-      "matchup": "NYJ at KC",
-      "model_probability": 0.8777646921960169,
-      "price": 0.7975,
+      "edge_pp": 11.57720641,
+      "market_id": "1827181",
+      "matchup": "BUF at MIN",
+      "model_probability": 0.48077206410369133,
+      "price": 0.365,
       "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
+      "start_time": "2026-11-10T01:15:00+00:00",
       "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-03T14:04:32.815042+00:00",
+  "source_feed_generated_at": "2026-11-03T14:04:41.240005+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 6
+    "buy": 8
   }
 }
