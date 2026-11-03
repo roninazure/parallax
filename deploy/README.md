@@ -33,7 +33,7 @@ python scripts/nfl_forward_market_evaluation.py \
 
 The evaluator uses the same fixed observation window as capture: no later than 60 minutes before kickoff and no older than 24 hours. It compares Elo, de-vig sportsbook consensus, and a fixed 50/50 research-only blend using Brier score, log loss, and paired calendar-week cluster bootstrap intervals.
 
-No improvement is certified unless there are at least 100 matched completed games across at least 12 distinct calendar weeks and both Brier and log-loss confidence intervals support improvement. Otherwise the report remains `INSUFFICIENT_FORWARD_SAMPLE` or `IMPROVEMENT_NOT_ESTABLISHED`. Exit status 2 means the evidence gate is not met; it is not a production incident.
+No improvement is certified unless there are at least 100 matched completed games across at least 12 distinct calendar weeks and both Brier and log-loss confidence intervals support improvement. If the sample threshold is not met, the top-level status is `INSUFFICIENT_FORWARD_SAMPLE`. If the sample is sufficient but the confidence intervals do not establish improvement, the challenger's `evidence_gate` is `IMPROVEMENT_NOT_ESTABLISHED`. Exit status 2 means the sample gate is not met; it is not a production incident.
 
 The evaluator is offline apart from fetching the official schedule, does not call the Odds API, does not tune or promote a model, and never authorizes customer BUY publication or makes profitability claims.
 
