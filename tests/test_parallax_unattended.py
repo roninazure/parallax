@@ -782,15 +782,17 @@ def test_nfl_sportsbook_no_eligible_games_is_a_clean_skip_without_capture_succes
             output = "{}"
         return subprocess.CompletedProcess(command, 0, output, "")
 
+    now = [0.0]
     scheduler = UnattendedScheduler(
         root=tmp_path / "release",
         state_dir=tmp_path / "state",
         runtime_env=runtime_env,
         runner=runner,
         clock=lambda: "2026-11-03T00:00:00+00:00",
-        monotonic=lambda: 3600.0,
+        monotonic=lambda: now[0],
     )
     scheduler.next_due["nba"] = scheduler.next_due["nhl"] = float("inf")
+    now[0] = 3600.0
     health = scheduler.run_cycle()
 
     assert any(c[1].endswith("nfl_sportsbook_capture.py") for c in calls)
