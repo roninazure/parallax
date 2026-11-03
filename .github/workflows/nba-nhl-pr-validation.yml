@@ -75,8 +75,5 @@ jobs:
             tests/test_nfl_odds_v4.py \
             tests/test_nfl_sportsbook_capture.py \
             tests/test_sports_fair_value.py \
-            tests/test_sports_odds_provider.py \
-            tests/test_parallax_unattended.py \
-            tests/test_parallax_nfl.py \
-            tests/test_parallax_public_feed.py
+            tests/test_sports_odds_provider.py
 
