@@ -59,13 +59,29 @@ def capture(response: OddsResponse, games_csv: str, *, observed_at: datetime) ->
     return capture_games(response, parse_games(games_csv), observed_at=observed_at)
 
 
-def quota_headroom_verified(state: dict | None, *, reserve: int) -> bool:
-    """Unknown or malformed quota means zero authorized requests."""
-    if not isinstance(state, dict) or reserve < 1:
+def quota_headroom_verified(
+    state: dict | None, *, reserve: int, now: datetime,
+    max_age_seconds: int = 7200,
+) -> bool:
+    """Require positive headroom from a recent, timezone-aware quota snapshot."""
+    if (
+        not isinstance(state, dict)
+        or reserve < 1
+        or max_age_seconds < 1
+        or now.tzinfo is None
+    ):
         return False
     try:
         remaining = int(state["remaining"])
+        captured_at = datetime.fromisoformat(
+            str(state["captured_at_utc"]).replace("Z", "+00:00")
+        )
+        if captured_at.tzinfo is None:
+            return False
     except (KeyError, TypeError, ValueError, OverflowError):
+        return False
+    age = (now.astimezone(UTC) - captured_at.astimezone(UTC)).total_seconds()
+    if age < 0 or age > max_age_seconds:
         return False
     return remaining > reserve
 
@@ -229,7 +245,7 @@ def main() -> int:
     if args.output.exists():
         parser.error("refusing to overwrite existing snapshot")
     state = load_quota_state(args.quota_state)
-    if not quota_headroom_verified(state, reserve=args.min_quota_reserve):
+    if not quota_headroom_verified(state, reserve=args.min_quota_reserve, now=now):
         parser.error("missing known quota headroom: refusing provider request")
     if not quota_allows_request(state, now=now, reserve=args.min_quota_reserve):
         parser.error("quota reserve reached: refusing provider request")
