@@ -2,7 +2,7 @@ import unittest
 from datetime import UTC, datetime, timedelta
 
 from parallax.nfl import NFLGame
-from scripts.nfl_forward_market_evaluation import evaluate
+from scripts.nfl_forward_market_evaluation import _paired_bootstrap, evaluate
 
 
 KICKOFF = datetime(2026, 11, 8, 18, tzinfo=UTC)
@@ -24,6 +24,8 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
         self.assertEqual(result["status"], "SUFFICIENT_FORWARD_SAMPLE")
         self.assertEqual(result["matched_completed_games"], 1)
         self.assertFalse(result["buy_publication_eligible"])
+        self.assertIn("paired_comparisons_vs_elo", result)
+        self.assertEqual(result["paired_comparisons_vs_elo"]["market"]["brier"]["n"], 1)
 
     def test_after_cutoff_and_postkickoff_rejected(self):
         for observed in (KICKOFF-timedelta(minutes=30), KICKOFF+timedelta(minutes=5)):
@@ -47,6 +49,20 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
     def test_insufficient_sample_does_not_certify(self):
         result = evaluate([GAME], [snapshot(KICKOFF-timedelta(hours=2))], min_scored=100)
         self.assertEqual(result["status"], "INSUFFICIENT_FORWARD_SAMPLE")
+        self.assertEqual(result["paired_comparisons_vs_elo"]["market"]["evidence_gate"],
+                         "MINIMUM_SAMPLE_NOT_MET")
+
+    def test_paired_bootstrap_reports_challenger_improvement_when_consistent(self):
+        rows = [{"home_win": 1, "elo": .40, "market": .80} for _ in range(100)]
+        result = _paired_bootstrap(rows, "market", "brier")
+        self.assertLess(result["delta"], 0)
+        self.assertLess(result["ci95"][1], 0)
+        self.assertEqual(result["interpretation"], "CHALLENGER_IMPROVEMENT_SUPPORTED")
+
+    def test_paired_bootstrap_is_deterministic(self):
+        rows = [{"home_win": i % 2, "elo": .55, "market": .60} for i in range(40)]
+        self.assertEqual(_paired_bootstrap(rows, "market", "log_loss"),
+                         _paired_bootstrap(rows, "market", "log_loss"))
 
 
 if __name__ == "__main__":
