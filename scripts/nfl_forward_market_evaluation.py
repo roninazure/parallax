@@ -43,35 +43,50 @@ def _scores(probabilities: list[float], outcomes: list[int]) -> dict:
 
 def _paired_bootstrap(rows: list[dict], challenger: str, metric: str, *,
                       iterations: int = 2000, seed: int = 20261103) -> dict:
-    """Paired game-level bootstrap of challenger-minus-Elo loss.
+    """Paired week-cluster bootstrap of challenger-minus-Elo loss.
 
-    Negative deltas favor the challenger. Resampling is paired by game so both
-    models are evaluated on exactly the same outcomes. This is uncertainty
-    quantification, not a substitute for a predeclared untouched holdout.
+    All games from a calendar week are resampled together to reduce the
+    independence assumption across games sharing weekly conditions. Negative
+    deltas favor the challenger. This remains uncertainty quantification,
+    not a substitute for a predeclared untouched holdout.
     """
     if not rows:
-        return {"n": 0, "delta": None, "ci95": [None, None], "interpretation": "NO_DATA"}
-    deltas = [
-        _loss(row[challenger], row["home_win"], metric)
-        - _loss(row["elo"], row["home_win"], metric)
-        for row in rows
-    ]
+        return {"n": 0, "clusters": 0, "delta": None, "ci95": [None, None],
+                "interpretation": "NO_DATA"}
+    clusters: dict[str, list[float]] = {}
+    for row in rows:
+        kickoff = _aware_utc(row["kickoff"])
+        if kickoff is None:
+            continue
+        week_start = (kickoff.date() - timedelta(days=kickoff.weekday())).isoformat()
+        clusters.setdefault(week_start, []).append(
+            _loss(row[challenger], row["home_win"], metric)
+            - _loss(row["elo"], row["home_win"], metric)
+        )
+    if not clusters:
+        return {"n": 0, "clusters": 0, "delta": None, "ci95": [None, None],
+                "interpretation": "NO_VALID_CLUSTERS"}
+    groups = list(clusters.values())
+    deltas = [value for group in groups for value in group]
     point = mean(deltas)
     rng = random.Random(seed)
-    samples = sorted(
-        mean(deltas[rng.randrange(len(deltas))] for _ in range(len(deltas)))
-        for _ in range(iterations)
-    )
+    samples = []
+    for _ in range(iterations):
+        selected = [groups[rng.randrange(len(groups))] for _ in range(len(groups))]
+        samples.append(mean(value for group in selected for value in group))
+    samples.sort()
     low = samples[int(0.025 * (iterations - 1))]
     high = samples[int(0.975 * (iterations - 1))]
     return {
         "n": len(deltas),
+        "clusters": len(groups),
         "delta": round(point, 8),
         "ci95": [round(low, 8), round(high, 8)],
         "interpretation": "CHALLENGER_IMPROVEMENT_SUPPORTED" if high < 0 else (
             "ELO_IMPROVEMENT_SUPPORTED" if low > 0 else "NO_CLEAR_DIFFERENCE"
         ),
         "delta_definition": "mean challenger loss minus mean Elo loss; negative favors challenger",
+        "resampling_unit": "calendar_week_cluster",
         "bootstrap_iterations": iterations,
         "seed": seed,
     }
@@ -168,7 +183,7 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
         "research_only": True,
         "buy_publication_eligible": False,
         "limits": ["Snapshots must have been captured before a fixed kickoff cutoff.",
-                   "Paired bootstrap intervals quantify sampling uncertainty, not causal proof.",
+                   "Week-cluster bootstrap intervals quantify sampling uncertainty, not causal proof.",
                    "No execution prices, betting profitability, or BUY eligibility inferred.",
                    "Experimental blend is not fitted, selected, or production-certified."],
     }
