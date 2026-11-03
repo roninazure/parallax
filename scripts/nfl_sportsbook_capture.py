@@ -13,7 +13,7 @@ import os
 import sys
 import tempfile
 from dataclasses import asdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,6 +144,33 @@ def update_capture_state(path: Path, **updates: object) -> None:
             fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
 
 
+def eligible_capture_games(
+    games: list[NFLGame], *, now: datetime, min_lead_minutes: int = 60,
+    max_lookback_hours: int = 24,
+) -> list[NFLGame]:
+    """Only collect quotes that can qualify for the forward evaluation window."""
+    if now.tzinfo is None:
+        raise ValueError("evaluation window requires timezone-aware time")
+    if min_lead_minutes < 0 or max_lookback_hours < 1:
+        raise ValueError("invalid capture evaluation window")
+    earliest = now.astimezone(UTC) + timedelta(minutes=min_lead_minutes)
+    latest = now.astimezone(UTC) + timedelta(hours=max_lookback_hours)
+    eligible = []
+    for game in games:
+        if game.home_score is not None or game.away_score is not None:
+            continue
+        try:
+            kickoff = datetime.fromisoformat(game.kickoff.replace("Z", "+00:00"))
+        except (AttributeError, TypeError, ValueError):
+            continue
+        if kickoff.tzinfo is None:
+            continue
+        kickoff = kickoff.astimezone(UTC)
+        if earliest <= kickoff <= latest:
+            eligible.append(game)
+    return sorted(eligible, key=lambda game: (game.kickoff, game.game_id))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     schedule = parser.add_mutually_exclusive_group(required=True)
@@ -155,6 +182,8 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--min-quota-reserve", type=int, default=10)
     parser.add_argument("--min-interval-seconds", type=int, default=MINIMUM_CAPTURE_INTERVAL_SECONDS)
+    parser.add_argument("--min-lead-minutes", type=int, default=60)
+    parser.add_argument("--max-lookback-hours", type=int, default=24)
     parser.add_argument("--fetch-once", action="store_true", help="Explicitly authorize one odds request")
     args = parser.parse_args()
 
@@ -166,18 +195,11 @@ def main() -> int:
         parser.error("quota reserve must be positive")
     if args.min_interval_seconds < MINIMUM_CAPTURE_INTERVAL_SECONDS:
         parser.error("minimum capture interval cannot be less than 3600 seconds")
-    state = load_quota_state(args.quota_state)
-    if not quota_headroom_verified(state, reserve=args.min_quota_reserve):
-        parser.error("missing known quota headroom: refusing provider request")
-    now = datetime.now(UTC)
-    if not quota_allows_request(state, now=now, reserve=args.min_quota_reserve):
-        parser.error("quota reserve reached: refusing provider request")
-    api_key = os.environ.get("THE_ODDS_API_KEY")
-    if not api_key:
-        parser.error("THE_ODDS_API_KEY unavailable")
+    if args.min_lead_minutes < 0 or args.max_lookback_hours < 1:
+        parser.error("invalid capture evaluation window")
 
-    # Fetch and validate the authoritative fixture list before reserving the
-    # scarce Odds API request. The schedule source is not the Odds API quota.
+    # Fetch the official schedule before quota checks. If no game can qualify
+    # for the pregame evaluation window, do not spend an Odds API request.
     if args.fetch_schedule:
         try:
             games = fetch_games()
@@ -187,6 +209,34 @@ def main() -> int:
         games = parse_games(args.games_csv.read_text(encoding="utf-8"))
     if not games:
         parser.error("empty or invalid official NFL schedule")
+
+    now = datetime.now(UTC)
+    eligible_games = eligible_capture_games(
+        games, now=now, min_lead_minutes=args.min_lead_minutes,
+        max_lookback_hours=args.max_lookback_hours,
+    )
+    if not eligible_games:
+        print(json.dumps({
+            "status": "SKIPPED_NO_ELIGIBLE_GAMES",
+            "research_only": True,
+            "buy_publication_eligible": False,
+            "schedule_games": len(games),
+            "eligible_games": 0,
+            "min_lead_minutes": args.min_lead_minutes,
+            "max_lookback_hours": args.max_lookback_hours,
+        }, sort_keys=True))
+        return 0
+
+    if args.output.exists():
+        parser.error("refusing to overwrite existing snapshot")
+    state = load_quota_state(args.quota_state)
+    if not quota_headroom_verified(state, reserve=args.min_quota_reserve):
+        parser.error("missing known quota headroom: refusing provider request")
+    if not quota_allows_request(state, now=now, reserve=args.min_quota_reserve):
+        parser.error("quota reserve reached: refusing provider request")
+    api_key = os.environ.get("THE_ODDS_API_KEY")
+    if not api_key:
+        parser.error("THE_ODDS_API_KEY unavailable")
 
     try:
         reserve_capture_attempt(
@@ -198,7 +248,7 @@ def main() -> int:
     try:
         response = fetch_nfl_v4_once(api_key=api_key, now=now)
         persist_quota_state(args.quota_state, response, now)
-        report = capture_games(response, games, observed_at=now)
+        report = capture_games(response, eligible_games, observed_at=now)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         with args.output.open("x", encoding="utf-8") as target:
             json.dump(report, target, indent=2, sort_keys=True)
