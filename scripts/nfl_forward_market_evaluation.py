@@ -13,7 +13,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from statistics import mean
 
-from parallax.nfl import NFLGame, _advance, _probability, parse_games
+from parallax.nfl import NFLGame, _advance, _probability, fetch_games, parse_games
 
 
 def _aware_utc(value: str) -> datetime | None:
@@ -197,13 +197,18 @@ def evaluate(games: list[NFLGame], snapshots: list[dict], *,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--games-csv", type=Path, required=True)
+    schedule = parser.add_mutually_exclusive_group(required=True)
+    schedule.add_argument("--games-csv", type=Path)
+    schedule.add_argument("--fetch-schedule", action="store_true",
+                          help="Fetch the official nflverse schedule once")
     parser.add_argument("--snapshots", type=Path, nargs="+", required=True)
     parser.add_argument("--min-scored", type=int, default=100)
     args = parser.parse_args()
     snapshots = [json.loads(path.read_text(encoding="utf-8")) for path in args.snapshots]
-    report = evaluate(parse_games(args.games_csv.read_text(encoding="utf-8")), snapshots,
-                      min_scored=args.min_scored)
+    games = fetch_games() if args.fetch_schedule else parse_games(
+        args.games_csv.read_text(encoding="utf-8")
+    )
+    report = evaluate(games, snapshots, min_scored=args.min_scored)
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0 if report["status"] == "SUFFICIENT_FORWARD_SAMPLE" else 2
 
