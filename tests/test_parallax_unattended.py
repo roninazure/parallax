@@ -638,6 +638,7 @@ def test_nfl_sportsbook_research_lane_is_opt_in_and_hourly_isolated(
     def runner(command, **kwargs):
         calls.append(command)
         if command[1].endswith("nfl_sportsbook_capture.py"):
+            now[0] += 30.0  # Simulate schedule/provider processing time.
             return subprocess.CompletedProcess(
                 command, 0,
                 json.dumps({
@@ -693,11 +694,12 @@ def test_nfl_sportsbook_research_lane_is_opt_in_and_hourly_isolated(
     assert first["lanes"]["nfl_sportsbook_research"]["events_accepted"] == 16
     assert "nfl_sportsbook_research" not in exports
 
-    now[0] = 3601
+    assert scheduler.next_due["nfl_sportsbook_research"] == 7230.0
+    now[0] = 7229
     scheduler.run_cycle()
     assert len([c for c in calls if c[1].endswith("nfl_sportsbook_capture.py")]) == 1
 
-    now[0] = 7200
+    now[0] = 7230
     scheduler.run_cycle()
     assert len([c for c in calls if c[1].endswith("nfl_sportsbook_capture.py")]) == 2
 
