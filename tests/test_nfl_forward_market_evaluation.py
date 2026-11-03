@@ -168,10 +168,12 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
             snapshots_dir = Path(directory) / "snapshots"
             snapshots_dir.mkdir()
             stdout = StringIO()
+            report_path = Path(directory) / "evaluation.json"
             argv = [
                 "nfl_forward_market_evaluation",
                 "--fetch-schedule",
                 "--snapshots-dir", str(snapshots_dir),
+                "--output", str(report_path),
             ]
             with (
                 patch("sys.argv", argv),
@@ -186,6 +188,7 @@ class NFLForwardMarketEvaluationTests(unittest.TestCase):
             self.assertEqual(result, 2)
             self.assertEqual(report["status"], "INSUFFICIENT_FORWARD_SAMPLE")
             self.assertEqual(report["matched_completed_games"], 0)
+            self.assertEqual(json.loads(report_path.read_text(encoding="utf-8")), report)
 
     def test_hundred_games_in_one_week_do_not_pass_week_breadth_gate(self):
         games = []
