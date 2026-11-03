@@ -16,26 +16,8 @@ scripts/parallax_unattended.py
 
 It owns the NFL, optional CFB, MLB, and prospective-reconciliation schedules. Each lane keeps its own business logic; the unattended scheduler owns only cadence, isolation, locking, health state, and child-process execution.
 
-The optional `nfl_sportsbook_research` lane is disabled unless `PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1` is set in the runtime environment. When enabled, it performs at most one NFL research capture per hour, persists its attempt throttle under external state, requires known Odds API quota headroom above the configured reserve, and writes research snapshots outside the public-feed directory. It is not a customer publisher and never sets BUY publication eligibility.
+The optional `nfl_sportsbook_research` lane is disabled unless `PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1` is set in the runtime environment. When enabled, it performs at most one NFL research capture per hour, persists its attempt throttle under external state, first checks the actual account quota through the zero-credit `GET /v4/sports/` endpoint, and writes research snapshots outside the public-feed directory. It is not a customer publisher and never sets BUY publication eligibility.
 
-
-
-## Forward-only NFL market evaluation
-
-After the research capture lane has accumulated pregame snapshots, run the offline evaluator from the repository root:
-
-```bash
-: "${PARALLAX_STATE_DIR:?Set PARALLAX_STATE_DIR to the external SwarmEdge state directory}"
-python scripts/nfl_forward_market_evaluation.py \
-  --fetch-schedule \
-  --snapshots-dir "$PARALLAX_STATE_DIR"/research/nfl_sportsbook/snapshots
-```
-
-The evaluator uses the same fixed observation window as capture: no later than 60 minutes before kickoff and no older than 24 hours. It compares Elo, de-vig sportsbook consensus, and a fixed 50/50 research-only blend using Brier score, log loss, and paired calendar-week cluster bootstrap intervals.
-
-No improvement is certified unless there are at least 100 matched completed games across at least 12 distinct calendar weeks and both Brier and log-loss confidence intervals support improvement. If the sample threshold is not met, the top-level status is `INSUFFICIENT_FORWARD_SAMPLE`. If the sample is sufficient but the confidence intervals do not establish improvement, the challenger's `evidence_gate` is `IMPROVEMENT_NOT_ESTABLISHED`. Exit status 2 means the sample gate is not met; it is not a production incident.
-
-The evaluator is offline apart from fetching the official schedule, does not call the Odds API, does not tune or promote a model, and never authorizes customer BUY publication or makes profitability claims.
 
 ## Optional NFL sportsbook research capture
 
@@ -43,10 +25,11 @@ Enable only after the operator confirms the provider plan and quota budget:
 
 ```text
 PARALLAX_NFL_SPORTSBOOK_RESEARCH_ENABLED=1
-THE_ODDS_API_KEY=<configured in the protected runtime environment>
+# Key remains in the existing macOS Keychain service swarmaxis-the-odds-api.
+# THE_ODDS_API_KEY is supported only as an explicit protected environment fallback.
 ```
 
-The feature is disabled by default. The scheduler delays its first attempt for one hour after startup or after a runtime transition from disabled to enabled, then invokes the capture lane no more than hourly. The capture script independently enforces a persistent minimum 3,600-second interval across restarts and failed requests. Quote freshness is measured at HTTP response receipt, and the 60-minute pregame eligibility window is rechecked after the response arrives. It reserves the attempt before calling the Odds API, makes no retries, refuses unknown, malformed, future-dated, or older-than-two-hours quota state, and requires the shared quota snapshot to remain above the fixed 10-request reserve. Before quota checks or Odds API HTTP, it filters the official schedule to games 60 minutes to 24 hours before kickoff; if none qualify, it records a clean skip and makes no Odds API request. This is a separate NFL request in addition to the existing MLB Odds API lane; it does not reduce or alter MLB cadence. Confirm the provider's monthly allowance and current remaining quota before enabling it.
+The feature is disabled by default. The scheduler delays its first attempt for one hour after startup or after a runtime transition from disabled to enabled, then invokes the capture lane no more than hourly. The capture script independently enforces a persistent minimum 3,600-second interval across restarts and failed requests. It reserves the paid odds attempt before making that request, makes no retries, and requires at least 10 credits of headroom. Before quota checks or any Odds API HTTP, it filters the official schedule to games 60 minutes to 24 hours before kickoff; if none qualify, it records a clean skip. When games qualify, it retrieves the account's real usage from the provider's documented **zero-credit** `GET /v4/sports/` endpoint and rejects missing, corrupt, charged, or insufficient-quota responses without attempting paid odds. Its quota receipt is atomically stored under external `research/nfl_sportsbook/quota_state.json`, independent of the legacy paper-only `scripts/sports_scan.py` state; the production MLB command (`python -m parallax scan`) does not maintain that legacy file. The research script retrieves the existing Odds API credential from macOS Keychain service `swarmaxis-the-odds-api` for the launchd process user, or uses an explicitly provided protected `THE_ODDS_API_KEY` environment value. No key is logged or copied into the research snapshot. **Keychain visibility from the unattended launchd user and actual account subscription/budget remain attended pre-deployment gates.** The resulting NFL research odds call is separate from existing MLB/CFB provider paths, whose schedules and behavior remain unchanged.
 
 Snapshots and capture state are written beneath the external state directory at `research/nfl_sportsbook/`; they are not exported to customer feeds. Every snapshot is hard-coded `research_only=true` and `buy_publication_eligible=false`. No model, scanner, notification, or customer BUY behavior is changed.
 
