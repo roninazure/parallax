@@ -386,6 +386,12 @@ class UnattendedScheduler:
                 errors.append(message)
                 self.lane_health[lane] = {"state": "FAILED", "error": message, "last_successful_scan": self.last_success[lane]}
                 print(f"[WARN] {message}", file=sys.stderr, flush=True)
+            finally:
+                if lane == "nfl_sportsbook_research":
+                    # The capture's persistent timestamp is written after its
+                    # schedule preflight. Measure the next interval from child
+                    # completion so a slow request cannot trip the throttle.
+                    self.next_due[lane] = self.monotonic() + interval
 
         self.recent_errors.extend(errors)
         heartbeat = self.clock()
