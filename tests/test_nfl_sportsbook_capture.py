@@ -304,32 +304,36 @@ class NFLOddsCaptureTests(unittest.TestCase):
         with TemporaryDirectory() as directory:
             state = Path(directory) / "capture-state.json"
             reserve_capture_attempt(state, now=NOW)
-            with self.assertRaisesRegex(RuntimeError, "one-hour minimum"):
+            with self.assertRaisesRegex(RuntimeError, "24-hour paid-attempt"):
                 reserve_capture_attempt(state, now=NOW + timedelta(seconds=3599))
-            reserve_capture_attempt(state, now=NOW + timedelta(seconds=3600))
+            with self.assertRaisesRegex(RuntimeError, "24-hour paid-attempt"):
+                reserve_capture_attempt(state, now=NOW + timedelta(hours=23, minutes=59))
+            reserve_capture_attempt(state, now=NOW + timedelta(hours=24))
 
-    def test_failed_attempt_still_consumes_one_hour_reservation(self):
+    def test_failed_attempt_still_consumes_24_hour_reservation(self):
         with TemporaryDirectory() as directory:
             state = Path(directory) / "capture-state.json"
             reserve_capture_attempt(state, now=NOW)
             update_capture_state(state, status="FAILED", last_error_type="TimeoutError")
-            with self.assertRaisesRegex(RuntimeError, "one-hour minimum"):
+            with self.assertRaisesRegex(RuntimeError, "24-hour paid-attempt"):
                 reserve_capture_attempt(state, now=NOW + timedelta(minutes=30))
+            with self.assertRaisesRegex(RuntimeError, "24-hour paid-attempt"):
+                reserve_capture_attempt(state, now=NOW + timedelta(hours=23))
 
     def test_hard_monthly_budget_counts_failed_and_successful_attempts(self):
         import json
         with TemporaryDirectory() as directory:
             state = Path(directory) / "capture-state.json"
-            for number in range(100):
-                when = NOW + timedelta(hours=number)
-                reserve_capture_attempt(state, now=when)
-                if number == 0:
-                    update_capture_state(state, status="FAILED", last_error_type="TimeoutError")
+            reserve_capture_attempt(state, now=NOW)
+            update_capture_state(state, status="FAILED", last_error_type="TimeoutError")
+            payload = json.loads(state.read_text(encoding="utf-8"))
+            payload["attempt_count_month_utc"] = 100
+            state.write_text(json.dumps(payload), encoding="utf-8")
             payload = json.loads(state.read_text(encoding="utf-8"))
             self.assertEqual(payload["attempt_month_utc"], "2026-11")
             self.assertEqual(payload["attempt_count_month_utc"], 100)
             with self.assertRaisesRegex(RuntimeError, "monthly 100-attempt"):
-                reserve_capture_attempt(state, now=NOW + timedelta(hours=100))
+                reserve_capture_attempt(state, now=NOW + timedelta(days=2))
             self.assertEqual(
                 json.loads(state.read_text(encoding="utf-8"))["attempt_count_month_utc"], 100,
             )
