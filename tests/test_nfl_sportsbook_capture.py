@@ -129,7 +129,10 @@ class NFLOddsCaptureTests(unittest.TestCase):
             with (
                 patch("sys.argv", argv),
                 patch.dict("os.environ", {"THE_ODDS_API_KEY": "TEST_KEY"}),
-                patch("scripts.nfl_sportsbook_capture.load_quota_state", return_value={"remaining": 100}),
+                patch(
+                    "scripts.nfl_sportsbook_capture.load_quota_state",
+                    return_value={"remaining": 100, "captured_at_utc": datetime.now(UTC).isoformat()},
+                ),
                 patch("scripts.nfl_sportsbook_capture.quota_allows_request", return_value=True),
                 patch("scripts.nfl_sportsbook_capture.eligible_capture_games", return_value=parse_games(CSV)),
                 patch(
@@ -179,11 +182,25 @@ class NFLOddsCaptureTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "less than one hour"):
                 reserve_capture_attempt(state, now=NOW, min_interval_seconds=3599)
 
-    def test_missing_or_malformed_quota_is_blocked(self):
-        for state in (None, {}, {"remaining": None}, {"remaining": "unknown"},
-                      {"remaining": 10}, {"remaining": -1}):
-            self.assertFalse(quota_headroom_verified(state, reserve=10))
-        self.assertTrue(quota_headroom_verified({"remaining": 11}, reserve=10))
+    def test_missing_malformed_or_stale_quota_is_blocked(self):
+        invalid_states = (
+            None,
+            {},
+            {"remaining": None, "captured_at_utc": NOW.isoformat()},
+            {"remaining": "unknown", "captured_at_utc": NOW.isoformat()},
+            {"remaining": 10, "captured_at_utc": NOW.isoformat()},
+            {"remaining": -1, "captured_at_utc": NOW.isoformat()},
+            {"remaining": 11},
+            {"remaining": 11, "captured_at_utc": "not-a-timestamp"},
+            {"remaining": 11, "captured_at_utc": (NOW - timedelta(hours=3)).isoformat()},
+            {"remaining": 11, "captured_at_utc": (NOW + timedelta(seconds=1)).isoformat()},
+        )
+        for state in invalid_states:
+            self.assertFalse(quota_headroom_verified(state, reserve=10, now=NOW))
+        self.assertTrue(quota_headroom_verified(
+            {"remaining": 11, "captured_at_utc": NOW.isoformat()},
+            reserve=10, now=NOW,
+        ))
 
 
 if __name__ == "__main__":
