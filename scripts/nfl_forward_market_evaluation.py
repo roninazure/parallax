@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import random
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -224,7 +225,13 @@ def main() -> int:
     snapshot_source.add_argument("--snapshots", type=Path, nargs="+")
     snapshot_source.add_argument("--snapshots-dir", type=Path)
     parser.add_argument("--min-scored", type=int, default=100)
+    parser.add_argument("--output", type=Path,
+                        help="Optional path for a timestamped JSON evaluation report")
     args = parser.parse_args()
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        if args.output.exists():
+            parser.error("refusing to overwrite existing evaluation report")
     snapshot_paths = (
         sorted(args.snapshots_dir.glob("*.json"))
         if args.snapshots_dir is not None
@@ -235,7 +242,17 @@ def main() -> int:
         args.games_csv.read_text(encoding="utf-8")
     )
     report = evaluate(games, snapshots, min_scored=args.min_scored)
-    print(json.dumps(report, indent=2, sort_keys=True))
+    rendered = json.dumps(report, indent=2, sort_keys=True)
+    if args.output is not None:
+        temporary = args.output.with_name(args.output.name + ".tmp")
+        if temporary.exists():
+            parser.error("temporary evaluation report already exists")
+        with temporary.open("x", encoding="utf-8") as handle:
+            handle.write(rendered + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, args.output)
+    print(rendered)
     return 0 if report["status"] == "SUFFICIENT_FORWARD_SAMPLE" else 2
 
 
