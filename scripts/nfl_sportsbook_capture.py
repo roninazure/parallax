@@ -189,8 +189,6 @@ def main() -> int:
 
     if not args.fetch_once:
         parser.error("no network request without --fetch-once")
-    if args.output.exists():
-        parser.error("refusing to overwrite existing snapshot")
     if args.min_quota_reserve < 1:
         parser.error("quota reserve must be positive")
     if args.min_interval_seconds < MINIMUM_CAPTURE_INTERVAL_SECONDS:
