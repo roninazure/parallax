@@ -84,7 +84,8 @@ def _paired_bootstrap(rows: list[dict], challenger: str, metric: str, *,
         "delta": round(point, 8),
         "ci95": [round(low, 8), round(high, 8)],
         "interpretation": "CHALLENGER_IMPROVEMENT_SUPPORTED" if high < 0 else (
-            "ELO_IMPROVEMENT_SUPPORTED" if low > 0 else "NO_CLEAR_DIFFERENCE"
+            ("ELO_IMPROVEMENT_SUPPORTED" if baseline == "elo" else "BASELINE_IMPROVEMENT_SUPPORTED")
+            if low > 0 else "NO_CLEAR_DIFFERENCE"
         ),
         "delta_definition": f"mean {challenger} loss minus mean {baseline} loss; negative favors challenger",
         "baseline": baseline,
