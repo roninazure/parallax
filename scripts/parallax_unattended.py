@@ -34,7 +34,8 @@ SPORTS_INTERVAL_SECONDS = {
     "nhl": 3600,
 }
 RECONCILIATION_INTERVAL_SECONDS = 300
-NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS = 3600
+NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS = 24 * 3600
+NFL_SPORTSBOOK_RESEARCH_STARTUP_GRACE_SECONDS = 3600
 # Keep the first unattended cycle bounded after launch. Subsequent cadence is
 # unchanged; CFB's first request is delayed a full hour to preserve its quota.
 STARTUP_OFFSETS_SECONDS = {
@@ -187,7 +188,7 @@ class UnattendedScheduler:
             # Enabling research after a long-running daemon must not trigger an
             # immediate provider request. Start a fresh one-hour grace period.
             self.next_due["nfl_sportsbook_research"] = (
-                self.monotonic() + NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS
+                self.monotonic() + NFL_SPORTSBOOK_RESEARCH_STARTUP_GRACE_SECONDS
             )
         self._nfl_sportsbook_research_was_enabled = enabled
         return enabled

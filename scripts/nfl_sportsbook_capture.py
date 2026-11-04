@@ -30,6 +30,7 @@ from sports.odds_provider import OddsResponse
 from sports.nfl_odds_v4 import fetch_nfl_v4_once
 
 MINIMUM_CAPTURE_INTERVAL_SECONDS = 3600
+MINIMUM_PAID_CAPTURE_INTERVAL_SECONDS = 24 * 3600
 MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS = 100
 FREE_USAGE_ENDPOINT = "https://api.the-odds-api.com/v4/sports/"
 KEYCHAIN_SERVICE = "swarmaxis-the-odds-api"
@@ -195,8 +196,8 @@ def reserve_capture_attempt(
                 except (TypeError, ValueError) as exc:
                     raise RuntimeError("capture state timestamp is invalid; refusing provider request") from exc
                 elapsed = (now.astimezone(UTC) - previous_at.astimezone(UTC)).total_seconds()
-                if elapsed < min_interval_seconds:
-                    raise RuntimeError("NFL sportsbook capture throttled by persistent one-hour minimum interval")
+                if elapsed < max(min_interval_seconds, MINIMUM_PAID_CAPTURE_INTERVAL_SECONDS):
+                    raise RuntimeError("NFL sportsbook capture throttled by persistent 24-hour paid-attempt limit")
             month = now.astimezone(UTC).strftime("%Y-%m")
             prior_month = state.get("attempt_month_utc")
             prior_count = state.get("attempt_count_month_utc")
