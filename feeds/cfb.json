@@ -1,47 +1,13 @@
 {
-  "generated_at": "2026-11-04T16:04:28.901601+00:00",
+  "generated_at": "2026-11-04T17:34:17.135437+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "NO",
-      "edge_pp": 46.56702061,
-      "market_id": "1839339",
-      "matchup": "Toledo at Sacramento State",
-      "model_probability": 0.5206702060610618,
-      "price": 0.055,
-      "sport": "CFB",
-      "start_time": "2026-11-05T00:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 32.39728868,
-      "market_id": "1703485",
-      "matchup": "James Madison at Southern Miss",
-      "model_probability": 0.488972886779782,
-      "price": 0.165,
-      "sport": "CFB",
-      "start_time": "2026-11-06T01:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 23.26818908,
-      "market_id": "1785609",
-      "matchup": "Miami at Notre Dame",
-      "model_probability": 0.5726818907733169,
-      "price": 0.34,
-      "sport": "CFB",
-      "start_time": "2026-11-08T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
   "source_feed_generated_at": "2026-11-04T16:03:37.437067+00:00",
-  "source_schedule_state": "UNVERIFIED",
-  "state": "LIVE",
+  "source_schedule_state": "STALE",
+  "state": "STALE",
   "summary": {
-    "buy": 3
+    "buy": 0
   }
 }
