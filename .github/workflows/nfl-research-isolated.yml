@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - fix/nfl-sportsbook-research-isolated-20261103
+      - fix/nfl-sportsbook-daily-budget-20261103
   pull_request:
     branches:
       - baseline/nfl-research-20261103
+      - fix/nfl-sportsbook-research-isolated-20261103
   workflow_dispatch:
 
 permissions:
