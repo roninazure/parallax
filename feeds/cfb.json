@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-04T15:01:56.698989+00:00",
+  "generated_at": "2026-11-04T16:04:28.901601+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 47.06702061,
+      "edge_pp": 46.56702061,
       "market_id": "1839339",
       "matchup": "Toledo at Sacramento State",
       "model_probability": 0.5206702060610618,
-      "price": 0.05,
+      "price": 0.055,
       "sport": "CFB",
       "start_time": "2026-11-05T00:00:00+00:00",
       "venue": "POLYMARKET"
@@ -38,7 +38,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-04T15:01:46.146089+00:00",
+  "source_feed_generated_at": "2026-11-04T16:03:37.437067+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
