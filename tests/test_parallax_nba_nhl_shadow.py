@@ -561,7 +561,6 @@ def test_mocked_nhl_schedule_response_builds_only_future_regular_fixtures():
 
 
 def test_synthetic_certified_provider_to_ntfy_lifecycle_is_deduplicated(monkeypatch, tmp_path):
-    from dataclasses import replace as dc_replace
     from parallax import nba_nhl
     from parallax.alerts import AlertConfig, AlertDeliveryStore, AlertDispatcher, DeliveryResult
 
@@ -577,20 +576,21 @@ def test_synthetic_certified_provider_to_ntfy_lifecycle_is_deduplicated(monkeypa
     fx = fixture()
     raw = {**MARKETS["NBA"], "status": "active", "market_type": "binary",
            "price_level_structure": "linear_cent", "notional_value_dollars": "1",
-           "expected_expiration_time": "2026-10-27T05:00:00Z"}
+           "expected_expiration_time": "2026-10-27T05:00:00Z",
+           "_discovery_event": {"event_ticker": MARKETS["NBA"]["event_ticker"], "series_ticker": "KXNBAGAME"},
+           "_discovery_series": {"ticker": "KXNBAGAME", "fee_type": "quadratic_with_maker_fees", "fee_multiplier": 1}}
     class Book:
         def book(self, _ticker):
             return {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
                                      "no_dollars": [["0.50", "250"]]}}
-    monkeypatch.setattr(nba_nhl, "attach_fees", lambda market, _now, **_kw: dc_replace(market,
-        mechanics=dc_replace(market.mechanics, fee_rate=.001, fee_source="SYNTHETIC_TEST_ONLY",
-            fee_valid_until="2026-10-27T00:00:00+00:00", fee_status="VERIFIED_SCHEDULE")))
     artifact = synthetic_certified_artifact()
     first = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher,
                         model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"], now=NOW)
     second = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher,
                          model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"], now=NOW)
     assert any(row["publication_eligible"] for row in first["rows"])
+    assert any(row["fee_status"] == "VERIFIED_UPPER_BOUND" for row in first["rows"])
+    assert all(row["fee"] is not None for row in first["rows"] if row["publication_eligible"])
     assert first["alerts"] == 1 and second["alerts"] == 0
     assert len(transport.calls) == 1
     assert transport.calls[0][1]["topic"] == "synthetic-topic"
