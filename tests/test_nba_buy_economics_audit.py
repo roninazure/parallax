@@ -32,6 +32,9 @@ def quote(*, fee_status="VERIFIED_UPPER_BOUND", ask=.60, captured="2026-11-04T15
         "venue": "kalshi", "market_id": "KXNBAGAME-TEST-WAS",
         "scheduled_start": "2026-11-05T01:00:00+00:00",
         "source_observed_at": observed, "captured_at": captured,
+        "fee_valid_until": "2026-11-14T00:00:00+00:00",
+        "yes_bid": .59, "no_bid": .41,
+        "executable_depth": {"YES": [[ask, 250]], "NO": [[.42, 250]]},
         "rules_sha256": "a"*64, "status": "OPEN",
         "yes_ask": ask, "no_ask": .42,
         "fee_status": fee_status,
@@ -93,3 +96,33 @@ def test_rejects_untrusted_quote_file_symlink(tmp_path):
     (quotes / "parallax-league-quotes-20261104.jsonl").symlink_to(external)
     with pytest.raises(ValueError, match="symlink"):
         module.audit(forecasts, quotes)
+
+def test_old_quote_without_fee_expiry_is_never_approved(tmp_path):
+    forecasts, quotes = inputs(tmp_path)
+    row = quote()
+    del row["fee_valid_until"]
+    save(quotes, row)
+    report = module.audit(forecasts, quotes)
+    assert report["historical_economic_passes"] == 0
+    assert report["failure_counts"]["FEE_VALIDITY_UNPROVEN"] == 2
+
+def test_wide_spread_and_missing_depth_block_positive_edge(tmp_path):
+    forecasts, quotes = inputs(tmp_path)
+    row = quote()
+    row["yes_bid"] = .30
+    row["executable_depth"]["YES"] = []
+    save(quotes, row)
+    report = module.audit(forecasts, quotes)
+    yes = next(r for r in report["rows"] if r["side"] == "YES")
+    assert "SPREAD_UNVERIFIED_OR_WIDE" in yes["blocking_reasons"]
+    assert "ORDERBOOK_DEPTH_NOT_VERIFIED" in yes["blocking_reasons"]
+    assert report["historical_economic_passes"] == 0
+
+def test_expired_fee_evidence_blocks_even_correct_fee_status(tmp_path):
+    forecasts, quotes = inputs(tmp_path)
+    row = quote()
+    row["fee_valid_until"] = "2026-11-04T14:59:59+00:00"
+    save(quotes, row)
+    report = module.audit(forecasts, quotes)
+    assert report["historical_economic_passes"] == 0
+    assert report["failure_counts"]["FEE_VALIDITY_UNPROVEN"] == 2
