@@ -428,7 +428,9 @@ def test_pmus_nba_verified_fees_to_qualified_buy_and_customer_feed():
         "id": normalized.venue_market_id, "slug": normalized.slug,
         "question": normalized.title, "event_id": "nba:gs-den:2026-10-26",
         "active": True, "closed": False, "accepting_orders": True,
-        "raw": normalized.original_metadata["market"],
+        "raw": {**normalized.original_metadata["market"],
+                "endDate": "2026-10-27T05:00:00+00:00",
+                "minimumTradeQty": 1, "orderPriceMinTickSize": .01},
     }
     class PMUS:
         def book(self, slug):
