@@ -69,7 +69,8 @@ class LeagueQuoteSnapshotStore:
             "fee_rate": market.mechanics.fee_rate,
             "fee_rounding": market.mechanics.fee_rounding,
             "fee_status": market.mechanics.fee_status,
-            "fee_valid_until": market.mechanics.fee_valid_until,
+            **({"fee_valid_until": market.mechanics.fee_valid_until}
+               if sport == "NBA" else {}),
             "fee_source": market.mechanics.fee_source,
             "fee_observed_at": market.mechanics.fee_observed_at,
             "fee_buffer_per_contract": market.mechanics.fee_buffer_per_contract,
