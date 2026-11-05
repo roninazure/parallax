@@ -45,7 +45,7 @@ def _evaluate_quote(snapshot: dict, forecasts: dict) -> list[dict]:
         captured = parse_stamp(snapshot["captured_at"])
         key = (kickoff.astimezone(ET).strftime("%Y%m%d"), away, home)
     except (KeyError, TypeError, ValueError, AttributeError):
-        return [{"status": "BLOCKED", "reasons": ["INVALID_IDENTITY_OR_TIMESTAMPS"]}]
+        return [{"status": "BLOCKED", "side": "UNKNOWN", "blocking_reasons": ["INVALID_IDENTITY_OR_TIMESTAMPS"], "economic_check": "BLOCKED", "publication_eligible": False, "buy_authorized": False}]
     match = forecasts.get(key)
     identity = {
         "game_id": snapshot.get("game_id"), "matchup": f"{away}@{home}",
@@ -105,6 +105,32 @@ def _evaluate_quote(snapshot: dict, forecasts: dict) -> list[dict]:
             except (TypeError, ValueError, IndexError):
                 reasons.append("ORDERBOOK_DEPTH_NOT_VERIFIED")
         contracts = _numeric(scenario.get("contracts")) if isinstance(scenario, dict) else None
+        # A provider's scenario.available flag is not enough: verify the
+        # captured order book can actually fill the scenario's contracts.
+        book_total = 0.0
+        book_cost = 0.0
+        book_levels_valid = True
+        if isinstance(side_depth, list):
+            last_price = 0.0
+            for level in side_depth:
+                if not isinstance(level, (tuple, list)) or len(level) != 2:
+                    book_levels_valid = False
+                    break
+                p, size = (_numeric(v) for v in level)
+                if p is None or not 0 < p < 1 or size is None or size <= 0 or p < last_price:
+                    book_levels_valid = False
+                    break
+                last_price = p
+                if contracts is not None and contracts > book_total:
+                    take = min(size, contracts - book_total)
+                    book_cost += take * p
+                book_total += size
+        else:
+            book_levels_valid = False
+        if not book_levels_valid:
+            reasons.append("ORDERBOOK_DEPTH_NOT_VERIFIED")
+        if contracts is not None and contracts > book_total + 1e-8:
+            reasons.append("INSUFFICIENT_ORDERBOOK_DEPTH")
         total = _numeric(scenario.get("total_cost")) if isinstance(scenario, dict) else None
         fee = _numeric(scenario.get("fees_estimate")) if isinstance(scenario, dict) else None
         if not (0 < (ask or 0) < 1):
@@ -117,6 +143,8 @@ def _evaluate_quote(snapshot: dict, forecasts: dict) -> list[dict]:
         if total is not None and contracts is not None and ask is not None and fee is not None:
             if total + 1e-8 < contracts * ask + fee:
                 reasons.append("INCONSISTENT_COST_ACCOUNTING")
+            if book_levels_valid and total + 1e-8 < book_cost + fee:
+                reasons.append("ORDERBOOK_SLIPPAGE_NOT_ACCOUNTED")
         side_team = selected if side == "YES" else (away if selected == home else home)
         probability = None
         gross_edge = None
@@ -131,7 +159,9 @@ def _evaluate_quote(snapshot: dict, forecasts: dict) -> list[dict]:
                     reasons.append("GROSS_EDGE_BELOW_THRESHOLD")
             if (contracts is not None and contracts > 0 and total is not None and total > 0
                     and fee is not None and fee >= 0 and fee_status in APPROVED_FEE_STATES
-                    and "INCONSISTENT_COST_ACCOUNTING" not in reasons):
+                    and "INCONSISTENT_COST_ACCOUNTING" not in reasons
+                    and "ORDERBOOK_SLIPPAGE_NOT_ACCOUNTED" not in reasons
+                    and "INSUFFICIENT_ORDERBOOK_DEPTH" not in reasons):
                 net_ev = probability * contracts - total
                 net_return = net_ev / total
                 if net_return < MIN_NET_RETURN:
