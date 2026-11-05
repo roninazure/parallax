@@ -20,4 +20,4 @@ jobs:
       - name: Compile code
         run: python -m compileall -q scripts/nba_buy_economics_audit.py scripts/nba_kalshi_fee_preflight.py
       - name: NBA quote economics gate tests
-        run: python -m pytest -q tests/test_nba_buy_economics_audit.py tests/test_nba_forward_reconcile.py tests/test_nba_kalshi_fee_preflight.py tests/test_parallax_nba_nhl_shadow.py
+        run: python -m pytest -q tests/test_nba_buy_economics_audit.py tests/test_nba_forward_reconcile.py tests/test_nba_kalshi_fee_preflight.py tests/test_parallax_nba_nhl_shadow.py tests/test_parallax_league_model.py tests/test_parallax_league_model_v2.py tests/test_parallax_public_feed.py
