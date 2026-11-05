@@ -190,12 +190,31 @@ def _apply_calibration(cal: Mapping[str, Any], p: float) -> float:
     return min(1 - 1e-9, max(1e-9, float(knots[-1][1])))
 
 
-def _fit_calibrator(ps: list[float], ys: list[int]) -> dict[str, Any]:
+def _nba_calibration_date_cut(days: list[date]) -> int:
+    """Split on a complete game day; no NBA same-date result crosses selection."""
+    if len(days) < 2 or any(left > right for left, right in pairwise(days)):
+        raise ValueError("NBA calibration dates must be chronologically ordered")
+    boundaries = [i for i in range(1, len(days)) if days[i - 1] < days[i]]
+    if not boundaries:
+        raise ValueError("NBA calibration needs multiple distinct game dates")
+    target = len(days) * 0.8
+    # Pick the closest complete-date boundary; deterministic tie breaking.
+    return min(boundaries, key=lambda index: (abs(index - target), index))
+
+
+def _fit_calibrator(
+    ps: list[float], ys: list[int], *, nba_game_dates: list[date] | None = None,
+) -> dict[str, Any]:
     # Select calibration family using only an ordered split inside the
     # calibration period; the final holdout is never consulted here.
     if len(ps) < 2 or len(set(ys)) != 2:
         raise ValueError("calibration period needs both outcomes and a validation row")
-    cut = min(len(ps) - 1, max(1, int(len(ps) * 0.8)))
+    if nba_game_dates is not None:
+        if len(nba_game_dates) != len(ps):
+            raise ValueError("NBA calibration dates and predictions differ in length")
+        cut = _nba_calibration_date_cut(nba_game_dates)
+    else:
+        cut = min(len(ps) - 1, max(1, int(len(ps) * 0.8)))
     fit_ps, fit_ys = ps[:cut], ys[:cut]
     val_ps, val_ys = ps[cut:], ys[cut:]
     candidates = []
@@ -286,7 +305,7 @@ def train_artifact(
     all_pred, ratings = _replay(rows, home_adv, k)
     cp = [all_pred[(sport, g.game_id)] for g in calibration]
     cy = [int(g.winner_team == g.home_team) for g in calibration]
-    calibration_model = _fit_calibrator(cp, cy)
+    calibration_model = _fit_calibrator(\n        cp, cy, nba_game_dates=[g.game_date for g in calibration] if sport == "NBA" else None\n    )
     hp = [
         _apply_calibration(calibration_model, all_pred[(sport, g.game_id)])
         for g in holdout
