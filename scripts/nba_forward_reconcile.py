@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 ET = ZoneInfo("America/New_York")
-TEAM_ALIAS = {"GS": "GSW", "NY": "NYK", "SA": "SAS", "NO": "NOP", "UTAH": "UTA"}
+TEAM_ALIAS = {"GS": "GSW", "NY": "NYK", "SA": "SAS", "NO": "NOP", "UTAH": "UTA", "WSH": "WAS"}
 
 def canonical(team: str) -> str:
     code = team.strip().upper()
