@@ -21,6 +21,7 @@ APPROVED_FEE_STATES = {"REVIEWED", "VERIFIED_SCHEDULE", "VERIFIED_UPPER_BOUND"}
 MAX_OBSERVATION_AGE_SECONDS = 60
 MIN_EDGE = .05
 MIN_NET_RETURN = .05
+MAX_SPREAD = .05
 
 
 def _numeric(value):
@@ -62,11 +63,23 @@ def _evaluate_quote(snapshot: dict, forecasts: dict) -> list[dict]:
         failure.append("STALE_AT_CAPTURE")
     if match and parse_stamp(match["captured_at_utc"]) > observed:
         failure.append("FORECAST_NOT_AVAILABLE_AT_QUOTE_TIME")
+    if match and parse_stamp(match["kickoff_utc"]) != kickoff:
+        failure.append("FORECAST_KICKOFF_MISMATCH")
     if not isinstance(snapshot.get("rules_sha256"), str) or len(snapshot["rules_sha256"]) != 64:
         failure.append("RULES_HASH_MISSING")
     if snapshot.get("status") != "OPEN":
         failure.append("MARKET_NOT_OPEN")
     fee_status = snapshot.get("fee_status", "UNVERIFIED")
+    # A fee status by itself is not proof that a reviewed schedule remained
+    # valid at the observed quote time. Older snapshot schema did not retain
+    # the expiration and must remain blocked rather than invent eligibility.
+    fee_expiration = snapshot.get("fee_valid_until")
+    try:
+        fees_current = bool(fee_expiration and observed < parse_stamp(fee_expiration))
+    except (TypeError, ValueError, AttributeError):
+        fees_current = False
+    if not fees_current:
+        failure.append("FEE_VALIDITY_UNPROVEN")
     if fee_status not in APPROVED_FEE_STATES:
         failure.append("FEES_UNVERIFIED")
     scenarios = snapshot.get("fee_scenario_25", {})
@@ -75,6 +88,22 @@ def _evaluate_quote(snapshot: dict, forecasts: dict) -> list[dict]:
         reasons = list(failure)
         scenario = scenarios.get(side) if isinstance(scenarios, dict) else None
         ask = _numeric(snapshot.get("yes_ask" if side == "YES" else "no_ask"))
+        bid = _numeric(snapshot.get("yes_bid" if side == "YES" else "no_bid"))
+        if ask is None or bid is None or bid < 0 or bid > ask or ask - bid > MAX_SPREAD + 1e-9:
+            reasons.append("SPREAD_UNVERIFIED_OR_WIDE")
+        depth = snapshot.get("executable_depth", {})
+        side_depth = depth.get(side) if isinstance(depth, dict) else None
+        if not isinstance(side_depth, list) or not side_depth:
+            reasons.append("ORDERBOOK_DEPTH_NOT_VERIFIED")
+        else:
+            try:
+                first_price, first_size = side_depth[0]
+                if (len(side_depth[0]) != 2 or _numeric(first_price) is None
+                        or _numeric(first_size) is None or float(first_size) <= 0
+                        or abs(float(first_price) - ask) > 1e-8):
+                    reasons.append("ORDERBOOK_DEPTH_NOT_VERIFIED")
+            except (TypeError, ValueError, IndexError):
+                reasons.append("ORDERBOOK_DEPTH_NOT_VERIFIED")
         contracts = _numeric(scenario.get("contracts")) if isinstance(scenario, dict) else None
         total = _numeric(scenario.get("total_cost")) if isinstance(scenario, dict) else None
         fee = _numeric(scenario.get("fees_estimate")) if isinstance(scenario, dict) else None
