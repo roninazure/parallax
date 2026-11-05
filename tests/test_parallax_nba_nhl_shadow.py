@@ -446,7 +446,7 @@ def test_pmus_nba_verified_fees_to_qualified_buy_and_customer_feed():
         now=NOW,
     )
     buys = [row for row in result["rows"] if row["publication_eligible"]]
-    assert buys, {"rows": result["rows"], "venues": result["venues"]}
+    assert buys, [(r["side"],r["failed_gates"],r["fee_status"],r["model_probability"],r["executable_price"],r["net_ev_25"],r["expected_return"],r["selected_team"]) for r in result["rows"]]
     assert all(row["venue"] == Venue.POLYMARKET.value for row in buys)
     assert all(row["fee_status"] == "VERIFIED_UPPER_BOUND" for row in buys)
     assert all(row["fee"] is not None and row["expected_return"] >= .05 for row in buys)
