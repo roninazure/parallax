@@ -305,7 +305,9 @@ def train_artifact(
     all_pred, ratings = _replay(rows, home_adv, k)
     cp = [all_pred[(sport, g.game_id)] for g in calibration]
     cy = [int(g.winner_team == g.home_team) for g in calibration]
-    calibration_model = _fit_calibrator(\n        cp, cy, nba_game_dates=[g.game_date for g in calibration] if sport == "NBA" else None\n    )
+    calibration_model = _fit_calibrator(
+        cp, cy, nba_game_dates=[g.game_date for g in calibration] if sport == "NBA" else None
+    )
     hp = [
         _apply_calibration(calibration_model, all_pred[(sport, g.game_id)])
         for g in holdout
