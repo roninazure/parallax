@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-05T13:47:48.104937+00:00",
+  "generated_at": "2026-11-05T14:52:58.453496+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 32.39728868,
+      "edge_pp": 31.39728868,
       "market_id": "1703485",
       "matchup": "James Madison at Southern Miss",
       "model_probability": 0.488972886779782,
-      "price": 0.165,
+      "price": 0.175,
       "sport": "CFB",
       "start_time": "2026-11-06T01:00:00+00:00",
       "venue": "POLYMARKET"
@@ -49,7 +49,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-05T13:47:04.970163+00:00",
+  "source_feed_generated_at": "2026-11-05T14:52:31.290595+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
