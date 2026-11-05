@@ -59,3 +59,15 @@ def test_rejects_invalid_probability_and_naive_timestamp(tmp_path):
     assert counts["invalid_rows"] == 1
     with pytest.raises(ValueError):
         module.parse_stamp("2026-11-05T10:00:00")
+
+def test_washington_espn_alias_matches_archived_forecast(tmp_path):
+    snapshot(tmp_path, "nba-shadow-a.json", "2026-11-04T10:00:00Z",
+             [row(.64, kickoff="2026-11-04T23:00:00Z", matchup="ATL@WAS")])
+    forecasts, _ = module.archived_forecasts(tmp_path)
+    report = module.evaluate(
+        forecasts, now=datetime(2026, 11, 5, tzinfo=UTC),
+        fetch=lambda _: final(home="WSH", away="ATL", home_score="105", away_score="120"))
+    assert report["graded_games"] == 1
+    assert report["unmatched_counts"] == {}
+    assert report["games"][0]["matchup"] == "ATL@WAS"
+    assert report["correct"] == 0
