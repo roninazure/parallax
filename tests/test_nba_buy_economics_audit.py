@@ -80,7 +80,7 @@ def test_stale_book_and_future_forecast_rejected(tmp_path):
 def test_no_network_or_side_effects_and_row_limit(tmp_path):
     forecasts, quotes = inputs(tmp_path)
     save(quotes, quote())
-    with pytest.raises(ValueError, match="budget"):
+    with pytest.raises(ValueError, match="out of range"):
         module.audit(forecasts, quotes, max_rows=0)
     assert sorted(p.name for p in tmp_path.rglob("*") if p.is_file()) == [
         "nba-shadow-a.json", "parallax-league-quotes-20261104.jsonl"
