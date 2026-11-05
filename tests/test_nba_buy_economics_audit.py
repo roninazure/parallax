@@ -126,3 +126,33 @@ def test_expired_fee_evidence_blocks_even_correct_fee_status(tmp_path):
     report = module.audit(forecasts, quotes)
     assert report["historical_economic_passes"] == 0
     assert report["failure_counts"]["FEE_VALIDITY_UNPROVEN"] == 2
+
+def test_scenario_claims_more_contracts_than_book_can_fill(tmp_path):
+    forecasts, quotes = inputs(tmp_path)
+    row = quote()
+    row["executable_depth"]["YES"] = [[.60, 10]]
+    save(quotes, row)
+    report = module.audit(forecasts, quotes)
+    yes = next(r for r in report["rows"] if r["side"] == "YES")
+    assert "INSUFFICIENT_ORDERBOOK_DEPTH" in yes["blocking_reasons"]
+    assert yes["economic_check"] == "BLOCKED"
+
+def test_scenario_ignores_second_level_slippage(tmp_path):
+    forecasts, quotes = inputs(tmp_path)
+    row = quote()
+    row["executable_depth"]["YES"] = [[.60, 10], [.70, 100]]
+    save(quotes, row)
+    report = module.audit(forecasts, quotes)
+    yes = next(r for r in report["rows"] if r["side"] == "YES")
+    assert "ORDERBOOK_SLIPPAGE_NOT_ACCOUNTED" in yes["blocking_reasons"]
+    assert yes["economic_check"] == "BLOCKED"
+
+def test_malformed_identity_never_crashes_entire_audit(tmp_path):
+    forecasts, quotes = inputs(tmp_path)
+    row = quote()
+    del row["scheduled_start"]
+    save(quotes, row)
+    report = module.audit(forecasts, quotes)
+    assert report["blocked_side_evaluations"] == 1
+    assert report["failure_counts"]["INVALID_IDENTITY_OR_TIMESTAMPS"] == 1
+    assert report["buy_authorized"] is False
