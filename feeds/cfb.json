@@ -1,13 +1,58 @@
 {
-  "generated_at": "2026-11-05T12:42:57.885576+00:00",
+  "generated_at": "2026-11-05T13:47:48.104937+00:00",
   "lane": "CFB",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 32.39728868,
+      "market_id": "1703485",
+      "matchup": "James Madison at Southern Miss",
+      "model_probability": 0.488972886779782,
+      "price": 0.165,
+      "sport": "CFB",
+      "start_time": "2026-11-06T01:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 28.26818908,
+      "market_id": "1785609",
+      "matchup": "Miami at Notre Dame",
+      "model_probability": 0.5726818907733169,
+      "price": 0.29,
+      "sport": "CFB",
+      "start_time": "2026-11-08T00:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 26.08137662,
+      "market_id": "1839349",
+      "matchup": "Alabama at LSU",
+      "model_probability": 0.5858137661656136,
+      "price": 0.325,
+      "sport": "CFB",
+      "start_time": "2026-11-07T20:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 23.33684778,
+      "market_id": "1839351",
+      "matchup": "Kentucky at Tennessee",
+      "model_probability": 0.5633684777692294,
+      "price": 0.33,
+      "sport": "CFB",
+      "start_time": "2026-11-07T23:15:00+00:00",
+      "venue": "POLYMARKET"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-05T12:42:45.129863+00:00",
+  "source_feed_generated_at": "2026-11-05T13:47:04.970163+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 4
   }
 }
