@@ -421,6 +421,39 @@ def test_mocked_pmus_client_market_uses_same_fixture_match_normalize_qualify_pat
     assert result["model_validation_state"] == "BLOCKED"
 
 
+def test_pmus_nba_verified_fees_to_qualified_buy_and_customer_feed():
+    """Test the real PMUS fees+qualification+feed path, with test-only model."""
+    normalized = pmus()
+    raw = {
+        "id": normalized.venue_market_id, "slug": normalized.slug,
+        "question": normalized.title, "event_id": "nba:gs-den:2026-10-26",
+        "active": True, "closed": False, "accepting_orders": True,
+        "raw": normalized.original_metadata["market"],
+    }
+    class PMUS:
+        def book(self, slug):
+            return {
+                f"{slug}::YES": {"best_bid": .45, "best_ask": .47,
+                                "bid_size_shares": 250, "ask_size_shares": 250},
+                f"{slug}::NO": {"best_bid": .53, "best_ask": .55,
+                               "bid_size_shares": 250, "ask_size_shares": 250},
+            }
+
+    artifact = synthetic_certified_artifact()
+    result = scan_league(
+        "NBA", [fixture()], [], [], [raw], pmus_client=PMUS(),
+        model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"],
+        now=NOW,
+    )
+    buys = [row for row in result["rows"] if row["publication_eligible"]]
+    assert buys, result
+    assert all(row["venue"] == Venue.POLYMARKET.value for row in buys)
+    assert all(row["fee_status"] == "VERIFIED_UPPER_BOUND" for row in buys)
+    assert all(row["fee"] is not None and row["expected_return"] >= .05 for row in buys)
+    feed = sanitize_completed_scan("nba", json.dumps(result), generated_at=NOW)
+    assert feed["summary"]["buy"] >= 1
+
+
 def test_mocked_bdl_schedule_response_uses_existing_verified_fixture_adapter():
     row = {**NBA_BDL_GAME,
         "home_team": {"abbreviation": "DEN", "city": "Denver"},
