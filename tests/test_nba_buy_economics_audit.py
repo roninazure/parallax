@@ -1,10 +1,13 @@
 """Offline integration of frozen NBA forecasts with executable quote economics."""
 import importlib.util
 import json
+import sys
 from pathlib import Path
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts/nba_buy_economics_audit.py"
+SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+SCRIPT = SCRIPTS / "nba_buy_economics_audit.py"
 spec = importlib.util.spec_from_file_location("nba_buy_economics_audit", SCRIPT)
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
