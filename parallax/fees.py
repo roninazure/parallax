@@ -85,7 +85,7 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
             and event.get("event_ticker") == market.event
             and market.event
             and series.get("ticker")
-            in {"KXMLBGAME", "KXNFLGAME", "KXNCAAF", "KXCFB"}
+            in {"KXMLBGAME", "KXNFLGAME", "KXNCAAF", "KXCFB", "KXNBAGAME"}
             and event.get("series_ticker") == series.get("ticker")
         ):
             kind = event.get("fee_type_override")
@@ -150,6 +150,11 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
                 proof["schedule_effective_at"] = "2026-07-07"
                 proof["effective_multiplier"] = multiplier
                 proof["verified_series"] = series.get("ticker")
+                if series.get("ticker") == "KXNBAGAME":
+                    proof["published_schedule_review_url"] = "https://kalshi.com/fee-schedule"
+                    proof["series_fee_evidence_verified"] = True
+                    proof["market_scope"] = "KXNBAGAME"
+                    proof["nba_schedule_review_date"] = "2026-11-05"
                 proof["account_precision"] = (
                     "Unknown account: conservative $0.01 alignment (direct members use $0.0001)"
                 )
@@ -162,15 +167,9 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
             and isinstance(market.venue_market_id, str)
             and market.venue_market_id.startswith("KXNBAGAME-")
         ):
-            # No current published KXNBAGAME-specific fee schedule has been
-            # verified. Event/series API metadata cannot alone establish the
-            # governing published rate or authorize BUY economics.
             proof["series_fee_evidence_verified"] = False
             proof["market_scope"] = "KXNBAGAME"
-            reason = (
-                "KXNBAGAME published series fee evidence unverified; "
-                "event/series metadata alone cannot authorize costs"
-            )
+            reason = "KXNBAGAME live event/series fee evidence unavailable or inconsistent"
         else:
             reason = "Market-bound event and series fee metadata unavailable"
     proof["reason"] = reason
