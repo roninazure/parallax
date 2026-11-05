@@ -821,8 +821,8 @@ def test_ambiguous_pmus_sides_rejected():
                            fixture(), forecast(), now=NOW) is None
 
 
-def test_kalshi_nba_game_fee_gate_remains_unverified_without_published_series_proof():
-    """Synthetic event/series metadata cannot certify KXNBAGAME economics."""
+def test_kalshi_nba_market_bound_fee_schedule_and_untrusted_overrides():
+    """Official standard NBA rate + live market/event/series identity is required."""
     from parallax.fees import attach_fees
 
     market = kalshi("NBA")
@@ -830,17 +830,39 @@ def test_kalshi_nba_game_fee_gate_remains_unverified_without_published_series_pr
         "event_ticker": MARKETS["NBA"]["event_ticker"],
         "series_ticker": "KXNBAGAME",
     }
-    for multiplier in (1, 0, 0.5):
-        series = {
-            "ticker": "KXNBAGAME",
-            "fee_type": "quadratic_with_maker_fees",
-            "fee_multiplier": multiplier,
-        }
-        assessed = attach_fees(market, NOW, event=event, series=series)
-        assert assessed.mechanics.fee_status == "UNVERIFIED"
-        assert assessed.mechanics.fee_rate is None
-        proof = assessed.original_metadata["fee_provenance"]
-        assert proof["series_fee_evidence_verified"] is False
-        assert proof["market_scope"] == "KXNBAGAME"
-        assert "published series fee evidence unverified" in proof["reason"]
+    series = {
+        "ticker": "KXNBAGAME",
+        "fee_type": "quadratic_with_maker_fees",
+        "fee_multiplier": 1,
+    }
+    approved = attach_fees(market, NOW, event=event, series=series)
+    assert approved.mechanics.fee_status == "VERIFIED_UPPER_BOUND"
+    assert approved.mechanics.fee_rate == pytest.approx(0.07)
+    assert approved.original_metadata["fee_provenance"]["series_fee_evidence_verified"] is True
+    assert approved.original_metadata["fee_provenance"]["market_scope"] == "KXNBAGAME"
+    assert approved.mechanics.fee_valid_until is not None
 
+    no_metadata = attach_fees(market, NOW)
+    assert no_metadata.mechanics.fee_status == "UNVERIFIED"
+    assert no_metadata.mechanics.fee_rate is None
+
+    wrong_event = {**event, "event_ticker": "KXNBAGAME-OTHER"}
+    rejected = attach_fees(market, NOW, event=wrong_event, series=series)
+    assert rejected.mechanics.fee_status == "UNVERIFIED"
+
+    unsupported = {**series, "fee_type": "unknown_fee_type"}
+    rejected = attach_fees(market, NOW, event=event, series=unsupported)
+    assert rejected.mechanics.fee_status == "UNVERIFIED"
+
+    # Never treat undocumented fee waivers as zero-cost opportunities.
+    compromised_raw = {**MARKETS["NBA"], "fee_multiplier_override": 0}
+    altered = normalize_kalshi(
+        {**compromised_raw, "status": "active", "market_type": "binary",
+         "price_level_structure": "linear_cent", "notional_value_dollars": "1",
+         "expected_expiration_time": "2026-10-27T05:00:00Z"},
+        {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
+                          "no_dollars": [["0.50", "250"]]}},
+        NOW.isoformat(),
+    )
+    rejected = attach_fees(altered, NOW, event=event, series=series)
+    assert rejected.mechanics.fee_status == "UNVERIFIED"
