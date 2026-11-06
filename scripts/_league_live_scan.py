@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from parallax.league_elo_experimental import FinalGame, load_final_games_csv
 from parallax.league_shadow_evidence import ShadowFixture
 from parallax.nba_nhl import scan_league, fetch_nba_fixtures, fetch_nhl_fixtures
+from parallax.league_quote_snapshots import LeagueQuoteSnapshotStore
 from parallax.discovery import paginate, paginate_collection
 from parallax.sources import KalshiPublicClient
 from maker_spread_economics.polymarket_us import PolymarketUSPublicClient
@@ -169,10 +170,18 @@ def main(sport: str) -> int:
             dispatcher = AlertDispatcher(AlertDeliveryStore(state / "parallax_alert_delivery.sqlite"))
         except Exception:
             dispatcher = None
+        # Opt-in NBA research evidence only. NHL and all production BUY paths unchanged.
+        quote_store = None
+        if sport == "NBA" and os.environ.get("PARALLAX_LEAGUE_QUOTE_SNAPSHOT_DIR"):
+            quote_store = LeagueQuoteSnapshotStore(
+                os.environ["PARALLAX_LEAGUE_QUOTE_SNAPSHOT_DIR"],
+                retention_days=int(os.environ.get("PARALLAX_LEAGUE_QUOTE_RETENTION_DAYS", "180")),
+            )
         try:
             result = scan_league(sport, fixtures, history, kalshi_rows, pmus_rows,
                 kalshi_client=kclient, pmus_client=pclient,
-                pmus_acquisition=acquisition, alert_dispatcher=dispatcher, now=now)
+                pmus_acquisition=acquisition, alert_dispatcher=dispatcher,
+                quote_snapshot_store=quote_store, now=now)
         finally:
             if hasattr(kclient, "close"): kclient.close()
             pclient.close()
