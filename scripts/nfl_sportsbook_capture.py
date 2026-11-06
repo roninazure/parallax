@@ -31,7 +31,7 @@ from sports.nfl_odds_v4 import fetch_nfl_v4_once
 
 MINIMUM_CAPTURE_INTERVAL_SECONDS = 3600
 MINIMUM_PAID_CAPTURE_INTERVAL_SECONDS = 24 * 3600
-MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS = 100
+MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS = 8
 FREE_USAGE_ENDPOINT = "https://api.the-odds-api.com/v4/sports/"
 KEYCHAIN_SERVICE = "swarmaxis-the-odds-api"
 
@@ -223,7 +223,7 @@ def reserve_capture_attempt(
                 raise RuntimeError("legacy capture state has no monthly budget; refusing provider request")
             count = prior_count if prior_month == month else 0
             if count >= MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS:
-                raise RuntimeError("NFL research monthly 100-attempt safety budget exhausted")
+                raise RuntimeError(f"NFL research monthly {MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS}-attempt safety budget exhausted")
             reserved = {
                 **state,
                 "last_attempt_at_utc": now.astimezone(UTC).isoformat(),
