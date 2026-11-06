@@ -327,15 +327,15 @@ class NFLOddsCaptureTests(unittest.TestCase):
             reserve_capture_attempt(state, now=NOW)
             update_capture_state(state, status="FAILED", last_error_type="TimeoutError")
             payload = json.loads(state.read_text(encoding="utf-8"))
-            payload["attempt_count_month_utc"] = 100
+            payload["attempt_count_month_utc"] = 8
             state.write_text(json.dumps(payload), encoding="utf-8")
             payload = json.loads(state.read_text(encoding="utf-8"))
             self.assertEqual(payload["attempt_month_utc"], "2026-11")
-            self.assertEqual(payload["attempt_count_month_utc"], 100)
-            with self.assertRaisesRegex(RuntimeError, "monthly 100-attempt"):
+            self.assertEqual(payload["attempt_count_month_utc"], 8)
+            with self.assertRaisesRegex(RuntimeError, "monthly 8-attempt"):
                 reserve_capture_attempt(state, now=NOW + timedelta(days=2))
             self.assertEqual(
-                json.loads(state.read_text(encoding="utf-8"))["attempt_count_month_utc"], 100,
+                json.loads(state.read_text(encoding="utf-8"))["attempt_count_month_utc"], 8,
             )
             rolled = reserve_capture_attempt(state, now=datetime(2026, 12, 1, tzinfo=UTC))
             self.assertEqual(rolled["attempt_month_utc"], "2026-12")
