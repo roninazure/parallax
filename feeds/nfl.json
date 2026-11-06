@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06T09:45:04.803990+00:00",
+  "generated_at": "2026-11-06T09:49:43.762490+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -47,14 +47,14 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 40.77640269,
-      "market_id": "KXNFLGAME-26NOV08NYGPHI-NYG",
-      "matchup": "NYG at PHI",
-      "model_probability": 0.7877640269446287,
-      "price": 0.38,
+      "contract_side": "YES",
+      "edge_pp": 8.5220004,
+      "market_id": "KXNFLGAME-26NOV08GBNE-GB",
+      "matchup": "GB at NE",
+      "model_probability": 0.47522000403580367,
+      "price": 0.39,
       "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
+      "start_time": "2026-11-08T21:25:00+00:00",
       "venue": "KALSHI"
     },
     {
@@ -69,31 +69,31 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 8.5220004,
-      "market_id": "1785084",
-      "matchup": "GB at NE",
-      "model_probability": 0.47522000403580367,
-      "price": 0.39,
+      "contract_side": "NO",
+      "edge_pp": 40.02640269,
+      "market_id": "1785081",
+      "matchup": "NYG at PHI",
+      "model_probability": 0.7877640269446287,
+      "price": 0.3875,
       "sport": "NFL",
-      "start_time": "2026-11-08T21:25:00+00:00",
+      "start_time": "2026-11-08T18:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 9.82720641,
-      "market_id": "1827181",
+      "contract_side": "YES",
+      "edge_pp": 11.07720641,
+      "market_id": "KXNFLGAME-26NOV09BUFMIN-MIN",
       "matchup": "BUF at MIN",
       "model_probability": 0.48077206410369133,
-      "price": 0.3825,
+      "price": 0.37,
       "sport": "NFL",
       "start_time": "2026-11-10T01:15:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-06T09:44:16.232470+00:00",
+  "source_feed_generated_at": "2026-11-06T09:49:42.193423+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
