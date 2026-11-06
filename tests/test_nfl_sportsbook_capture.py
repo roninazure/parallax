@@ -126,7 +126,8 @@ class NFLOddsCaptureTests(unittest.TestCase):
         self.assertEqual(
             run.call_args.args[0],
             ["/usr/bin/security", "find-generic-password", "-w",
-             "-s", "swarmaxis-the-odds-api", "-a", "scottsteele"],
+             "-s", "swarmaxis-the-odds-api", "-a", "scottsteele",
+             "/Library/Keychains/System.keychain"],
         )
         self.assertTrue(run.call_args.kwargs["capture_output"])
         with (
@@ -136,6 +137,38 @@ class NFLOddsCaptureTests(unittest.TestCase):
                   side_effect=AssertionError("non-mac must not access keychain")),
         ):
             self.assertIsNone(resolve_odds_api_key())
+
+    def test_system_keychain_miss_falls_back_to_login_without_logging_secret(self):
+        from subprocess import CompletedProcess
+        with (
+            patch.dict("os.environ", {"THE_ODDS_API_KEY": ""}),
+            patch("scripts.nfl_sportsbook_capture.sys.platform", "darwin"),
+            patch("scripts.nfl_sportsbook_capture.getuser", return_value="scottsteele"),
+            patch("scripts.nfl_sportsbook_capture.subprocess.run",
+                  side_effect=[
+                      CompletedProcess([], 44, "", "not found"),
+                      CompletedProcess([], 0, "INTERACTIVE_SECRET\\n", ""),
+                  ]) as run,
+        ):
+            self.assertEqual(resolve_odds_api_key(), "INTERACTIVE_SECRET")
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(
+            run.call_args_list[-1].args[0],
+            ["/usr/bin/security", "find-generic-password", "-w",
+             "-s", "swarmaxis-the-odds-api", "-a", "scottsteele"],
+        )
+
+    def test_keychain_unavailable_fails_closed(self):
+        from subprocess import CompletedProcess
+        with (
+            patch.dict("os.environ", {"THE_ODDS_API_KEY": ""}),
+            patch("scripts.nfl_sportsbook_capture.sys.platform", "darwin"),
+            patch("scripts.nfl_sportsbook_capture.getuser", return_value="scottsteele"),
+            patch("scripts.nfl_sportsbook_capture.subprocess.run",
+                  return_value=CompletedProcess([], 44, "", "not found")) as run,
+        ):
+            self.assertIsNone(resolve_odds_api_key())
+        self.assertEqual(run.call_count, 2)
 
     def test_naive_capture_timestamp_rejected(self):
         with self.assertRaises(ValueError):
