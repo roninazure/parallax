@@ -8,7 +8,8 @@ from unittest.mock import patch
 
 from scripts.parallax_unattended import (
     LANES, SPORTS_LANES, STARTUP_OFFSETS_SECONDS,
-    NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS, UnattendedScheduler,\n    _safe_sportsbook_failure_detail,
+    NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS, UnattendedScheduler,
+    _safe_sportsbook_failure_detail,
 )
 
 class NFLResearchSchedulerIsolationTests(unittest.TestCase):
