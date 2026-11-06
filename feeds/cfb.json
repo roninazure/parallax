@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06T13:09:05.483561+00:00",
+  "generated_at": "2026-11-06T14:13:56.251225+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -37,11 +37,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 23.83684778,
+      "edge_pp": 22.83684778,
       "market_id": "1839351",
       "matchup": "Kentucky at Tennessee",
       "model_probability": 0.5633684777692294,
-      "price": 0.325,
+      "price": 0.335,
       "sport": "CFB",
       "start_time": "2026-11-07T23:15:00+00:00",
       "venue": "POLYMARKET"
@@ -49,7 +49,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-06T13:08:06.658870+00:00",
+  "source_feed_generated_at": "2026-11-06T14:13:41.643419+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
