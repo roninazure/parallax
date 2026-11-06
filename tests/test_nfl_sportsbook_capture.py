@@ -147,7 +147,7 @@ class NFLOddsCaptureTests(unittest.TestCase):
             patch("scripts.nfl_sportsbook_capture.subprocess.run",
                   side_effect=[
                       CompletedProcess([], 44, "", "not found"),
-                      CompletedProcess([], 0, "INTERACTIVE_SECRET\\n", ""),
+                      CompletedProcess([], 0, "INTERACTIVE_SECRET" + chr(10), ""),
                   ]) as run,
         ):
             self.assertEqual(resolve_odds_api_key(), "INTERACTIVE_SECRET")
