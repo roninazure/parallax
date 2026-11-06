@@ -95,21 +95,31 @@ def quota_headroom_verified(
 
 
 def resolve_odds_api_key() -> str | None:
-    """Use the existing operator Keychain; never log a credential."""
+    """Prefer the macOS System Keychain for LaunchDaemons; preserve login fallback.
+
+    Never print secrets or keychain errors. The system item must be provisioned
+    separately with an appropriate access policy before enabling research.
+    """
     provided = os.environ.get("THE_ODDS_API_KEY", "").strip()
     if provided:
         return provided
     if sys.platform != "darwin":
         return None
-    try:
-        result = subprocess.run(
-            ["/usr/bin/security", "find-generic-password", "-w",
-             "-s", KEYCHAIN_SERVICE, "-a", getuser()],
-            text=True, capture_output=True, timeout=10, check=False,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    return result.stdout.strip() if result.returncode == 0 and result.stdout.strip() else None
+    command = ["/usr/bin/security", "find-generic-password", "-w",
+               "-s", KEYCHAIN_SERVICE, "-a", getuser()]
+    # LaunchDaemons have a different keychain search context than login shells.
+    # System.keychain works without an interactive login once explicitly allowed.
+    for keychain in ("/Library/Keychains/System.keychain", None):
+        try:
+            result = subprocess.run(
+                command + ([keychain] if keychain else []),
+                text=True, capture_output=True, timeout=10, check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            continue
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    return None
 
 
 def fetch_free_usage_snapshot(*, api_key: str, now: datetime) -> dict:
