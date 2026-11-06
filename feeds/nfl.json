@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-11-06T10:52:24.996564+00:00",
+  "generated_at": "2026-11-06T10:58:09.628924+00:00",
   "lane": "NFL",
   "plays": [
     {
-      "contract_side": "NO",
+      "contract_side": "YES",
       "edge_pp": 7.64883261,
-      "market_id": "1785074",
+      "market_id": "KXNFLGAME-26NOV08CINATL-ATL",
       "matchup": "CIN at ATL",
       "model_probability": 0.46648832610155455,
       "price": 0.39,
       "sport": "NFL",
       "start_time": "2026-11-08T14:30:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -47,14 +47,14 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 40.02640269,
-      "market_id": "1785081",
-      "matchup": "NYG at PHI",
-      "model_probability": 0.7877640269446287,
+      "contract_side": "YES",
+      "edge_pp": 8.7720004,
+      "market_id": "1785084",
+      "matchup": "GB at NE",
+      "model_probability": 0.47522000403580367,
       "price": 0.3875,
       "sport": "NFL",
-      "start_time": "2026-11-08T18:00:00+00:00",
+      "start_time": "2026-11-08T21:25:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -69,14 +69,14 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 8.7720004,
-      "market_id": "1785084",
-      "matchup": "GB at NE",
-      "model_probability": 0.47522000403580367,
+      "contract_side": "NO",
+      "edge_pp": 40.02640269,
+      "market_id": "1785081",
+      "matchup": "NYG at PHI",
+      "model_probability": 0.7877640269446287,
       "price": 0.3875,
       "sport": "NFL",
-      "start_time": "2026-11-08T21:25:00+00:00",
+      "start_time": "2026-11-08T18:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -93,7 +93,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-06T10:51:49.369361+00:00",
+  "source_feed_generated_at": "2026-11-06T10:58:08.677406+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
