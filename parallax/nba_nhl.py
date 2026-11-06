@@ -20,6 +20,7 @@ from zoneinfo import ZoneInfo
 
 from .engine import qualify
 from .fees import attach_fees
+from .league_quote_snapshots import LeagueQuoteSnapshotStore
 from .league_elo_experimental import FinalGame, predict_future
 from .league_shadow_evidence import ShadowFixture, shadow_evidence, nba_fixture_from_balldontlie
 from .models import Action, Side, Venue, utcnow
@@ -173,6 +174,7 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                 pmus_rows: Iterable[dict[str, Any]] = (), *,
                 kalshi_client=None, pmus_client=None, pmus_acquisition=None,
                 alert_dispatcher=None,
+                quote_snapshot_store: LeagueQuoteSnapshotStore | None = None,
                 now: datetime | None = None) -> dict[str, Any]:
     """Score supported full-game markets. Provider objects expose book(id)."""
     sport = sport.upper()
@@ -186,6 +188,8 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
     diagnostics = {"KALSHI": {"discovered": 0, "book_failures": 0},
                    "PMUS": {"discovered": 0, "book_failures": 0}}
     book_budget = {"KALSHI": 20, "PMUS": 20}
+    quote_snapshots = {"enabled": sport == "NBA" and quote_snapshot_store is not None,
+                       "written": 0, "deduplicated": 0, "failures": 0}
     for venue, markets, client in (
         (Venue.KALSHI, kalshi_rows, kalshi_client),
         (Venue.POLYMARKET, pmus_rows, pmus_client),
@@ -219,6 +223,18 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                 market = attach_fees(market, now,
                     event=raw.get("_discovery_event"),
                     series=raw.get("_discovery_series"))
+                if sport == "NBA" and quote_snapshot_store is not None:
+                    yes_team = _selected(market, Side.YES, fixture, raw)
+                    if yes_team is not None:
+                        try:
+                            recorded = quote_snapshot_store.record(
+                                sport="NBA", fixture=fixture, market=market,
+                                observed_at=observed, yes_team=yes_team,
+                            )
+                            quote_snapshots["written" if recorded is not None else "deduplicated"] += 1
+                        except (OSError, ValueError, TypeError):
+                            # Research archive failure must never publish or change a BUY decision.
+                            quote_snapshots["failures"] += 1
                 forecast = predict_future(histories, sport=sport, game_date=fixture.kickoff.astimezone(_ET).date(), home_team=fixture.home_team, away_team=fixture.away_team, game_id=fixture.game_id, season=fixture.season)
                 evidence = shadow_evidence(market, fixture, forecast, now=now)
                 if evidence is None:
@@ -279,7 +295,8 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
             "sport": sport, "scan_mode": "LIVE_READ_ONLY", "refreshed_at": now.isoformat(),
             # Discovery is deliberately capped, so do not claim whole-market completeness.
             "market_data_complete": False,
-            "venues": diagnostics, "summary": {"rows": rows}, "rows": rows}
+            "venues": diagnostics, "quote_snapshots": quote_snapshots,
+            "summary": {"rows": rows}, "rows": rows}
 
 
 def _market_matches(market, raw: dict, fixture: ShadowFixture) -> bool:
