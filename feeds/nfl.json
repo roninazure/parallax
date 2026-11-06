@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06T12:10:57.275442+00:00",
+  "generated_at": "2026-11-06T12:16:46.528301+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -70,14 +70,14 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 8.7720004,
-      "market_id": "1785084",
+      "edge_pp": 8.5220004,
+      "market_id": "KXNFLGAME-26NOV08GBNE-GB",
       "matchup": "GB at NE",
       "model_probability": 0.47522000403580367,
-      "price": 0.3875,
+      "price": 0.39,
       "sport": "NFL",
       "start_time": "2026-11-08T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -93,7 +93,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-06T12:10:41.405084+00:00",
+  "source_feed_generated_at": "2026-11-06T12:16:21.644657+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
