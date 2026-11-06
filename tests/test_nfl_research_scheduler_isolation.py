@@ -9,6 +9,7 @@ from unittest.mock import patch
 from scripts.parallax_unattended import (
     LANES, SPORTS_LANES, STARTUP_OFFSETS_SECONDS,
     NFL_SPORTSBOOK_RESEARCH_INTERVAL_SECONDS, UnattendedScheduler,
+    _safe_sportsbook_failure_detail,
 )
 
 class NFLResearchSchedulerIsolationTests(unittest.TestCase):
@@ -21,6 +22,19 @@ class NFLResearchSchedulerIsolationTests(unittest.TestCase):
                 monotonic=lambda: 5000.0,
             )
         return s
+
+    def test_safe_error_reporting_extracts_credential_failure(self):
+        stderr = ("usage: nfl_sportsbook_capture.py [-h] ...\n"
+                  "nfl_sportsbook_capture.py: error: Odds API credential unavailable in runtime or operator Keychain\n")
+        self.assertEqual(
+            _safe_sportsbook_failure_detail(stderr),
+            "Odds API credential unavailable in runtime or operator Keychain",
+        )
+
+    def test_safe_error_reporting_redacts_unexpected_urls(self):
+        stderr = "nfl_sportsbook_capture.py: error: https://example.com/?apiKey=SECRET"
+        self.assertNotIn("SECRET", _safe_sportsbook_failure_detail(stderr))
+        self.assertIn("safe diagnostic", _safe_sportsbook_failure_detail(stderr))
 
     def test_disabled_by_default_and_no_extra_sports_feed(self):
         with TemporaryDirectory() as tmp:

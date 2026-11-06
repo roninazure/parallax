@@ -123,6 +123,20 @@ def release_sha(root: Path) -> str:
         return candidate if len(candidate) == 40 else "unknown"
 
 
+def _safe_sportsbook_failure_detail(stderr: str) -> str:
+    """Surface only the collector's controlled argparse error, never a credential URL."""
+    last_line = stderr.strip().splitlines()[-1] if stderr.strip() else ""
+    prefixes = ("nfl_sportsbook_capture.py: error: ", "nfl_sportsbook_capture: error: ")
+    for prefix in prefixes:
+        if last_line.startswith(prefix):
+            reason = last_line[len(prefix):]
+            # argparse errors in this collector are controlled messages.
+            # Defense in depth: do not log URLs, query parameters, or raw secrets.
+            if "://" not in reason and "apiKey" not in reason and len(reason) <= 220:
+                return reason
+    return "collector exited without a safe diagnostic; inspect local state"
+
+
 def _reported_market_data_incomplete(stdout: str) -> bool:
     """Recognize an explicit incomplete sports slate in successful JSON output."""
     try:
@@ -291,7 +305,7 @@ class UnattendedScheduler:
                     detail = (completed.stderr or completed.stdout or "no output").strip().replace("\n", " ")
                     raise RuntimeError(
                         f"exit {completed.returncode}: "
-                        f"{detail[-800:] if lane == 'cfb' else detail[:400]}"
+                        f"{_safe_sportsbook_failure_detail(completed.stderr or '') if lane == 'nfl_sportsbook_research' else detail[-800:] if lane == 'cfb' else detail[:400]}"
                     )
                 if completed.stdout:
                     print(f"[{lane}] {completed.stdout.strip()}", flush=True)

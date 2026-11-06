@@ -31,7 +31,7 @@ from sports.nfl_odds_v4 import fetch_nfl_v4_once
 
 MINIMUM_CAPTURE_INTERVAL_SECONDS = 3600
 MINIMUM_PAID_CAPTURE_INTERVAL_SECONDS = 24 * 3600
-MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS = 100
+MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS = 8
 FREE_USAGE_ENDPOINT = "https://api.the-odds-api.com/v4/sports/"
 KEYCHAIN_SERVICE = "swarmaxis-the-odds-api"
 
@@ -95,21 +95,31 @@ def quota_headroom_verified(
 
 
 def resolve_odds_api_key() -> str | None:
-    """Use the existing operator Keychain; never log a credential."""
+    """Prefer the macOS System Keychain for LaunchDaemons; preserve login fallback.
+
+    Never print secrets or keychain errors. The system item must be provisioned
+    separately with an appropriate access policy before enabling research.
+    """
     provided = os.environ.get("THE_ODDS_API_KEY", "").strip()
     if provided:
         return provided
     if sys.platform != "darwin":
         return None
-    try:
-        result = subprocess.run(
-            ["/usr/bin/security", "find-generic-password", "-w",
-             "-s", KEYCHAIN_SERVICE, "-a", getuser()],
-            text=True, capture_output=True, timeout=10, check=False,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    return result.stdout.strip() if result.returncode == 0 and result.stdout.strip() else None
+    command = ["/usr/bin/security", "find-generic-password", "-w",
+               "-s", KEYCHAIN_SERVICE, "-a", getuser()]
+    # LaunchDaemons have a different keychain search context than login shells.
+    # System.keychain works without an interactive login once explicitly allowed.
+    for keychain in ("/Library/Keychains/System.keychain", None):
+        try:
+            result = subprocess.run(
+                command + ([keychain] if keychain else []),
+                text=True, capture_output=True, timeout=10, check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            continue
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    return None
 
 
 def fetch_free_usage_snapshot(*, api_key: str, now: datetime) -> dict:
@@ -223,7 +233,7 @@ def reserve_capture_attempt(
                 raise RuntimeError("legacy capture state has no monthly budget; refusing provider request")
             count = prior_count if prior_month == month else 0
             if count >= MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS:
-                raise RuntimeError("NFL research monthly 100-attempt safety budget exhausted")
+                raise RuntimeError(f"NFL research monthly {MAX_UTC_CALENDAR_MONTH_RESEARCH_ATTEMPTS}-attempt safety budget exhausted")
             reserved = {
                 **state,
                 "last_attempt_at_utc": now.astimezone(UTC).isoformat(),

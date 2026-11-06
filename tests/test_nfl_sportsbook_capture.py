@@ -126,7 +126,8 @@ class NFLOddsCaptureTests(unittest.TestCase):
         self.assertEqual(
             run.call_args.args[0],
             ["/usr/bin/security", "find-generic-password", "-w",
-             "-s", "swarmaxis-the-odds-api", "-a", "scottsteele"],
+             "-s", "swarmaxis-the-odds-api", "-a", "scottsteele",
+             "/Library/Keychains/System.keychain"],
         )
         self.assertTrue(run.call_args.kwargs["capture_output"])
         with (
@@ -136,6 +137,38 @@ class NFLOddsCaptureTests(unittest.TestCase):
                   side_effect=AssertionError("non-mac must not access keychain")),
         ):
             self.assertIsNone(resolve_odds_api_key())
+
+    def test_system_keychain_miss_falls_back_to_login_without_logging_secret(self):
+        from subprocess import CompletedProcess
+        with (
+            patch.dict("os.environ", {"THE_ODDS_API_KEY": ""}),
+            patch("scripts.nfl_sportsbook_capture.sys.platform", "darwin"),
+            patch("scripts.nfl_sportsbook_capture.getuser", return_value="scottsteele"),
+            patch("scripts.nfl_sportsbook_capture.subprocess.run",
+                  side_effect=[
+                      CompletedProcess([], 44, "", "not found"),
+                      CompletedProcess([], 0, "INTERACTIVE_SECRET" + chr(10), ""),
+                  ]) as run,
+        ):
+            self.assertEqual(resolve_odds_api_key(), "INTERACTIVE_SECRET")
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(
+            run.call_args_list[-1].args[0],
+            ["/usr/bin/security", "find-generic-password", "-w",
+             "-s", "swarmaxis-the-odds-api", "-a", "scottsteele"],
+        )
+
+    def test_keychain_unavailable_fails_closed(self):
+        from subprocess import CompletedProcess
+        with (
+            patch.dict("os.environ", {"THE_ODDS_API_KEY": ""}),
+            patch("scripts.nfl_sportsbook_capture.sys.platform", "darwin"),
+            patch("scripts.nfl_sportsbook_capture.getuser", return_value="scottsteele"),
+            patch("scripts.nfl_sportsbook_capture.subprocess.run",
+                  return_value=CompletedProcess([], 44, "", "not found")) as run,
+        ):
+            self.assertIsNone(resolve_odds_api_key())
+        self.assertEqual(run.call_count, 2)
 
     def test_naive_capture_timestamp_rejected(self):
         with self.assertRaises(ValueError):
@@ -327,15 +360,15 @@ class NFLOddsCaptureTests(unittest.TestCase):
             reserve_capture_attempt(state, now=NOW)
             update_capture_state(state, status="FAILED", last_error_type="TimeoutError")
             payload = json.loads(state.read_text(encoding="utf-8"))
-            payload["attempt_count_month_utc"] = 100
+            payload["attempt_count_month_utc"] = 8
             state.write_text(json.dumps(payload), encoding="utf-8")
             payload = json.loads(state.read_text(encoding="utf-8"))
             self.assertEqual(payload["attempt_month_utc"], "2026-11")
-            self.assertEqual(payload["attempt_count_month_utc"], 100)
-            with self.assertRaisesRegex(RuntimeError, "monthly 100-attempt"):
+            self.assertEqual(payload["attempt_count_month_utc"], 8)
+            with self.assertRaisesRegex(RuntimeError, "monthly 8-attempt"):
                 reserve_capture_attempt(state, now=NOW + timedelta(days=2))
             self.assertEqual(
-                json.loads(state.read_text(encoding="utf-8"))["attempt_count_month_utc"], 100,
+                json.loads(state.read_text(encoding="utf-8"))["attempt_count_month_utc"], 8,
             )
             rolled = reserve_capture_attempt(state, now=datetime(2026, 12, 1, tzinfo=UTC))
             self.assertEqual(rolled["attempt_month_utc"], "2026-12")
