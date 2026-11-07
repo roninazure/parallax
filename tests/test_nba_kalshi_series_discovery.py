@@ -11,11 +11,12 @@ def _run(monkeypatch, *, sport="NBA", series_mode="present"):
     import _league_live_scan as scanner
 
     class Fixture:
-        sport = "NBA" if sport == "NBA" else "NHL"
+        sport = None  # supplied after class creation to avoid class scope shadowing
         kickoff = datetime(2026, 11, 8, 0, 30, tzinfo=UTC)
         away_team = "BOS"
         home_team = "ATL"
 
+    Fixture.sport = sport
     ticker = "KXNBAGAME" if sport == "NBA" else "KXNHLGAME"
     event_ticker = f"{ticker}-26NOV07BOSATL"
 
