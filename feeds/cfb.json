@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-07T22:19:39.769594+00:00",
+  "generated_at": "2026-11-07T23:18:56.356990+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -15,33 +15,22 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 25.04732087,
+      "edge_pp": 24.54732087,
       "market_id": "1839353",
       "matchup": "Oklahoma at Florida",
       "model_probability": 0.6054732087353637,
-      "price": 0.355,
+      "price": 0.36,
       "sport": "CFB",
       "start_time": "2026-11-08T00:45:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 21.83684778,
-      "market_id": "1839351",
-      "matchup": "Kentucky at Tennessee",
-      "model_probability": 0.5633684777692294,
-      "price": 0.345,
-      "sport": "CFB",
-      "start_time": "2026-11-07T23:15:00+00:00",
       "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-07T22:19:19.108157+00:00",
+  "source_feed_generated_at": "2026-11-07T23:18:18.084034+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 2
   }
 }
