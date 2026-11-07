@@ -137,7 +137,7 @@ def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtu
                 "exact_fixture_candidates": len(matched),
                 "missing_nested_markets": missing_nested,
                 "nba_series_fee_evidence": nba_series_fee_evidence if sport == "NBA" else "NOT_APPLICABLE",
-                "request_cap": 1 + KALSHI_EVENT_PAGES + 2 * KALSHI_MAX_GAMES,
+                "request_cap": 1 + KALSHI_EVENT_PAGES + 2 * KALSHI_MAX_GAMES + (1 if sport == "NBA" else 0),
                 "request_count": kalshi.request_count,
             },
             "discovered": len(krows),
