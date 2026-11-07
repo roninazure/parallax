@@ -156,3 +156,44 @@ def test_malformed_identity_never_crashes_entire_audit(tmp_path):
     assert report["blocked_side_evaluations"] == 1
     assert report["failure_counts"]["INVALID_IDENTITY_OR_TIMESTAMPS"] == 1
     assert report["buy_authorized"] is False
+
+def test_pmus_nov6_tier_change_rejects_stale_flat_fee_even_if_status_verified(tmp_path):
+    forecasts, quotes = inputs(tmp_path)
+    # Forecast frozen before quote and Nov 6 effective fee cutover.
+    (forecasts / "nba-shadow-a.json").write_text(json.dumps({
+        "captured_at_utc": "2026-11-06T16:00:00+00:00",
+        "screened": [{"matchup": "ATL@WAS",
+                      "start_utc": "2026-11-07T01:00:00+00:00",
+                      "raw_elo_home_probability": .8}]}))
+    row = quote(observed="2026-11-06T19:00:00+00:00",
+                captured="2026-11-06T19:00:02+00:00")
+    row["venue"] = "POLYMARKET"
+    row["scheduled_start"] = "2026-11-07T01:00:00+00:00"
+    row["fee_scenario_25"]["YES"]["fees_estimate"] = .75
+    # At 40 contracts at .60, the conservative .095 coefficient needs .912.
+    save(quotes, row)
+    report = module.audit(forecasts, quotes)
+    yes = next(r for r in report["rows"] if r["side"] == "YES")
+    assert yes["economic_check"] == "BLOCKED"
+    assert "PMUS_POST_CUTOVER_TIER_FEE_NOT_COVERED" in yes["blocking_reasons"]
+    assert yes["buy_authorized"] is False
+
+
+def test_pmus_nov6_tier_change_accepts_conservative_fee_for_offline_only(tmp_path):
+    forecasts, quotes = inputs(tmp_path)
+    (forecasts / "nba-shadow-a.json").write_text(json.dumps({
+        "captured_at_utc": "2026-11-06T16:00:00+00:00",
+        "screened": [{"matchup": "ATL@WAS",
+                      "start_utc": "2026-11-07T01:00:00+00:00",
+                      "raw_elo_home_probability": .8}]}))
+    row = quote(observed="2026-11-06T19:00:00+00:00",
+                captured="2026-11-06T19:00:02+00:00")
+    row["venue"] = "POLYMARKET_US"
+    row["scheduled_start"] = "2026-11-07T01:00:00+00:00"
+    row["fee_scenario_25"]["YES"]["fees_estimate"] = .95
+    save(quotes, row)
+    report = module.audit(forecasts, quotes)
+    yes = next(r for r in report["rows"] if r["side"] == "YES")
+    assert yes["economic_check"] == "PASSED_HISTORICAL_ONLY"
+    assert yes["publication_eligible"] is False
+    assert yes["buy_authorized"] is False
