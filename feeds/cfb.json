@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-07T20:18:35.259810+00:00",
+  "generated_at": "2026-11-07T21:19:36.001596+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -11,17 +11,6 @@
       "price": 0.3,
       "sport": "CFB",
       "start_time": "2026-11-08T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 25.08137662,
-      "market_id": "1839349",
-      "matchup": "Alabama at LSU",
-      "model_probability": 0.5858137661656136,
-      "price": 0.335,
-      "sport": "CFB",
-      "start_time": "2026-11-07T20:30:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -38,10 +27,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-07T20:17:54.863654+00:00",
+  "source_feed_generated_at": "2026-11-07T21:18:47.000780+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 2
   }
 }
