@@ -22,6 +22,10 @@ MAX_OBSERVATION_AGE_SECONDS = 60
 MIN_EDGE = .05
 MIN_NET_RETURN = .05
 MAX_SPREAD = .05
+# Official Polymarket US tiered-taker schedule effective 2026-11-06 13:00 ET.
+# Use the maximum standard outright coefficient if the account tier is unknown.
+PMUS_TIERED_CUTOVER_UTC = datetime(2026, 11, 6, 18, 0, tzinfo=UTC)
+PMUS_MAX_STANDARD_TAKER_COEFFICIENT = .095
 
 
 def _numeric(value):
@@ -140,6 +144,27 @@ def _evaluate_quote(snapshot: dict, forecasts: dict) -> list[dict]:
             reasons.append("INSUFFICIENT_EXECUTABLE_LIQUIDITY")
         if fee is None or fee < 0:
             reasons.append("UNKNOWN_FEE_ESTIMATE")
+        # Existing fee snapshots may use a stale flat 0.0695 PMUS rate.
+        # Independently enforce the highest standard account tier for NBA
+        # outright taker purchases after the public 2026-11-06 cutover.
+        # For a deeper book, apply the formula to the actually consumed levels.
+        # This is a minimum required scenario charge, not proof of execution.
+        if (str(snapshot.get("venue", "")).casefold() in
+                {"polymarket", "polymarket_us", "polymarket-us"}
+                and observed >= PMUS_TIERED_CUTOVER_UTC
+                and contracts is not None and contracts > 0 and book_levels_valid):
+            remaining = contracts
+            tier_fee_floor = 0.0
+            for level_price, level_size in side_depth:
+                take = min(remaining, float(level_size))
+                if take <= 0:
+                    break
+                price = float(level_price)
+                tier_fee_floor += (PMUS_MAX_STANDARD_TAKER_COEFFICIENT
+                                   * take * price * (1.0 - price))
+                remaining -= take
+            if remaining > 1e-8 or fee is None or fee + 1e-8 < tier_fee_floor:
+                reasons.append("PMUS_POST_CUTOVER_TIER_FEE_NOT_COVERED")
         if total is not None and contracts is not None and ask is not None and fee is not None:
             if total + 1e-8 < contracts * ask + fee:
                 reasons.append("INCONSISTENT_COST_ACCOUNTING")
