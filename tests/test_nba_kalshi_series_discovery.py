@@ -72,6 +72,8 @@ def test_nba_series_fee_metadata_is_observed_not_certified(monkeypatch):
     }
     assert coverage["nba_series_fee_evidence"] == "METADATA_OBSERVED_NOT_SCHEDULE_VERIFIED"
     assert requests == 2
+    assert coverage["request_count"] == requests
+    assert coverage["request_cap"] == 1 + 3 + 2 * 2 + 1
 
 
 @pytest.mark.parametrize("mode,status", [
@@ -89,3 +91,5 @@ def test_nhl_discovery_does_not_fetch_extra_fee_series(monkeypatch):
     assert row["_discovery_series"] == {"ticker": "KXNHLGAME"}
     assert coverage["nba_series_fee_evidence"] == "NOT_APPLICABLE"
     assert requests == 1
+    assert coverage["request_count"] == requests
+    assert coverage["request_cap"] == 1 + 3 + 2 * 2
