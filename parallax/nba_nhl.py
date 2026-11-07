@@ -222,7 +222,7 @@ def scan_league(sport: str, fixtures: Iterable[ShadowFixture], history: Iterable
                 market = normalize_kalshi(raw, book, observed, event=raw.get("_discovery_event")) if venue == Venue.KALSHI else normalize_pmus(raw, book, observed)
                 market = attach_fees(market, now,
                     event=raw.get("_discovery_event"),
-                    series=raw.get("_discovery_series"))
+                    series=raw.get("_discovery_series"), sport=sport)
                 if sport == "NBA" and quote_snapshot_store is not None:
                     yes_team = _selected(market, Side.YES, fixture, raw)
                     if yes_team is not None:

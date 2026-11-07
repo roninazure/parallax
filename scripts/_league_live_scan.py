@@ -92,6 +92,28 @@ def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtu
             (event for event in events if event.get("event_ticker") in expected),
             key=lambda event: expected[event["event_ticker"]].kickoff,
         )[:KALSHI_MAX_GAMES]
+        # NBA-only fee provenance: obtain the actual series fee metadata,
+        # not a ticker-only placeholder. No fee approval is inferred here.
+        # If the request fails, keep the existing unverified fee state.
+        nba_series_metadata = {"ticker": ticker}
+        nba_series_fee_evidence = "NOT_REQUESTED"
+        if sport == "NBA" and matched:
+            try:
+                fetched_series = kalshi.series(ticker)
+                if (isinstance(fetched_series, dict)
+                        and fetched_series.get("ticker") == ticker
+                        and isinstance(fetched_series.get("fee_type"), str)
+                        and fetched_series.get("fee_multiplier") is not None):
+                    nba_series_metadata = {
+                        "ticker": ticker,
+                        "fee_type": fetched_series["fee_type"],
+                        "fee_multiplier": fetched_series["fee_multiplier"],
+                    }
+                    nba_series_fee_evidence = "METADATA_OBSERVED_NOT_SCHEDULE_VERIFIED"
+                else:
+                    nba_series_fee_evidence = "MISSING_OR_MISMATCHED_SERIES_METADATA"
+            except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                nba_series_fee_evidence = "SERIES_METADATA_REQUEST_FAILED"
         missing_nested = 0
         for event in matched:
             nested = event.get("markets")
@@ -105,7 +127,7 @@ def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtu
                     **market,
                     "event_ticker": event["event_ticker"],
                     "_discovery_event": event,
-                    "_discovery_series": {"ticker": ticker},
+                    "_discovery_series": nba_series_metadata if sport == "NBA" else {"ticker": ticker},
                 })
         diagnostics["KALSHI"] = {
             "coverage": {
@@ -114,7 +136,8 @@ def _live_markets(sport: str, now: datetime, acquisition: PMUSAcquisition, fixtu
                 "fixture_candidates": len(expected),
                 "exact_fixture_candidates": len(matched),
                 "missing_nested_markets": missing_nested,
-                "request_cap": 1 + KALSHI_EVENT_PAGES + 2 * KALSHI_MAX_GAMES,
+                "nba_series_fee_evidence": nba_series_fee_evidence if sport == "NBA" else "NOT_APPLICABLE",
+                "request_cap": 1 + KALSHI_EVENT_PAGES + 2 * KALSHI_MAX_GAMES + (1 if sport == "NBA" else 0),
                 "request_count": kalshi.request_count,
             },
             "discovered": len(krows),
