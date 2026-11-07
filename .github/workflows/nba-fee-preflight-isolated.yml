@@ -7,6 +7,9 @@ on:
     paths:
       - scripts/nba_kalshi_fee_preflight.py
       - tests/test_nba_kalshi_fee_preflight.py
+      - tests/test_nba_pmus_tiered_fees.py
+      - parallax/fees.py
+      - parallax/nba_nhl.py
       - .github/workflows/nba-fee-preflight-isolated.yml
   workflow_dispatch:
 permissions:
@@ -22,4 +25,8 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install 'pytest>=8,<9'
       - run: python -m compileall -q scripts/nba_kalshi_fee_preflight.py
-      - run: python -m pytest -q tests/test_nba_kalshi_fee_preflight.py
+      - run: python -m pytest -q tests/test_nba_kalshi_fee_preflight.py tests/test_nba_pmus_tiered_fees.py tests/test_parallax_nba_nhl_shadow.py
+      - name: Guard NFL MLB and CFB production lanes
+        env:
+          TZ: America/New_York
+        run: python -m pytest -q tests/test_parallax_nfl.py tests/test_parallax_live_mlb.py tests/test_parallax_live_cfb.py
