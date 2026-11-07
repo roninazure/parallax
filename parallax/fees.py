@@ -1,7 +1,7 @@
 """Read-only, explicitly expiring venue fee review. No promotions or rebates."""
 
 from dataclasses import replace
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 import logging
 
@@ -11,6 +11,9 @@ from .normalization import number
 PMUS_SCHEDULE = "https://docs.polymarket.us/fees"
 KALSHI_SCHEDULE = "https://kalshi.com/docs/kalshi-fee-schedule.pdf"
 KALSHI_ROUNDING = "https://docs.kalshi.com/getting_started/fee_rounding"
+# NBA-specific conservative upper bound on standard PMUS taker tiers.
+PMUS_NBA_TIER_CUTOVER = datetime(2026, 11, 6, 18, 0, tzinfo=UTC)
+PMUS_NBA_MAX_TAKER_THETA = 0.095
 # Fixed review window: refreshing books must not renew a static policy review.
 REVIEWED_AT = "2026-10-16T04:39:00+00:00"
 REVIEW_EXPIRES = "2026-11-15T04:39:00+00:00"
@@ -19,7 +22,7 @@ _expiry_warning_emitted = False
 logger = logging.getLogger(__name__)
 
 
-def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=None):
+def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=None, sport: str | None = None):
     global _expiry_warning_emitted
     expires = timestamp(REVIEW_EXPIRES)
     if (
@@ -71,14 +74,25 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
             if "table tennis" in scope_text:
                 reason = "Table Tennis uses theta 0.10; market-specific fee model is not enabled"
             else:
+                # NBA only. Do not alter historical NFL, CFB or MLB rules.
+                nba_tiered = (sport == "NBA" and now >= PMUS_NBA_TIER_CUTOVER)
+                fee_theta = PMUS_NBA_MAX_TAKER_THETA if nba_tiered else 0.0695
+                if nba_tiered:
+                    proof["nba_tiered_schedule_effective_at"] = PMUS_NBA_TIER_CUTOVER.isoformat()
+                    proof["nba_account_tier"] = "UNKNOWN_UPPER_BOUND_TIER_1"
+                    proof["nba_taker_theta_upper_bound"] = fee_theta
+                    proof["nba_taker_schedule_url"] = PMUS_SCHEDULE
                 mechanics = replace(
                     mechanics,
-                    fee_rate=0.0695,
+                    fee_rate=fee_theta,
                     fee_rounding="HALF_EVEN",
                     fee_status="VERIFIED_UPPER_BOUND",
                     fee_valid_until=expires.isoformat(),
                 )
-                reason = "Standard taker theta 0.0695; half-even cumulative order cap; maker rebate recorded separately"
+                reason = ("NBA post-cutover conservative standard taker theta 0.095; "
+                          "account discounts not assumed"
+                          if nba_tiered else
+                          "Standard taker theta 0.0695; half-even cumulative order cap; maker rebate recorded separately")
         elif (
             event
             and series
