@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-11-08T22:37:34.350107+00:00",
+  "generated_at": "2026-11-08T22:43:15.466551+00:00",
   "lane": "NFL",
   "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 7.91553239,
-      "market_id": "KXNFLGAME-26NOV08TBCHI-TB",
-      "matchup": "TB at CHI",
-      "model_probability": 0.36915532387249905,
-      "price": 0.29,
-      "sport": "NFL",
-      "start_time": "2026-11-09T01:20:00+00:00",
-      "venue": "KALSHI"
-    },
     {
       "contract_side": "NO",
       "edge_pp": 9.32720641,
@@ -25,23 +14,45 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 14.26624522,
-      "market_id": "2041469",
+      "contract_side": "YES",
+      "edge_pp": 7.91553239,
+      "market_id": "KXNFLGAME-26NOV08TBCHI-TB",
+      "matchup": "TB at CHI",
+      "model_probability": 0.36915532387249905,
+      "price": 0.29,
+      "sport": "NFL",
+      "start_time": "2026-11-09T01:20:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 17.01624522,
+      "market_id": "KXNFLGAME-26NOV15NEDET-DET",
       "matchup": "NE at DET",
       "model_probability": 0.6801624522471549,
-      "price": 0.5375,
+      "price": 0.51,
       "sport": "NFL",
       "start_time": "2026-11-15T14:30:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 15.48892988,
+      "market_id": "KXNFLGAME-26NOV15SFDAL-DAL",
+      "matchup": "SF at DAL",
+      "model_probability": 0.41488929876053465,
+      "price": 0.26,
+      "sport": "NFL",
+      "start_time": "2026-11-15T21:25:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-08T22:36:57.169568+00:00",
+  "source_feed_generated_at": "2026-11-08T22:43:14.601085+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 4
   }
 }
