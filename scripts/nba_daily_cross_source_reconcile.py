@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from collections import Counter
 from datetime import date
 from pathlib import Path
@@ -88,9 +89,19 @@ def main() -> int:
     parser.add_argument("--espn-csv", type=Path, required=True)
     parser.add_argument("--espn-provenance", type=Path, required=True)
     parser.add_argument("--bdl-json", type=Path, required=True)
+    parser.add_argument("--output", type=Path, help="Optional write-once local evidence JSON")
     args = parser.parse_args()
     report = compare(args.espn_csv, args.espn_provenance, args.bdl_json)
-    print(json.dumps(report, indent=2, sort_keys=True))
+    encoded = (json.dumps(report, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    if args.output is not None:
+        if args.output.is_symlink() or args.output.exists():
+            parser.error("output exists or is a symlink; refusing overwrite")
+        fd = os.open(args.output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+    print(encoded.decode("utf-8"), end="")
     return 0 if report["cross_source_results_consistent"] else 2
 
 
