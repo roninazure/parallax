@@ -2,8 +2,11 @@
 import csv
 import hashlib
 import json
-from datetime import date
+import sys
 
+import pytest
+
+from scripts import nba_daily_cross_source_reconcile as module
 from scripts.nba_daily_cross_source_reconcile import compare
 
 
@@ -35,3 +38,17 @@ def test_disagreed_winner_blocks(tmp_path):
     assert result["status"] == "RESEARCH_RECONCILIATION_BLOCKED"
     assert len(result["winner_disagreements"]) == 1
     assert result["daily"][0]["matched"] is False
+
+
+def test_write_once_output_refuses_overwrite(tmp_path, monkeypatch):
+    espn, provenance, bdl = inputs(tmp_path)
+    target = tmp_path / "evidence.json"
+    monkeypatch.setattr(sys, "argv", ["audit", "--espn-csv", str(espn),
+        "--espn-provenance", str(provenance), "--bdl-json", str(bdl),
+        "--output", str(target)])
+    assert module.main() == 0
+    result = json.loads(target.read_text())
+    assert result["cross_source_results_consistent"] is True
+    assert result["model_certified"] is False
+    with pytest.raises(SystemExit):
+        module.main()
