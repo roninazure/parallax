@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T23:15:20.253111+00:00",
+  "generated_at": "2026-11-08T23:20:01.608617+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -26,6 +26,17 @@
     },
     {
       "contract_side": "NO",
+      "edge_pp": 16.01624522,
+      "market_id": "2041469",
+      "matchup": "NE at DET",
+      "model_probability": 0.6801624522471549,
+      "price": 0.52,
+      "sport": "NFL",
+      "start_time": "2026-11-15T14:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
       "edge_pp": 12.17161661,
       "market_id": "2041474",
       "matchup": "CAR at NO",
@@ -37,41 +48,30 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 9.4239823,
+      "edge_pp": 9.9239823,
       "market_id": "2041475",
       "matchup": "JAX at TEN",
       "model_probability": 0.2717398229659631,
-      "price": 0.1775,
+      "price": 0.1725,
       "sport": "NFL",
       "start_time": "2026-11-15T18:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 10.48892988,
-      "market_id": "KXNFLGAME-26NOV15SFDAL-DAL",
-      "matchup": "SF at DAL",
-      "model_probability": 0.41488929876053465,
-      "price": 0.31,
-      "sport": "NFL",
-      "start_time": "2026-11-15T21:25:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
+      "contract_side": "NO",
       "edge_pp": 11.46639269,
-      "market_id": "2041481",
+      "market_id": "KXNFLGAME-26NOV15PITCIN-CIN",
       "matchup": "PIT at CIN",
       "model_probability": 0.5046639268514588,
       "price": 0.39,
       "sport": "NFL",
       "start_time": "2026-11-16T01:20:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-08T23:14:10.545275+00:00",
+  "source_feed_generated_at": "2026-11-08T23:19:54.540249+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
