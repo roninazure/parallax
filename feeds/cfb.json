@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-07T23:18:56.356990+00:00",
+  "generated_at": "2026-11-08T00:25:50.948199+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -23,14 +23,25 @@
       "sport": "CFB",
       "start_time": "2026-11-08T00:45:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 20.5269036,
+      "market_id": "1841032",
+      "matchup": "Colorado at Arizona State",
+      "model_probability": 0.6152690360185019,
+      "price": 0.41,
+      "sport": "CFB",
+      "start_time": "2026-11-08T00:30:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-07T23:18:18.084034+00:00",
+  "source_feed_generated_at": "2026-11-08T00:24:58.467283+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 2
+    "buy": 3
   }
 }
