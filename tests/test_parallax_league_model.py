@@ -132,3 +132,35 @@ def test_real_history_candidate_artifacts_report_holdout_and_remain_blocked(
     assert artifact["holdout_metrics"]["n_games"] >= 300
     assert artifact["certified"] is certified
     verify_artifact(artifact, sport=sport, require_certified=False)
+
+
+def test_nba_internal_calibrator_selection_never_splits_one_game_date():
+    from parallax.league_model import _nba_calibration_date_cut
+
+    day = date(2026, 1, 1)
+    dates = ([day] * 3 + [day + timedelta(days=1)] * 3
+             + [day + timedelta(days=2)] * 6 + [day + timedelta(days=3)] * 6)
+    cut = _nba_calibration_date_cut(dates)
+    assert cut in (3, 6, 12)
+    assert dates[cut - 1] < dates[cut]
+    # The old 80% row cut was 14 and split the last day's six games.
+    assert cut != int(len(dates) * .8)
+
+
+@pytest.mark.parametrize("dates", [
+    [date(2026, 1, 1)] * 5,
+    [date(2026, 1, 2), date(2026, 1, 1)],
+])
+def test_nba_internal_calibrator_rejects_no_date_boundary_or_reordered_input(dates):
+    from parallax.league_model import _nba_calibration_date_cut
+
+    with pytest.raises(ValueError, match="NBA calibration"):
+        _nba_calibration_date_cut(dates)
+
+
+def test_nba_calibrator_never_accepts_mismatched_date_count():
+    from parallax.league_model import _fit_calibrator
+
+    with pytest.raises(ValueError, match="differ in length"):
+        _fit_calibrator([.3, .5, .6, .8], [0, 0, 1, 1],
+                        nba_game_dates=[date(2026, 1, 1)])

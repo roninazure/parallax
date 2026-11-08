@@ -1,0 +1,33 @@
+name: NBA Kalshi public fee evidence
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/nba-kalshi-fee-evidence.yml'
+permissions:
+  contents: read
+jobs:
+  nba-public-fee-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch bounded public KXNBAGAME series metadata only
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from urllib.request import Request, urlopen
+          endpoint = "https://api.elections.kalshi.com/trade-api/v2/series/KXNBAGAME"
+          req = Request(endpoint, headers={"Accept":"application/json","User-Agent":"PARALLAX-NBA-Fee-Research/1"})
+          with urlopen(req, timeout=10) as resp:
+              payload = json.loads(resp.read(100_000))
+          series = payload.get("series",{})
+          result = {key:series.get(key) for key in ("ticker","fee_type","fee_multiplier","category")}
+          assert result["ticker"] == "KXNBAGAME", "Unexpected series identity"
+          assert result["fee_type"] in ("quadratic","quadratic_with_maker_fees"), "Unsupported series fees"
+          assert isinstance(result["fee_multiplier"], (int,float)) and not isinstance(result["fee_multiplier"],bool) and 0 < result["fee_multiplier"] <= 10, "Unknown fee multiplier"
+          print("KALSHI_NBA_SERIES_METADATA:", json.dumps(result, sort_keys=True))
+          print("FEE_SCHEDULE_REVIEW_STILL_REQUIRED: https://kalshi.com/fee-schedule")
+          print("EVENT_OVERRIDE_AND_MARKET_METADATA_STILL_REQUIRED: TRUE")
+          print("BUY_AUTHORIZED: FALSE")
+          PY

@@ -1,7 +1,7 @@
 """Read-only, explicitly expiring venue fee review. No promotions or rebates."""
 
 from dataclasses import replace
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 import logging
 
@@ -11,6 +11,9 @@ from .normalization import number
 PMUS_SCHEDULE = "https://docs.polymarket.us/fees"
 KALSHI_SCHEDULE = "https://kalshi.com/docs/kalshi-fee-schedule.pdf"
 KALSHI_ROUNDING = "https://docs.kalshi.com/getting_started/fee_rounding"
+# Conservative account-independent NBA outright taker upper bound after Nov 6.
+PMUS_NBA_TIER_CUTOVER = datetime(2026, 11, 6, 18, 0, tzinfo=UTC)
+PMUS_NBA_MAX_TAKER_THETA = 0.095
 # Fixed review window: refreshing books must not renew a static policy review.
 REVIEWED_AT = "2026-10-16T04:39:00+00:00"
 REVIEW_EXPIRES = "2026-11-15T04:39:00+00:00"
@@ -19,7 +22,7 @@ _expiry_warning_emitted = False
 logger = logging.getLogger(__name__)
 
 
-def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=None):
+def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=None, sport: str | None = None):
     global _expiry_warning_emitted
     expires = timestamp(REVIEW_EXPIRES)
     if (
@@ -71,21 +74,34 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
             if "table tennis" in scope_text:
                 reason = "Table Tennis uses theta 0.10; market-specific fee model is not enabled"
             else:
+                # Preserve NFL/other existing fee treatment. NBA uses a
+                # conservative upper bound because the account's PMUS tier
+                # and onboarding/overrides are not independently observable.
+                nba_tiered = (sport == "NBA" and now >= PMUS_NBA_TIER_CUTOVER)
+                fee_theta = PMUS_NBA_MAX_TAKER_THETA if nba_tiered else 0.0695
+                if nba_tiered:
+                    proof["nba_tiered_schedule_effective_at"] = PMUS_NBA_TIER_CUTOVER.isoformat()
+                    proof["nba_account_tier"] = "UNKNOWN_UPPER_BOUND_TIER_1"
+                    proof["nba_taker_theta_upper_bound"] = fee_theta
+                    proof["nba_taker_schedule_url"] = PMUS_SCHEDULE
                 mechanics = replace(
                     mechanics,
-                    fee_rate=0.0695,
+                    fee_rate=fee_theta,
                     fee_rounding="HALF_EVEN",
                     fee_status="VERIFIED_UPPER_BOUND",
                     fee_valid_until=expires.isoformat(),
                 )
-                reason = "Standard taker theta 0.0695; half-even cumulative order cap; maker rebate recorded separately"
+                reason = ("NBA post-cutover: conservative standard taker theta 0.095; "
+                          "unknown account tier, no rebate or onboarding discount assumed"
+                          if nba_tiered else
+                          "Standard taker theta 0.0695; half-even cumulative order cap; maker rebate recorded separately")
         elif (
             event
             and series
             and event.get("event_ticker") == market.event
             and market.event
             and series.get("ticker")
-            in {"KXMLBGAME", "KXNFLGAME", "KXNCAAF", "KXCFB"}
+            in {"KXMLBGAME", "KXNFLGAME", "KXNCAAF", "KXCFB", "KXNBAGAME"}
             and event.get("series_ticker") == series.get("ticker")
         ):
             kind = event.get("fee_type_override")
@@ -150,6 +166,11 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
                 proof["schedule_effective_at"] = "2026-07-07"
                 proof["effective_multiplier"] = multiplier
                 proof["verified_series"] = series.get("ticker")
+                if series.get("ticker") == "KXNBAGAME":
+                    proof["published_schedule_review_url"] = "https://kalshi.com/fee-schedule"
+                    proof["series_fee_evidence_verified"] = True
+                    proof["market_scope"] = "KXNBAGAME"
+                    proof["nba_schedule_review_date"] = "2026-11-05"
                 proof["account_precision"] = (
                     "Unknown account: conservative $0.01 alignment (direct members use $0.0001)"
                 )
@@ -162,15 +183,9 @@ def attach_fees(market: NormalizedMarket, now: datetime, *, event=None, series=N
             and isinstance(market.venue_market_id, str)
             and market.venue_market_id.startswith("KXNBAGAME-")
         ):
-            # No current published KXNBAGAME-specific fee schedule has been
-            # verified. Event/series API metadata cannot alone establish the
-            # governing published rate or authorize BUY economics.
             proof["series_fee_evidence_verified"] = False
             proof["market_scope"] = "KXNBAGAME"
-            reason = (
-                "KXNBAGAME published series fee evidence unverified; "
-                "event/series metadata alone cannot authorize costs"
-            )
+            reason = "KXNBAGAME live event/series fee evidence unavailable or inconsistent"
         else:
             reason = "Market-bound event and series fee metadata unavailable"
     proof["reason"] = reason

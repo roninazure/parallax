@@ -27,10 +27,24 @@ def snapshot(start: date, end: date, *, fetch) -> tuple[list[dict], dict]:
         if not isinstance(payload, dict) or not isinstance(payload.get("events"), list):
             raise ValueError(f"invalid response for {stamp}")
         accepted = 0
+        regular = 0
+        unresolved = 0
+        event_ids = set()
         for game in payload["events"]:
-            if game.get("season", {}).get("type") != 2:
+            if not isinstance(game, dict) or not isinstance(game.get("season"), dict):
+                raise ValueError(f"malformed scoreboard event for {stamp}")
+            if game["season"].get("type") != 2:
                 continue
-            if not game.get("status", {}).get("type", {}).get("completed"):
+            event_id = str(game.get("id") or "")
+            if not event_id or event_id in event_ids:
+                raise ValueError(f"missing or duplicate event identity for {stamp}")
+            event_ids.add(event_id)
+            regular += 1
+            status = game.get("status", {}).get("type")
+            if not isinstance(status, dict) or type(status.get("completed")) is not bool:
+                raise ValueError(f"unknown game completion status for {stamp}")
+            if not status["completed"]:
+                unresolved += 1
                 continue
             competitions = game.get("competitions", [])
             if len(competitions) != 1:
@@ -53,7 +67,10 @@ def snapshot(start: date, end: date, *, fetch) -> tuple[list[dict], dict]:
                             "home_team": home, "away_team": away,
                             "winner_team": home if hs > ans else away})
             accepted += 1
-        days.append({"day": stamp, "finals": accepted})
+        days.append({"day": stamp, "finals": accepted,
+                     "provider_regular_events": regular,
+                     "unresolved_events": unresolved,
+                     "provider_internal_complete": unresolved == 0})
         day += timedelta(days=1)
     return results, {"source": "ESPN_PUBLIC_SCOREBOARD_RESEARCH_ONLY",
                      "independent_source_verified": False,
@@ -61,6 +78,8 @@ def snapshot(start: date, end: date, *, fetch) -> tuple[list[dict], dict]:
                      "complete_season_verified": False,
                      "start_date": start.isoformat(), "end_date": end.isoformat(),
                      "dates_requested": len(days), "games": len(results),
+                     "all_days_provider_internal_complete": all(d["provider_internal_complete"] for d in days),
+                     "expected_schedule_reconciled": False,
                      "daily_counts": days}
 
 def fetch_day(day: str) -> dict:

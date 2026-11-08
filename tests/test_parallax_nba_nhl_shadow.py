@@ -421,6 +421,41 @@ def test_mocked_pmus_client_market_uses_same_fixture_match_normalize_qualify_pat
     assert result["model_validation_state"] == "BLOCKED"
 
 
+def test_pmus_nba_verified_fees_to_qualified_buy_and_customer_feed():
+    """Test the real PMUS fees+qualification+feed path, with test-only model."""
+    normalized = pmus()
+    raw = {
+        "id": normalized.venue_market_id, "slug": normalized.slug,
+        "question": normalized.title, "event_id": "nba:gs-den:2026-10-26",
+        "active": True, "closed": False, "accepting_orders": True,
+        "raw": {**normalized.original_metadata["market"],
+                "endDate": "2026-10-27T05:00:00+00:00",
+                "minimumTradeQty": 1, "orderPriceMinTickSize": .01},
+    }
+    class PMUS:
+        def book(self, slug):
+            return {
+                f"{slug}::YES": {"best_bid": .45, "best_ask": .47,
+                                "bid_size_shares": 250, "ask_size_shares": 250},
+                f"{slug}::NO": {"best_bid": .53, "best_ask": .55,
+                               "bid_size_shares": 250, "ask_size_shares": 250},
+            }
+
+    artifact = synthetic_certified_artifact()
+    result = scan_league(
+        "NBA", [fixture()], [], [], [raw], pmus_client=PMUS(),
+        model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"],
+        now=NOW,
+    )
+    buys = [row for row in result["rows"] if row["publication_eligible"]]
+    assert buys, [(r["side"],r["failed_gates"],r["fee_status"],r["model_probability"],r["executable_price"],r["net_ev_25"],r["expected_return"],r["selected_team"]) for r in result["rows"]]
+    assert all(row["venue"] == Venue.POLYMARKET.value for row in buys)
+    assert all(row["fee_status"] == "VERIFIED_UPPER_BOUND" for row in buys)
+    assert all(row["fee"] is not None and row["expected_return"] >= .05 for row in buys)
+    feed = sanitize_completed_scan("nba", json.dumps(result), generated_at=NOW)
+    assert feed["summary"]["buy"] >= 1
+
+
 def test_mocked_bdl_schedule_response_uses_existing_verified_fixture_adapter():
     row = {**NBA_BDL_GAME,
         "home_team": {"abbreviation": "DEN", "city": "Denver"},
@@ -561,7 +596,6 @@ def test_mocked_nhl_schedule_response_builds_only_future_regular_fixtures():
 
 
 def test_synthetic_certified_provider_to_ntfy_lifecycle_is_deduplicated(monkeypatch, tmp_path):
-    from dataclasses import replace as dc_replace
     from parallax import nba_nhl
     from parallax.alerts import AlertConfig, AlertDeliveryStore, AlertDispatcher, DeliveryResult
 
@@ -577,20 +611,21 @@ def test_synthetic_certified_provider_to_ntfy_lifecycle_is_deduplicated(monkeypa
     fx = fixture()
     raw = {**MARKETS["NBA"], "status": "active", "market_type": "binary",
            "price_level_structure": "linear_cent", "notional_value_dollars": "1",
-           "expected_expiration_time": "2026-10-27T05:00:00Z"}
+           "expected_expiration_time": "2026-10-27T05:00:00Z",
+           "_discovery_event": {"event_ticker": MARKETS["NBA"]["event_ticker"], "series_ticker": "KXNBAGAME"},
+           "_discovery_series": {"ticker": "KXNBAGAME", "fee_type": "quadratic_with_maker_fees", "fee_multiplier": 1}}
     class Book:
         def book(self, _ticker):
             return {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
                                      "no_dollars": [["0.50", "250"]]}}
-    monkeypatch.setattr(nba_nhl, "attach_fees", lambda market, _now, **_kw: dc_replace(market,
-        mechanics=dc_replace(market.mechanics, fee_rate=.001, fee_source="SYNTHETIC_TEST_ONLY",
-            fee_valid_until="2026-10-27T00:00:00+00:00", fee_status="VERIFIED_SCHEDULE")))
     artifact = synthetic_certified_artifact()
     first = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher,
                         model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"], now=NOW)
     second = scan_league("NBA", [fx], [], [raw], [], kalshi_client=Book(), alert_dispatcher=dispatcher,
                          model_artifact=artifact, expected_model_sha256=artifact["artifact_sha256"], now=NOW)
     assert any(row["publication_eligible"] for row in first["rows"])
+    assert any(row["fee_status"] == "VERIFIED_UPPER_BOUND" for row in first["rows"])
+    assert all(row["fee"] is not None for row in first["rows"] if row["publication_eligible"])
     assert first["alerts"] == 1 and second["alerts"] == 0
     assert len(transport.calls) == 1
     assert transport.calls[0][1]["topic"] == "synthetic-topic"
@@ -821,8 +856,8 @@ def test_ambiguous_pmus_sides_rejected():
                            fixture(), forecast(), now=NOW) is None
 
 
-def test_kalshi_nba_game_fee_gate_remains_unverified_without_published_series_proof():
-    """Synthetic event/series metadata cannot certify KXNBAGAME economics."""
+def test_kalshi_nba_market_bound_fee_schedule_and_untrusted_overrides():
+    """Official standard NBA rate + live market/event/series identity is required."""
     from parallax.fees import attach_fees
 
     market = kalshi("NBA")
@@ -830,17 +865,39 @@ def test_kalshi_nba_game_fee_gate_remains_unverified_without_published_series_pr
         "event_ticker": MARKETS["NBA"]["event_ticker"],
         "series_ticker": "KXNBAGAME",
     }
-    for multiplier in (1, 0, 0.5):
-        series = {
-            "ticker": "KXNBAGAME",
-            "fee_type": "quadratic_with_maker_fees",
-            "fee_multiplier": multiplier,
-        }
-        assessed = attach_fees(market, NOW, event=event, series=series)
-        assert assessed.mechanics.fee_status == "UNVERIFIED"
-        assert assessed.mechanics.fee_rate is None
-        proof = assessed.original_metadata["fee_provenance"]
-        assert proof["series_fee_evidence_verified"] is False
-        assert proof["market_scope"] == "KXNBAGAME"
-        assert "published series fee evidence unverified" in proof["reason"]
+    series = {
+        "ticker": "KXNBAGAME",
+        "fee_type": "quadratic_with_maker_fees",
+        "fee_multiplier": 1,
+    }
+    approved = attach_fees(market, NOW, event=event, series=series)
+    assert approved.mechanics.fee_status == "VERIFIED_UPPER_BOUND"
+    assert approved.mechanics.fee_rate == pytest.approx(0.07)
+    assert approved.original_metadata["fee_provenance"]["series_fee_evidence_verified"] is True
+    assert approved.original_metadata["fee_provenance"]["market_scope"] == "KXNBAGAME"
+    assert approved.mechanics.fee_valid_until is not None
 
+    no_metadata = attach_fees(market, NOW)
+    assert no_metadata.mechanics.fee_status == "UNVERIFIED"
+    assert no_metadata.mechanics.fee_rate is None
+
+    wrong_event = {**event, "event_ticker": "KXNBAGAME-OTHER"}
+    rejected = attach_fees(market, NOW, event=wrong_event, series=series)
+    assert rejected.mechanics.fee_status == "UNVERIFIED"
+
+    unsupported = {**series, "fee_type": "unknown_fee_type"}
+    rejected = attach_fees(market, NOW, event=event, series=unsupported)
+    assert rejected.mechanics.fee_status == "UNVERIFIED"
+
+    # Never treat undocumented fee waivers as zero-cost opportunities.
+    compromised_raw = {**MARKETS["NBA"], "fee_multiplier_override": 0}
+    altered = normalize_kalshi(
+        {**compromised_raw, "status": "active", "market_type": "binary",
+         "price_level_structure": "linear_cent", "notional_value_dollars": "1",
+         "expected_expiration_time": "2026-10-27T05:00:00Z"},
+        {"orderbook_fp": {"yes_dollars": [["0.48", "250"]],
+                          "no_dollars": [["0.50", "250"]]}},
+        NOW.isoformat(),
+    )
+    rejected = attach_fees(altered, NOW, event=event, series=series)
+    assert rejected.mechanics.fee_status == "UNVERIFIED"

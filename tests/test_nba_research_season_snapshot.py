@@ -28,6 +28,13 @@ def test_regular_completed_only():
     assert rows[0]["winner_team"] == "NYK"
     assert provenance["dates_requested"] == 2
     assert provenance["independent_source_verified"] is False
+    assert provenance["expected_schedule_reconciled"] is False
+    assert provenance["all_days_provider_internal_complete"] is False
+    assert provenance["daily_counts"][0] == {
+        "day": "20261020", "finals": 1, "provider_regular_events": 2,
+        "unresolved_events": 1, "provider_internal_complete": False,
+    }
+    assert provenance["daily_counts"][1]["provider_internal_complete"] is True
 
 def test_duplicate_fails_closed():
     with pytest.raises(ValueError, match="duplicate"):
@@ -39,3 +46,17 @@ def test_invalid_window_or_payload_fails_closed():
         module.snapshot(date(2026,10,21), date(2026,10,20), fetch=lambda _: {"events":[]})
     with pytest.raises(ValueError):
         module.snapshot(date(2026,10,20), date(2026,10,20), fetch=lambda _: {})
+
+
+def test_unknown_completion_status_fails_closed():
+    event = game()
+    event["status"]["type"].pop("completed")
+    with pytest.raises(ValueError, match="completion status"):
+        module.snapshot(date(2026,10,20), date(2026,10,20),
+                        fetch=lambda _: {"events": [event]})
+
+
+def test_duplicate_provider_event_id_fails_closed():
+    with pytest.raises(ValueError, match="duplicate event identity"):
+        module.snapshot(date(2026,10,20), date(2026,10,20),
+                        fetch=lambda _: {"events": [game(), game(home="BOS", away="MIA")]})
