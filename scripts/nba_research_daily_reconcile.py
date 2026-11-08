@@ -18,8 +18,10 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from nba_forward_reconcile import archived_forecasts, evaluate, parse_stamp
+from nba_daily_cross_source_reconcile import compare as compare_cached_sources
 
 ET = ZoneInfo("America/New_York")
+MAX_SCOREBOARD_DAYS_PER_ATTEMPT = 1  # Offline/cached validation is preferred.
 
 
 def _write_json_exclusive(path: Path, document: dict) -> None:
@@ -35,7 +37,8 @@ def _write_json_exclusive(path: Path, document: dict) -> None:
         raise
 
 
-def run(*, snapshots: Path, state: Path, now: datetime, scorer=evaluate) -> dict:
+def run(*, snapshots: Path, state: Path, now: datetime, scorer=evaluate,
+        cached_sources: tuple[Path, Path, Path] | None = None) -> dict:
     if now.tzinfo is None:
         raise ValueError("aware now required")
     if not snapshots.is_dir():
@@ -61,10 +64,33 @@ def run(*, snapshots: Path, state: Path, now: datetime, scorer=evaluate) -> dict
             raise ValueError("no valid NBA forecasts")
         if any(source.get(k, 0) for k in ("malformed_snapshots", "invalid_rows")):
             raise ValueError("invalid NBA snapshot data; report not trusted")
+        # Fail closed before reserving the attempt or performing any request.
+        eligible_days = sorted({key[0] for key, row in forecasts.items()
+                                if parse_stamp(row["kickoff_utc"]) <= now.astimezone(UTC)})
+        if cached_sources is None and len(eligible_days) > MAX_SCOREBOARD_DAYS_PER_ATTEMPT:
+            raise ValueError("scoreboard request ceiling exceeded; use reviewed cached evidence")
+        if cached_sources is not None:
+            if len(cached_sources) != 3:
+                raise ValueError("three cached source paths required")
+            if any(not p.is_file() or p.is_symlink() for p in cached_sources):
+                raise ValueError("cached evidence absent or symlinked")
         # Reserve BEFORE making any network requests; failure cannot cause
         # repeated paid/unpaid provider calls from unattended restarts.
         _write_json_exclusive(attempt, {"day": day, "started_at_utc": now.astimezone(UTC).isoformat(),
                                         "status": "ATTEMPT_RESERVED", "research_only": True})
+        if cached_sources is not None:
+            evidence = compare_cached_sources(*cached_sources)
+            if not evidence["cross_source_results_consistent"]:
+                raise RuntimeError("cached NBA cross-source mismatch; scorecard withheld")
+            cached_report = {
+                "status": "CACHED_CROSS_SOURCE_RESEARCH_ONLY",
+                "day": day, "evidence": evidence,
+                "buy_authorized": False, "model_certified": False,
+                "network_requests": 0,
+            }
+            _write_json_exclusive(report, cached_report)
+            return {"status": cached_report["status"], "day": day,
+                    "network_requests": 0, "report": str(report)}
         result = scorer(forecasts, now=now)
         if result["scoreboard_errors"]:
             raise RuntimeError("scoreboard lookup failed; no scorecard published")
@@ -96,10 +122,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshots", type=Path, required=True)
     parser.add_argument("--state", type=Path, required=True)
+    parser.add_argument("--espn-csv", type=Path)
+    parser.add_argument("--espn-provenance", type=Path)
+    parser.add_argument("--bdl-json", type=Path)
     args = parser.parse_args()
+    provided = (args.espn_csv, args.espn_provenance, args.bdl_json)
+    if any(provided) and not all(provided):
+        parser.error("all three cached evidence inputs must be provided together")
     try:
         status = run(snapshots=args.snapshots, state=args.state,
-                     now=datetime.now(UTC))
+                     now=datetime.now(UTC),
+                     cached_sources=provided if all(provided) else None)
         print(json.dumps(status, sort_keys=True, allow_nan=False), flush=True)
         if status["status"] == "PARTIAL_MISSING_FINAL_OR_IDENTITY":
             return 2
