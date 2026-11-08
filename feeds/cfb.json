@@ -1,47 +1,13 @@
 {
-  "generated_at": "2026-11-08T00:25:50.948199+00:00",
+  "generated_at": "2026-11-08T01:26:52.076089+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 27.26818908,
-      "market_id": "1785609",
-      "matchup": "Miami at Notre Dame",
-      "model_probability": 0.5726818907733169,
-      "price": 0.3,
-      "sport": "CFB",
-      "start_time": "2026-11-08T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 24.54732087,
-      "market_id": "1839353",
-      "matchup": "Oklahoma at Florida",
-      "model_probability": 0.6054732087353637,
-      "price": 0.36,
-      "sport": "CFB",
-      "start_time": "2026-11-08T00:45:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 20.5269036,
-      "market_id": "1841032",
-      "matchup": "Colorado at Arizona State",
-      "model_probability": 0.6152690360185019,
-      "price": 0.41,
-      "sport": "CFB",
-      "start_time": "2026-11-08T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-08T00:24:58.467283+00:00",
+  "source_feed_generated_at": "2026-11-08T01:25:57.769045+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 0
   }
 }
