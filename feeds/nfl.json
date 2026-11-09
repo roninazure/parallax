@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T22:57:17.602600+00:00",
+  "generated_at": "2026-11-09T23:03:15.549606+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -26,11 +26,11 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 8.17161661,
+      "edge_pp": 8.42161661,
       "market_id": "2041474",
       "matchup": "CAR at NO",
       "model_probability": 0.6117161661028312,
-      "price": 0.53,
+      "price": 0.5275,
       "sport": "NFL",
       "start_time": "2026-11-15T18:00:00+00:00",
       "venue": "POLYMARKET"
@@ -58,17 +58,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 8.12909818,
-      "market_id": "KXNFLGAME-26NOV15MINGB-GB",
-      "matchup": "MIN at GB",
-      "model_probability": 0.461290981762998,
-      "price": 0.38,
-      "sport": "NFL",
-      "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "YES",
       "edge_pp": 9.78217294,
       "market_id": "2041478",
@@ -81,19 +70,30 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 7.75976511,
-      "market_id": "2041480",
+      "edge_pp": 8.00976511,
+      "market_id": "KXNFLGAME-26NOV15SFDAL-SF",
       "matchup": "SF at DAL",
       "model_probability": 0.410097651137439,
-      "price": 0.3325,
+      "price": 0.33,
       "sport": "NFL",
       "start_time": "2026-11-15T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 14.46639269,
+      "market_id": "KXNFLGAME-26NOV15PITCIN-CIN",
+      "matchup": "PIT at CIN",
+      "model_probability": 0.5046639268514588,
+      "price": 0.36,
+      "sport": "NFL",
+      "start_time": "2026-11-16T01:20:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-09T22:57:00.760229+00:00",
+  "source_feed_generated_at": "2026-11-09T23:02:55.300853+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
