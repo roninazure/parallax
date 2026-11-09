@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T12:53:12.842761+00:00",
+  "generated_at": "2026-11-09T12:59:05.172377+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -67,14 +67,25 @@
       "sport": "NFL",
       "start_time": "2026-11-15T21:25:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 14.46639269,
+      "market_id": "KXNFLGAME-26NOV15PITCIN-PIT",
+      "matchup": "PIT at CIN",
+      "model_probability": 0.5046639268514588,
+      "price": 0.36,
+      "sport": "NFL",
+      "start_time": "2026-11-16T01:20:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-09T12:52:47.631585+00:00",
+  "source_feed_generated_at": "2026-11-09T12:58:36.665213+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 6
+    "buy": 7
   }
 }
