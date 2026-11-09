@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T01:23:07.325768+00:00",
+  "generated_at": "2026-11-09T01:28:45.526718+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -25,25 +25,25 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 8.6739823,
-      "market_id": "2041475",
-      "matchup": "JAX at TEN",
-      "model_probability": 0.2717398229659631,
-      "price": 0.185,
+      "contract_side": "YES",
+      "edge_pp": 12.17161661,
+      "market_id": "KXNFLGAME-26NOV15CARNO-NO",
+      "matchup": "CAR at NO",
+      "model_probability": 0.6117161661028312,
+      "price": 0.49,
       "sport": "NFL",
       "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
-      "edge_pp": 10.28217294,
-      "market_id": "KXNFLGAME-26NOV15SEALV-SEA",
-      "matchup": "SEA at LV",
-      "model_probability": 0.7228217294182244,
-      "price": 0.62,
+      "edge_pp": 10.96145582,
+      "market_id": "KXNFLGAME-26NOV15HOUCLE-CLE",
+      "matchup": "HOU at CLE",
+      "model_probability": 0.45961455817984226,
+      "price": 0.35,
       "sport": "NFL",
-      "start_time": "2026-11-15T21:05:00+00:00",
+      "start_time": "2026-11-15T18:00:00+00:00",
       "venue": "KALSHI"
     },
     {
@@ -56,25 +56,14 @@
       "sport": "NFL",
       "start_time": "2026-11-15T21:25:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 11.46639269,
-      "market_id": "KXNFLGAME-26NOV15PITCIN-PIT",
-      "matchup": "PIT at CIN",
-      "model_probability": 0.5046639268514588,
-      "price": 0.39,
-      "sport": "NFL",
-      "start_time": "2026-11-16T01:20:00+00:00",
-      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-09T01:22:38.450332+00:00",
+  "source_feed_generated_at": "2026-11-09T01:28:07.334699+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 6
+    "buy": 5
   }
 }
