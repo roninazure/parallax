@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T00:49:22.641339+00:00",
+  "generated_at": "2026-11-10T00:55:17.413941+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -36,23 +36,23 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 11.96145582,
-      "market_id": "KXNFLGAME-26NOV15HOUCLE-CLE",
-      "matchup": "HOU at CLE",
-      "model_probability": 0.45961455817984226,
-      "price": 0.34,
-      "sport": "NFL",
-      "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "NO",
-      "edge_pp": 9.9239823,
+      "edge_pp": 9.6739823,
       "market_id": "2041475",
       "matchup": "JAX at TEN",
       "model_probability": 0.2717398229659631,
-      "price": 0.1725,
+      "price": 0.175,
+      "sport": "NFL",
+      "start_time": "2026-11-15T18:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 8.62909818,
+      "market_id": "2041473",
+      "matchup": "MIN at GB",
+      "model_probability": 0.461290981762998,
+      "price": 0.375,
       "sport": "NFL",
       "start_time": "2026-11-15T18:00:00+00:00",
       "venue": "POLYMARKET"
@@ -69,23 +69,34 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 7.75976511,
-      "market_id": "2041480",
+      "contract_side": "YES",
+      "edge_pp": 8.00976511,
+      "market_id": "KXNFLGAME-26NOV15SFDAL-DAL",
       "matchup": "SF at DAL",
       "model_probability": 0.410097651137439,
-      "price": 0.3325,
+      "price": 0.33,
       "sport": "NFL",
       "start_time": "2026-11-15T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 14.46639269,
+      "market_id": "KXNFLGAME-26NOV15PITCIN-CIN",
+      "matchup": "PIT at CIN",
+      "model_probability": 0.5046639268514588,
+      "price": 0.36,
+      "sport": "NFL",
+      "start_time": "2026-11-16T01:20:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-10T00:48:47.682088+00:00",
+  "source_feed_generated_at": "2026-11-10T00:54:43.438490+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 7
+    "buy": 8
   }
 }
