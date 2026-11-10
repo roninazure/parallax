@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T00:37:38.025732+00:00",
+  "generated_at": "2026-11-10T00:43:32.673569+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -37,25 +37,14 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 9.6739823,
+      "edge_pp": 9.9239823,
       "market_id": "2041475",
       "matchup": "JAX at TEN",
       "model_probability": 0.2717398229659631,
-      "price": 0.175,
+      "price": 0.1725,
       "sport": "NFL",
       "start_time": "2026-11-15T18:00:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 8.12909818,
-      "market_id": "KXNFLGAME-26NOV15MINGB-MIN",
-      "matchup": "MIN at GB",
-      "model_probability": 0.461290981762998,
-      "price": 0.38,
-      "sport": "NFL",
-      "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -69,20 +58,31 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 7.75976511,
-      "market_id": "2041480",
+      "contract_side": "YES",
+      "edge_pp": 8.00976511,
+      "market_id": "KXNFLGAME-26NOV15SFDAL-DAL",
       "matchup": "SF at DAL",
       "model_probability": 0.410097651137439,
-      "price": 0.3325,
+      "price": 0.33,
       "sport": "NFL",
       "start_time": "2026-11-15T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 14.46639269,
+      "market_id": "KXNFLGAME-26NOV15PITCIN-CIN",
+      "matchup": "PIT at CIN",
+      "model_probability": 0.5046639268514588,
+      "price": 0.36,
+      "sport": "NFL",
+      "start_time": "2026-11-16T01:20:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-10T00:36:57.752687+00:00",
+  "source_feed_generated_at": "2026-11-10T00:42:53.574738+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
