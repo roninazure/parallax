@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T18:36:08.709971+00:00",
+  "generated_at": "2026-11-10T18:42:08.833499+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -47,17 +47,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 10.756909,
-      "market_id": "KXNFLGAME-26NOV15MINGB-MIN",
-      "matchup": "MIN at GB",
-      "model_probability": 0.4475690900035437,
-      "price": 0.34,
-      "sport": "NFL",
-      "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "NO",
       "edge_pp": 8.35274991,
       "market_id": "2041479",
@@ -70,11 +59,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 14.21639269,
+      "edge_pp": 13.71639269,
       "market_id": "2041481",
       "matchup": "PIT at CIN",
       "model_probability": 0.5046639268514588,
-      "price": 0.3625,
+      "price": 0.3675,
       "sport": "NFL",
       "start_time": "2026-11-16T01:20:00+00:00",
       "venue": "POLYMARKET"
@@ -82,10 +71,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-10T18:36:07.320051+00:00",
-  "source_schedule_state": "COMPLETE",
+  "source_feed_generated_at": "2026-11-10T18:41:56.505658+00:00",
+  "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 7
+    "buy": 6
   }
 }
