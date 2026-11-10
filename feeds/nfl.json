@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T23:59:15.246977+00:00",
+  "generated_at": "2026-11-10T00:05:09.206845+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -26,14 +26,14 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 9.17161661,
-      "market_id": "KXNFLGAME-26NOV15CARNO-CAR",
+      "edge_pp": 8.67161661,
+      "market_id": "2041474",
       "matchup": "CAR at NO",
       "model_probability": 0.6117161661028312,
-      "price": 0.52,
+      "price": 0.525,
       "sport": "NFL",
       "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -82,7 +82,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-09T23:58:41.288442+00:00",
+  "source_feed_generated_at": "2026-11-10T00:04:37.630587+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
