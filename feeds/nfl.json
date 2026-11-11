@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-11T12:43:51.456731+00:00",
+  "generated_at": "2026-11-11T12:49:33.336620+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -48,6 +48,17 @@
     },
     {
       "contract_side": "YES",
+      "edge_pp": 8.10274991,
+      "market_id": "KXNFLGAME-26NOV15LARARI-ARI",
+      "matchup": "LA at ARI",
+      "model_probability": 0.29102749911303805,
+      "price": 0.21,
+      "sport": "NFL",
+      "start_time": "2026-11-15T21:05:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
       "edge_pp": 13.46639269,
       "market_id": "2041481",
       "matchup": "PIT at CIN",
@@ -60,10 +71,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-11T12:43:03.848611+00:00",
-  "source_schedule_state": "INCOMPLETE",
+  "source_feed_generated_at": "2026-11-11T12:49:29.550151+00:00",
+  "source_schedule_state": "COMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 5
+    "buy": 6
   }
 }
