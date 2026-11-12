@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-12T15:05:54.095397+00:00",
+  "generated_at": "2026-11-12T15:11:42.107084+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -16,13 +16,13 @@
     {
       "contract_side": "NO",
       "edge_pp": 12.96145582,
-      "market_id": "2041476",
+      "market_id": "KXNFLGAME-26NOV15HOUCLE-HOU",
       "matchup": "HOU at CLE",
       "model_probability": 0.4596145581798423,
       "price": 0.33,
       "sport": "NFL",
       "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -82,7 +82,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-12T15:05:14.187084+00:00",
+  "source_feed_generated_at": "2026-11-12T15:11:12.286900+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
