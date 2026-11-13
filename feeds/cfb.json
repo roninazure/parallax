@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-13T21:54:12.595354+00:00",
+  "generated_at": "2026-11-13T22:57:36.898084+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "YES",
-      "edge_pp": 46.63047601,
+      "edge_pp": 47.13047601,
       "market_id": "2000628",
       "matchup": "Illinois at UCLA",
       "model_probability": 0.676304760098712,
-      "price": 0.21,
+      "price": 0.205,
       "sport": "CFB",
       "start_time": "2026-11-14T02:00:00+00:00",
       "venue": "POLYMARKET"
@@ -26,22 +26,22 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 24.1527838,
+      "edge_pp": 23.6527838,
       "market_id": "2325405",
       "matchup": "Florida at Kentucky",
       "model_probability": 0.6465278380420398,
-      "price": 0.405,
+      "price": 0.41,
       "sport": "CFB",
       "start_time": "2026-11-14T23:15:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "YES",
-      "edge_pp": 23.33376371,
+      "edge_pp": 21.83376371,
       "market_id": "2000627",
       "matchup": "Florida State at Pittsburgh",
       "model_probability": 0.6333376370670266,
-      "price": 0.4,
+      "price": 0.415,
       "sport": "CFB",
       "start_time": "2026-11-14T00:00:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-13T21:53:54.220528+00:00",
+  "source_feed_generated_at": "2026-11-13T22:57:02.499045+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
