@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T18:49:24.163096+00:00",
+  "generated_at": "2026-11-13T19:50:18.899159+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -14,17 +14,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 24.79356353,
-      "market_id": "2000630",
-      "matchup": "Houston at Colorado",
-      "model_probability": 0.5079356353452782,
-      "price": 0.26,
-      "sport": "CFB",
-      "start_time": "2026-11-14T03:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
       "contract_side": "YES",
       "edge_pp": 24.1527838,
       "market_id": "2325405",
@@ -33,6 +22,17 @@
       "price": 0.405,
       "sport": "CFB",
       "start_time": "2026-11-14T23:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 23.83376371,
+      "market_id": "2000627",
+      "matchup": "Florida State at Pittsburgh",
+      "model_probability": 0.6333376370670266,
+      "price": 0.395,
+      "sport": "CFB",
+      "start_time": "2026-11-14T00:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-13T18:49:01.685243+00:00",
+  "source_feed_generated_at": "2026-11-13T19:49:49.333380+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
