@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T20:51:23.824374+00:00",
+  "generated_at": "2026-11-13T21:54:12.595354+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -11,6 +11,17 @@
       "price": 0.21,
       "sport": "CFB",
       "start_time": "2026-11-14T02:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 24.79356353,
+      "market_id": "2000630",
+      "matchup": "Houston at Colorado",
+      "model_probability": 0.5079356353452782,
+      "price": 0.26,
+      "sport": "CFB",
+      "start_time": "2026-11-14T03:15:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -26,33 +37,22 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 23.83376371,
+      "edge_pp": 23.33376371,
       "market_id": "2000627",
       "matchup": "Florida State at Pittsburgh",
       "model_probability": 0.6333376370670266,
-      "price": 0.395,
+      "price": 0.4,
       "sport": "CFB",
       "start_time": "2026-11-14T00:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 17.33451995,
-      "market_id": "2305432",
-      "matchup": "Texas at LSU",
-      "model_probability": 0.5583451995039247,
-      "price": 0.385,
-      "sport": "CFB",
-      "start_time": "2026-11-15T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
       "contract_side": "NO",
-      "edge_pp": 15.41329929,
+      "edge_pp": 14.91329929,
       "market_id": "2022560",
       "matchup": "Nevada at Northern Illinois",
       "model_probability": 0.4791329929222137,
-      "price": 0.325,
+      "price": 0.33,
       "sport": "CFB",
       "start_time": "2026-11-14T20:30:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-13T20:50:50.794259+00:00",
+  "source_feed_generated_at": "2026-11-13T21:53:54.220528+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
