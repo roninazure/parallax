@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T12:39:44.366893+00:00",
+  "generated_at": "2026-11-14T13:42:07.186947+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -26,11 +26,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 19.33451995,
+      "edge_pp": 19.83451995,
       "market_id": "2305432",
       "matchup": "Texas at LSU",
       "model_probability": 0.5583451995039247,
-      "price": 0.365,
+      "price": 0.36,
       "sport": "CFB",
       "start_time": "2026-11-15T00:30:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T12:39:18.279319+00:00",
+  "source_feed_generated_at": "2026-11-14T13:41:36.180257+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
