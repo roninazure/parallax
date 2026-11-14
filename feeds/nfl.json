@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T13:34:16.612637+00:00",
+  "generated_at": "2026-11-14T13:39:58.990872+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -38,13 +38,13 @@
     {
       "contract_side": "YES",
       "edge_pp": 10.47109283,
-      "market_id": "2041472",
+      "market_id": "KXNFLGAME-26NOV15MIAIND-MIA",
       "matchup": "MIA at IND",
       "model_probability": 0.44471092829391856,
       "price": 0.34,
       "sport": "NFL",
       "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -82,8 +82,8 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T13:33:21.924688+00:00",
-  "source_schedule_state": "INCOMPLETE",
+  "source_feed_generated_at": "2026-11-14T13:39:52.133545+00:00",
+  "source_schedule_state": "COMPLETE",
   "state": "LIVE",
   "summary": {
     "buy": 7
