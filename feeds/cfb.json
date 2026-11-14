@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T22:57:36.898084+00:00",
+  "generated_at": "2026-11-14T00:02:34.343506+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -37,13 +37,13 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 21.83376371,
-      "market_id": "2000627",
-      "matchup": "Florida State at Pittsburgh",
-      "model_probability": 0.6333376370670266,
-      "price": 0.415,
+      "edge_pp": 17.83451995,
+      "market_id": "2305432",
+      "matchup": "Texas at LSU",
+      "model_probability": 0.5583451995039247,
+      "price": 0.38,
       "sport": "CFB",
-      "start_time": "2026-11-14T00:00:00+00:00",
+      "start_time": "2026-11-15T00:30:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-13T22:57:02.499045+00:00",
+  "source_feed_generated_at": "2026-11-14T00:01:54.848940+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
