@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-14T15:45:01.061336+00:00",
+  "generated_at": "2026-11-14T16:47:51.042842+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "YES",
-      "edge_pp": 35.92702434,
+      "edge_pp": 36.42702434,
       "market_id": "2122099",
       "matchup": "USC at Indiana",
       "model_probability": 0.6092702433893745,
-      "price": 0.25,
+      "price": 0.245,
       "sport": "CFB",
       "start_time": "2026-11-14T20:30:00+00:00",
       "venue": "POLYMARKET"
@@ -25,17 +25,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 19.83451995,
-      "market_id": "2305432",
-      "matchup": "Texas at LSU",
-      "model_probability": 0.5583451995039247,
-      "price": 0.36,
-      "sport": "CFB",
-      "start_time": "2026-11-15T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
       "contract_side": "NO",
       "edge_pp": 14.91329929,
       "market_id": "2022560",
@@ -47,12 +36,23 @@
       "venue": "POLYMARKET"
     },
     {
+      "contract_side": "NO",
+      "edge_pp": 13.1721975,
+      "market_id": "2016041",
+      "matchup": "James Madison at UConn",
+      "model_probability": 0.49672197500063686,
+      "price": 0.365,
+      "sport": "CFB",
+      "start_time": "2026-11-14T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
       "contract_side": "YES",
-      "edge_pp": 9.00408152,
+      "edge_pp": 10.50408152,
       "market_id": "2102642",
       "matchup": "Wake Forest at SMU",
       "model_probability": 0.5600408151820374,
-      "price": 0.47,
+      "price": 0.455,
       "sport": "CFB",
       "start_time": "2026-11-14T17:00:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T15:44:18.295474+00:00",
+  "source_feed_generated_at": "2026-11-14T16:47:18.356900+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
