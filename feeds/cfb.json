@@ -1,25 +1,14 @@
 {
-  "generated_at": "2026-11-14T01:10:05.769833+00:00",
+  "generated_at": "2026-11-14T02:11:52.083889+00:00",
   "lane": "CFB",
   "plays": [
     {
-      "contract_side": "YES",
-      "edge_pp": 47.13047601,
-      "market_id": "2000628",
-      "matchup": "Illinois at UCLA",
-      "model_probability": 0.676304760098712,
-      "price": 0.205,
-      "sport": "CFB",
-      "start_time": "2026-11-14T02:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
       "contract_side": "NO",
-      "edge_pp": 24.79356353,
+      "edge_pp": 23.79356353,
       "market_id": "2000630",
       "matchup": "Houston at Colorado",
       "model_probability": 0.5079356353452782,
-      "price": 0.26,
+      "price": 0.27,
       "sport": "CFB",
       "start_time": "2026-11-14T03:15:00+00:00",
       "venue": "POLYMARKET"
@@ -56,11 +45,22 @@
       "sport": "CFB",
       "start_time": "2026-11-14T20:30:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 14.09879203,
+      "market_id": "2305427",
+      "matchup": "Ole Miss at Oklahoma",
+      "model_probability": 0.5759879203174451,
+      "price": 0.435,
+      "sport": "CFB",
+      "start_time": "2026-11-14T21:15:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T01:09:11.243101+00:00",
+  "source_feed_generated_at": "2026-11-14T02:10:51.083454+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
