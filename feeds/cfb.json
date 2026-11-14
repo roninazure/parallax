@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T11:38:42.992654+00:00",
+  "generated_at": "2026-11-14T12:39:44.366893+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -48,11 +48,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 7.50408152,
+      "edge_pp": 8.00408152,
       "market_id": "2102642",
       "matchup": "Wake Forest at SMU",
       "model_probability": 0.5600408151820374,
-      "price": 0.485,
+      "price": 0.48,
       "sport": "CFB",
       "start_time": "2026-11-14T17:00:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T11:38:20.539241+00:00",
+  "source_feed_generated_at": "2026-11-14T12:39:18.279319+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
