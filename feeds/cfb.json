@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-11-14T07:23:58.878457+00:00",
+  "generated_at": "2026-11-14T08:29:15.634211+00:00",
   "lane": "CFB",
   "plays": [
+    {
+      "contract_side": "NO",
+      "edge_pp": 35.17699124,
+      "market_id": "2103424",
+      "matchup": "Alabama at Vanderbilt",
+      "model_probability": 0.49676991236369517,
+      "price": 0.145,
+      "sport": "CFB",
+      "start_time": "2026-11-14T17:45:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "YES",
       "edge_pp": 23.1527838,
@@ -37,17 +48,6 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 14.09879203,
-      "market_id": "2305427",
-      "matchup": "Ole Miss at Oklahoma",
-      "model_probability": 0.5759879203174451,
-      "price": 0.435,
-      "sport": "CFB",
-      "start_time": "2026-11-14T21:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
       "edge_pp": 7.50408152,
       "market_id": "2102642",
       "matchup": "Wake Forest at SMU",
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T07:23:15.857760+00:00",
+  "source_feed_generated_at": "2026-11-14T08:29:07.702962+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
