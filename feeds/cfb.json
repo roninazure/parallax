@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T20:53:52.268186+00:00",
+  "generated_at": "2026-11-14T21:56:30.731224+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -26,6 +26,17 @@
     },
     {
       "contract_side": "YES",
+      "edge_pp": 16.1480753,
+      "market_id": "2325407",
+      "matchup": "Texas Tech at Oklahoma State",
+      "model_probability": 0.5514807529864709,
+      "price": 0.39,
+      "sport": "CFB",
+      "start_time": "2026-11-15T02:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
       "edge_pp": 14.59879203,
       "market_id": "2305427",
       "matchup": "Ole Miss at Oklahoma",
@@ -38,10 +49,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T20:53:25.779975+00:00",
+  "source_feed_generated_at": "2026-11-14T21:56:15.471726+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 3
+    "buy": 4
   }
 }
