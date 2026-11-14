@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-11-14T03:13:54.704300+00:00",
+  "generated_at": "2026-11-14T04:16:20.819869+00:00",
   "lane": "CFB",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 23.79356353,
-      "market_id": "2000630",
-      "matchup": "Houston at Colorado",
-      "model_probability": 0.5079356353452782,
-      "price": 0.27,
+      "edge_pp": 35.17699124,
+      "market_id": "2103424",
+      "matchup": "Alabama at Vanderbilt",
+      "model_probability": 0.49676991236369517,
+      "price": 0.145,
       "sport": "CFB",
-      "start_time": "2026-11-14T03:15:00+00:00",
+      "start_time": "2026-11-14T17:45:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T03:13:24.532443+00:00",
+  "source_feed_generated_at": "2026-11-14T04:15:18.661083+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
