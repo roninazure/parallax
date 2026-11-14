@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T04:16:20.819869+00:00",
+  "generated_at": "2026-11-14T05:18:07.230990+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -15,11 +15,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 23.6527838,
+      "edge_pp": 23.1527838,
       "market_id": "2325405",
       "matchup": "Florida at Kentucky",
       "model_probability": 0.6465278380420398,
-      "price": 0.41,
+      "price": 0.415,
       "sport": "CFB",
       "start_time": "2026-11-14T23:15:00+00:00",
       "venue": "POLYMARKET"
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-14T04:15:18.661083+00:00",
+  "source_feed_generated_at": "2026-11-14T05:17:34.679752+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
