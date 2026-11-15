@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-15T04:29:45.005761+00:00",
+  "generated_at": "2026-11-15T04:35:39.141184+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -70,11 +70,11 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 10.0243307,
+      "edge_pp": 9.5243307,
       "market_id": "2192424",
       "matchup": "IND at HOU",
       "model_probability": 0.29524330703860513,
-      "price": 0.195,
+      "price": 0.2,
       "sport": "NFL",
       "start_time": "2026-11-20T01:15:00+00:00",
       "venue": "POLYMARKET"
@@ -82,7 +82,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-15T04:29:32.113978+00:00",
+  "source_feed_generated_at": "2026-11-15T04:35:33.081335+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
