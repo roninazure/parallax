@@ -1,58 +1,13 @@
 {
-  "generated_at": "2026-11-14T23:00:36.347224+00:00",
+  "generated_at": "2026-11-15T00:30:34.118058+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 23.1527838,
-      "market_id": "2325405",
-      "matchup": "Florida at Kentucky",
-      "model_probability": 0.6465278380420398,
-      "price": 0.415,
-      "sport": "CFB",
-      "start_time": "2026-11-14T23:15:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 19.83451995,
-      "market_id": "2305432",
-      "matchup": "Texas at LSU",
-      "model_probability": 0.5583451995039247,
-      "price": 0.36,
-      "sport": "CFB",
-      "start_time": "2026-11-15T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 16.6480753,
-      "market_id": "2325407",
-      "matchup": "Texas Tech at Oklahoma State",
-      "model_probability": 0.5514807529864709,
-      "price": 0.385,
-      "sport": "CFB",
-      "start_time": "2026-11-15T02:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 14.09879203,
-      "market_id": "2305427",
-      "matchup": "Ole Miss at Oklahoma",
-      "model_probability": 0.5759879203174451,
-      "price": 0.435,
-      "sport": "CFB",
-      "start_time": "2026-11-15T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
   "source_feed_generated_at": "2026-11-14T22:59:49.050244+00:00",
-  "source_schedule_state": "UNVERIFIED",
-  "state": "LIVE",
+  "source_schedule_state": "STALE",
+  "state": "STALE",
   "summary": {
-    "buy": 4
+    "buy": 0
   }
 }
