@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-11-17T07:30:48.736104+00:00",
+  "generated_at": "2026-11-17T07:50:13.646600+00:00",
   "lane": "NFL",
   "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-17T07:30:48.274781+00:00",
-  "source_schedule_state": "INCOMPLETE",
+  "source_feed_generated_at": "2026-11-17T07:50:08.433350+00:00",
+  "source_schedule_state": "COMPLETE",
   "state": "LIVE",
   "summary": {
     "buy": 0
