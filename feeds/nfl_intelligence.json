@@ -56,7 +56,7 @@
       "home_team": "DET",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "PHI",
@@ -144,7 +144,7 @@
       "home_team": "SF",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "WATCH"
+      "status": "PASS"
     },
     {
       "away_team": "WAS",
@@ -160,10 +160,10 @@
       "home_team": "CLE",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-30T01:20:00+00:00",
-      "status": "WATCH"
+      "status": "PASS"
     }
   ],
-  "generated_at": "2026-11-22T18:23:28.709660+00:00",
+  "generated_at": "2026-11-22T18:29:14.093096+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -247,7 +247,37 @@
     {
       "contract_side": "NO",
       "failed_gates": [
-        "nfl_calibration_safety"
+        "liquidity",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2454046",
+      "market_title": "Who will win in the upcoming football event Chicago Bears vs Detroit Lions scheduled for November 26, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-26T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "liquidity",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV26PHIDAL-PHI",
+      "market_title": "Philadelphia wins",
+      "resolution_time": "2026-11-26T21:30:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "liquidity",
+        "nfl_calibration_safety",
+        "risk_reward"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
@@ -256,6 +286,34 @@
       "resolution_time": "2026-11-27T20:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "liquidity",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV27DENPIT-DEN",
+      "market_title": "Denver wins",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "nfl_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV27DENPIT-PIT",
+      "market_title": "Pittsburgh wins",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -275,10 +333,7 @@
     {
       "contract_side": "YES",
       "failed_gates": [
-        "liquidity",
-        "spread",
-        "nfl_calibration_safety",
-        "risk_reward"
+        "nfl_calibration_safety"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
@@ -320,7 +375,9 @@
     {
       "contract_side": "YES",
       "failed_gates": [
-        "nfl_calibration_safety"
+        "liquidity",
+        "nfl_calibration_safety",
+        "risk_reward"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
@@ -333,25 +390,7 @@
     {
       "contract_side": "NO",
       "failed_gates": [
-        "liquidity",
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555513",
-      "market_title": "Who will win in the upcoming football event Seattle Seahawks vs San Francisco 49ers scheduled for November 29, 2026 at 9:25 PM UTC?",
-      "resolution_time": "2026-11-29T21:25:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
-        "spread",
-        "risk_reward"
+        "spread"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
@@ -360,32 +399,16 @@
       "resolution_time": "2026-11-29T21:25:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555506",
-      "market_title": "Who will win in the upcoming football event Las Vegas Raiders vs Cleveland Browns scheduled for November 29, 2026 at 6:00 PM UTC?",
-      "resolution_time": "2026-11-30T01:20:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-22T18:22:39.265149+00:00",
+  "source_feed_generated_at": "2026-11-22T18:28:53.847839+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 8,
+    "buy": 7,
     "games": 20,
     "pass": 36,
-    "research_candidates": 14,
-    "watch": 14
+    "research_candidates": 16,
+    "watch": 16
   }
 }
