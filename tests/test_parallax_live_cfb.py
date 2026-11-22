@@ -178,6 +178,9 @@ def test_cfb_live_scan_fetches_exactly_one_active_season(monkeypatch):
     fetched = []
 
     class Client:
+        def __init__(self, **kwargs):
+            pass
+
         def markets_page(self, **kwargs):
             raise AssertionError("mock paginator must not call the provider client")
 
@@ -189,7 +192,7 @@ def test_cfb_live_scan_fetches_exactly_one_active_season(monkeypatch):
     monkeypatch.setattr(cfb_live_scan, "TrackRecord", lambda path: object())
     monkeypatch.setattr(cfb_live_scan, "PolymarketUSPublicClient", Client)
     monkeypatch.setattr(cfb_live_scan, "KalshiPublicClient", Client)
-    monkeypatch.setattr(cfb_live_scan, "paginate", lambda *args, **kwargs: ([], SimpleNamespace(pages=0)))
+    monkeypatch.setattr(cfb_live_scan, "_scope_pmus", lambda client, games: ([], {"state": "TARGETED"}))
     monkeypatch.setattr(cfb_live_scan, "_scope_kalshi", lambda client: ([], {"state": "COMPLETE"}))
 
     result = cfb_live_scan._scan(alert_dispatcher=object())
