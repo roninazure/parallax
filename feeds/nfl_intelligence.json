@@ -3,22 +3,6 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "JAX",
-      "game_id": "2026_11_JAX_NYG",
-      "home_team": "NYG",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-22T21:25:00+00:00",
-      "status": "BUY"
-    },
-    {
-      "away_team": "LV",
-      "game_id": "2026_11_LV_DEN",
-      "home_team": "DEN",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-22T21:25:00+00:00",
-      "status": "PASS"
-    },
-    {
       "away_team": "MIN",
       "game_id": "2026_11_MIN_SF",
       "home_team": "SF",
@@ -155,7 +139,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-22T21:23:42.559844+00:00",
+  "generated_at": "2026-11-22T21:26:00.111682+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -324,7 +308,7 @@
   "state": "LIVE",
   "summary": {
     "buy": 8,
-    "games": 19,
+    "games": 17,
     "pass": 38,
     "research_candidates": 11,
     "watch": 11
