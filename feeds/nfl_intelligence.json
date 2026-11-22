@@ -1,20 +1,594 @@
 {
   "fees_status": "UNCERTIFIED",
   "freshness_seconds": 900,
-  "games": [],
-  "generated_at": "2026-11-22T03:29:39.029449+00:00",
+  "games": [
+    {
+      "away_team": "ARI",
+      "game_id": "2026_11_ARI_KC",
+      "home_team": "KC",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "BAL",
+      "game_id": "2026_11_BAL_CAR",
+      "home_team": "CAR",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "JAX",
+      "game_id": "2026_11_JAX_NYG",
+      "home_team": "NYG",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "MIA",
+      "game_id": "2026_11_MIA_BUF",
+      "home_team": "BUF",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "NO",
+      "game_id": "2026_11_NO_CHI",
+      "home_team": "CHI",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "TB",
+      "game_id": "2026_11_TB_DET",
+      "home_team": "DET",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "TEN",
+      "game_id": "2026_11_TEN_DAL",
+      "home_team": "DAL",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "NYJ",
+      "game_id": "2026_11_NYJ_LAC",
+      "home_team": "LAC",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T21:05:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "LV",
+      "game_id": "2026_11_LV_DEN",
+      "home_team": "DEN",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T21:25:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "PIT",
+      "game_id": "2026_11_PIT_PHI",
+      "home_team": "PHI",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T21:25:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "MIN",
+      "game_id": "2026_11_MIN_SF",
+      "home_team": "SF",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-23T01:20:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "CIN",
+      "game_id": "2026_11_CIN_WAS",
+      "home_team": "WAS",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-24T01:15:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "GB",
+      "game_id": "2026_12_GB_LA",
+      "home_team": "LA",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-26T01:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "CHI",
+      "game_id": "2026_12_CHI_DET",
+      "home_team": "DET",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-26T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "PHI",
+      "game_id": "2026_12_PHI_DAL",
+      "home_team": "DAL",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-26T21:30:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "KC",
+      "game_id": "2026_12_KC_BUF",
+      "home_team": "BUF",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-27T01:20:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "DEN",
+      "game_id": "2026_12_DEN_PIT",
+      "home_team": "PIT",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-27T20:00:00+00:00",
+      "status": "WATCH"
+    }
+  ],
+  "generated_at": "2026-11-22T03:30:45.362685+00:00",
   "lane": "NFL",
-  "market_coverage": {},
+  "market_coverage": {
+    "KALSHI": "PARTIAL",
+    "PMUS": "COMPLETE"
+  },
   "read_only": true,
-  "research_candidates": [],
+  "research_candidates": [
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304821",
+      "market_title": "Who will win in the upcoming football event Arizona Cardinals vs Kansas City Chiefs scheduled for November 22, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22ARIKC-ARI",
+      "market_title": "Arizona wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22ARIKC-KC",
+      "market_title": "Kansas City wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304825",
+      "market_title": "Who will win in the upcoming football event Baltimore Ravens vs Carolina Panthers scheduled for November 22, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22BALCAR-BAL",
+      "market_title": "Baltimore wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22BALCAR-CAR",
+      "market_title": "Carolina wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304827",
+      "market_title": "Who will win in the upcoming football event Jacksonville Jaguars vs New York Giants scheduled for November 22, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304828",
+      "market_title": "Who will win in the upcoming football event Miami Dolphins vs Buffalo Bills scheduled for November 22, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22MIABUF-BUF",
+      "market_title": "Buffalo wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22MIABUF-MIA",
+      "market_title": "Miami wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304822",
+      "market_title": "Who will win in the upcoming football event New Orleans Saints vs Chicago Bears scheduled for November 22, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22NOCHI-CHI",
+      "market_title": "Chicago wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22NOCHI-NO",
+      "market_title": "New Orleans wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304823",
+      "market_title": "Who will win in the upcoming football event Tampa Bay Buccaneers vs Detroit Lions scheduled for November 22, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22TBDET-DET",
+      "market_title": "Detroit wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22TBDET-TB",
+      "market_title": "Tampa Bay wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304824",
+      "market_title": "Who will win in the upcoming football event Tennessee Titans vs Dallas Cowboys scheduled for November 22, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22TENDAL-DAL",
+      "market_title": "Dallas wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22TENDAL-TEN",
+      "market_title": "Tennessee wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304829",
+      "market_title": "Who will win in the upcoming football event New York Jets vs Los Angeles Chargers scheduled for November 22, 2026 at 9:05 PM UTC?",
+      "resolution_time": "2026-11-22T21:05:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304830",
+      "market_title": "Who will win in the upcoming football event Las Vegas Raiders vs Denver Broncos scheduled for November 22, 2026 at 9:25 PM UTC?",
+      "resolution_time": "2026-11-22T21:25:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304831",
+      "market_title": "Who will win in the upcoming football event Pittsburgh Steelers vs Philadelphia Eagles scheduled for November 22, 2026 at 9:25 PM UTC?",
+      "resolution_time": "2026-11-22T21:25:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2304833",
+      "market_title": "Who will win in the upcoming football event Minnesota Vikings vs San Francisco 49ers scheduled for November 23, 2026 at 1:20 AM UTC?",
+      "resolution_time": "2026-11-23T01:20:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2349621",
+      "market_title": "Who will win in the upcoming football event Cincinnati Bengals vs Washington Commanders scheduled for November 24, 2026 at 1:15 AM UTC?",
+      "resolution_time": "2026-11-24T01:15:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "liquidity",
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2422412",
+      "market_title": "Who will win in the upcoming football event Green Bay Packers vs Los Angeles Rams scheduled for November 26, 2026 at 1:00 AM UTC?",
+      "resolution_time": "2026-11-26T01:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "liquidity",
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2454046",
+      "market_title": "Who will win in the upcoming football event Chicago Bears vs Detroit Lions scheduled for November 26, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-26T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2454047",
+      "market_title": "Who will win in the upcoming football event Philadelphia Eagles vs Dallas Cowboys scheduled for November 26, 2026 at 9:30 PM UTC?",
+      "resolution_time": "2026-11-26T21:30:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "liquidity",
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2454048",
+      "market_title": "Who will win in the upcoming football event Kansas City Chiefs vs Buffalo Bills scheduled for November 27, 2026 at 1:20 AM UTC?",
+      "resolution_time": "2026-11-27T01:20:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2485096",
+      "market_title": "Who will win in the upcoming football event Denver Broncos vs Pittsburgh Steelers scheduled for November 27, 2026 at 8:00 PM UTC?",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    }
+  ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-22T03:29:39.474222+00:00",
-  "state": "STALE",
+  "source_feed_generated_at": "2026-11-22T03:29:58.033185+00:00",
+  "state": "LIVE",
   "summary": {
     "buy": 0,
-    "games": 0,
-    "pass": 42,
-    "research_candidates": 0,
-    "watch": 42
+    "games": 17,
+    "pass": 29,
+    "research_candidates": 29,
+    "watch": 29
   }
 }
