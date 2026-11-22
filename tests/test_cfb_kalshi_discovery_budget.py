@@ -160,3 +160,32 @@ def test_kalshi_direct_series_fallback_when_first_series_page_is_empty():
     assert {row["_discovery_series"]["ticker"] for row in rows} == {
         "KXNCAAFGAME", "KXCFBGAME",
     }
+
+def test_cfb_pmus_fee_worst_tier_is_reviewed_and_expires_closed():
+    from dataclasses import dataclass, field
+    from datetime import UTC, datetime
+    from scripts.cfb_live_scan import _attach_cfb_pmus_fees
+
+    @dataclass
+    class Mechanics:
+        fee_rate: float | None = None
+        fee_source: str = ""
+        fee_rounding: str = ""
+        fee_status: str = "UNVERIFIED"
+        fee_observed_at: str = ""
+        fee_valid_until: str | None = None
+        fee_buffer_per_contract: int = 0
+
+    @dataclass
+    class Market:
+        mechanics: Mechanics = field(default_factory=Mechanics)
+        original_metadata: dict = field(default_factory=dict)
+
+    market = Market()
+    now = datetime(2026, 11, 22, 20, tzinfo=UTC)
+    reviewed = _attach_cfb_pmus_fees(market, now)
+    assert reviewed.mechanics.fee_rate == 0.095
+    assert reviewed.mechanics.fee_status == "VERIFIED_UPPER_BOUND"
+    assert reviewed.mechanics.fee_valid_until == "2026-11-29T00:00:00+00:00"
+    assert "rebates" in reviewed.original_metadata["fee_provenance"]["reason"]
+    assert market.mechanics.fee_rate is None
