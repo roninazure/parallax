@@ -176,7 +176,9 @@ def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
     Discovery is intentionally partial: exhausting the entire public-call budget
     during enumeration would guarantee zero fresh CFB scoring.
     """
-    discovery_budget = max(2, client.max_requests // 2)
+    # Keep initial launchd acceptance bounded: no more than eight discovery
+    # calls; retain the original per-client ceiling for the whole scan.
+    discovery_budget = min(8, max(2, client.max_requests // 2))
     series, coverage = paginate_collection(
         client.series_page, key="series", max_pages=1
     )
@@ -193,8 +195,38 @@ def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
             break
         sid = str(series_row.get("ticker") or series_row.get("id") or "")
         try:
-            events = client.events_page(series_ticker=sid, limit=100).get("events", [])
+            events = list(client.events_page(series_ticker=sid, limit=100).get("events", []))
+            local_today = utcnow().astimezone(ZoneInfo("America/New_York")).date()
+
+            def game_date(event):
+                ticker = str(event.get("ticker") or event.get("event_ticker") or "").upper()
+                found = re.search(r"-(\\d{2}[A-Z]{3}\\d{2})", ticker)
+                if found:
+                    try:
+                        return datetime.strptime(found.group(1), "%y%b%d").date()
+                    except ValueError:
+                        pass
+                value = event.get("scheduled_start") or event.get("start_time")
+                if value:
+                    try:
+                        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+                        if parsed.tzinfo is None:
+                            return None
+                        return parsed.astimezone(ZoneInfo("America/New_York")).date()
+                    except ValueError:
+                        pass
+                return None
+
+            # Prefer upcoming games before consuming the bounded discovery pool.
+            events.sort(key=lambda event: (
+                game_date(event) is None,
+                game_date(event) is not None and game_date(event) < local_today,
+                game_date(event) or local_today,
+            ))
             for event in events:
+                date = game_date(event)
+                if date is not None and date < local_today:
+                    continue
                 if client.request_count >= discovery_budget:
                     budget_reached = True
                     break
