@@ -37,9 +37,9 @@ def test_cfb_discovery_reserves_at_least_half_public_request_budget():
     rows, coverage = _scope_kalshi(client)
     assert rows
     assert coverage["state"] == "PARTIAL"
-    assert coverage["discovery_requests"] <= 20
-    assert coverage["reserved_book_requests"] >= 20
-    assert len(rows) == 18
+    assert coverage["discovery_requests"]  <= 8
+    assert coverage["reserved_book_requests"]  >= 32
+    assert len(rows) == 6
     assert all("_discovery_event" in row and "_discovery_series" in row for row in rows)
 
 
