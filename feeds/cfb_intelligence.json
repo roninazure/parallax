@@ -2,39 +2,22 @@
   "fees_status": "UNCERTIFIED",
   "freshness_seconds": 900,
   "games": [],
-  "generated_at": "2026-11-22T02:35:22.085980+00:00",
+  "generated_at": "2026-11-22T02:51:19.241495+00:00",
   "lane": "CFB",
   "market_coverage": {
     "KALSHI": "PARTIAL",
     "PMUS": "BOUNDED"
   },
   "read_only": true,
-  "research_candidates": [
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "edge",
-        "cfb_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2363092",
-      "matchup": "Oklahoma State at Arizona State",
-      "resolution_time": "2026-11-22T03:15:00+00:00",
-      "sport": "CFB",
-      "venue": "PMUS"
-    }
-  ],
+  "research_candidates": [],
   "schema_version": "parallax.intelligence.v1",
   "source_feed_generated_at": "2026-11-22T02:35:12.554466+00:00",
-  "state": "LIVE",
+  "state": "STALE",
   "summary": {
     "buy": 0,
     "games": 0,
     "pass": 1,
-    "research_candidates": 1,
+    "research_candidates": 0,
     "watch": 1
   }
 }
