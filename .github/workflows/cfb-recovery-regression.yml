@@ -25,6 +25,15 @@ jobs:
         run: python -m pip install -e . 'pytest>=8,<9'
       - name: Validate production recovery shell syntax
         run: bash -n scripts/finish_cfb_recovery.sh scripts/finish_cfb_recovery_v2.sh
+      - name: Verify both production cutover guards target current release
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("scripts/finish_cfb_recovery_v2.sh").read_text()
+          correct = 'sudo launchctl print "$SERVICE" | grep -F "$LIVE_SHA" >/dev/null'
+          assert source.count(correct) == 2, "both release guards must match current production"
+          assert 'sudo launchctl print "$SERVICE" | grep -F "$OLD_SHA"' not in source
+          PY
       - name: Run CFB regressions
         env:
           PYTHONDONTWRITEBYTECODE: '1'
