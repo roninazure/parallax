@@ -1,0 +1,29 @@
+name: CFB recovery regression checks
+
+on:
+  push:
+    branches:
+      - fix/cfb-reserve-kalshi-book-budget-20261122
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cfb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout candidate branch
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install project dependencies
+        run: python -m pip install -e . 'pytest>=8,<9'
+      - name: Run CFB regressions
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python -m pytest -q tests/test_cfb_kalshi_discovery_budget.py tests/test_parallax_live_cfb.py tests/test_parallax_cfb.py
