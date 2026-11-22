@@ -3,14 +3,6 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "NYJ",
-      "game_id": "2026_11_NYJ_LAC",
-      "home_team": "LAC",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-22T21:05:00+00:00",
-      "status": "BUY"
-    },
-    {
       "away_team": "JAX",
       "game_id": "2026_11_JAX_NYG",
       "home_team": "NYG",
@@ -163,7 +155,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-22T21:03:03.066467+00:00",
+  "generated_at": "2026-11-22T21:05:27.019077+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -319,7 +311,7 @@
   "state": "LIVE",
   "summary": {
     "buy": 10,
-    "games": 20,
+    "games": 19,
     "pass": 38,
     "research_candidates": 10,
     "watch": 10
