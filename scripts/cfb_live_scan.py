@@ -99,26 +99,57 @@ def _is_cfb(row: dict, *parents: dict) -> bool:
 
 
 def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
-    series, coverage = paginate_collection(client.series_page, key="series", max_pages=100)
-    cfb_series = [s for s in series if str(s.get("ticker") or "").upper() in {"KXNCAAFGAME", "KXCFBGAME"}]
+    """Reserve Kalshi's existing per-client request budget for executable books.
+
+    Discovery is intentionally partial: exhausting the entire public-call budget
+    during enumeration would guarantee zero fresh CFB scoring.
+    """
+    discovery_budget = max(2, client.max_requests // 2)
+    series, coverage = paginate_collection(
+        client.series_page, key="series", max_pages=1
+    )
+    cfb_series = [
+        item for item in series
+        if str(item.get("ticker") or "").upper() in {"KXNCAAFGAME", "KXCFBGAME"}
+    ]
     rows: list[dict] = []
     failures: list[str] = []
+    budget_reached = False
     for series_row in cfb_series:
+        if client.request_count >= discovery_budget:
+            budget_reached = True
+            break
         sid = str(series_row.get("ticker") or series_row.get("id") or "")
         try:
-            events, _ = paginate_collection(lambda *, limit, cursor, sid=sid: client.events_page(series_ticker=sid, limit=limit, cursor=cursor), key="events", max_pages=100, max_rows=MAX_ACTIVE_MARKETS_PER_VENUE)
+            events = client.events_page(series_ticker=sid, limit=100).get("events", [])
             for event in events:
-                eid = str(event.get("ticker") or event.get("event_ticker") or event.get("id") or "")
-                markets, _ = paginate_collection(lambda *, limit, cursor, eid=eid: client.event_markets_page(event_ticker=eid, limit=limit, cursor=cursor), key="markets", max_pages=100, max_rows=max(1, MAX_ACTIVE_MARKETS_PER_VENUE - len(rows)))
-                rows.extend({**market, "_discovery_event": event, "_discovery_series": series_row} for market in markets)
-                if len(rows) >= MAX_ACTIVE_MARKETS_PER_VENUE:
+                if client.request_count >= discovery_budget:
+                    budget_reached = True
                     break
-        except Exception as exc:  # bounded failure summary only
+                eid = str(event.get("ticker") or event.get("event_ticker") or event.get("id") or "")
+                markets = client.event_markets_page(event_ticker=eid, limit=100).get("markets", [])
+                rows.extend(
+                    {**market, "_discovery_event": event, "_discovery_series": series_row}
+                    for market in markets
+                )
+                if len(rows) >= MAX_ACTIVE_MARKETS_PER_VENUE:
+                    budget_reached = True
+                    break
+        except Exception as exc:
             failures.append(type(exc).__name__)
-        if len(rows) >= MAX_ACTIVE_MARKETS_PER_VENUE:
+        if budget_reached:
             break
-    return rows, {"state": "BOUNDED" if len(rows) >= MAX_ACTIVE_MARKETS_PER_VENUE else ("PARTIAL" if failures else "COMPLETE"), "series_pages": coverage.pages, "cfb_series": len(cfb_series), "failed_scopes": Counter(failures)}
-
+    # Deliberately report partial coverage, even if the first page appeared complete.
+    # Uninspected event pages and scopes must never be counted as complete.
+    return rows, {
+        "state": "PARTIAL" if budget_reached or failures or cfb_series else "COMPLETE",
+        "reason": "bounded discovery reserves public requests for executable books",
+        "series_pages": coverage.pages,
+        "cfb_series": len(cfb_series),
+        "discovery_requests": client.request_count,
+        "reserved_book_requests": max(0, client.max_requests - client.request_count),
+        "failed_scopes": dict(Counter(failures)),
+    }
 
 def _scan(*, alert_dispatcher=None) -> dict:
     seasons = (active_cfb_season(datetime.now(UTC)),)
@@ -179,6 +210,9 @@ def _scan(*, alert_dispatcher=None) -> dict:
                     market = normalize_pmus(raw, book, utcnow().isoformat())
                     market = attach_fees(market, utcnow())
                 else:
+                    if kalshi_client.request_count >= kalshi_client.max_requests:
+                        statuses[venue_name]["ACQUISITION_BUDGET_EXHAUSTED"] += 1
+                        continue
                     book = kalshi_client.book(raw["ticker"])
                     market = attach_fees(normalize_kalshi(raw, book, utcnow().isoformat(), event=event), utcnow(), event=event, series=series)
                 statuses[venue_name]["EXECUTABLE_BOOK"] += 1
