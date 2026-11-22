@@ -5,8 +5,9 @@ import json
 import re
 import sys
 from collections import Counter
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -98,6 +99,77 @@ def _is_cfb(row: dict, *parents: dict) -> bool:
     return bool(re.search(r"\b(?:cfb|ncaaf|college football)\b|kx(?:ncaaf|cfb)", text, re.I))
 
 
+def _scope_pmus(client: PolymarketUSPublicClient, games) -> tuple[list[dict], dict]:
+    """Query exact schedule-derived PMUS aec-cfb full-game winner slugs.
+
+    Unlike the highest-volume global market search, this cannot be displaced
+    by 1,000 derivative/futures contracts. Unknown team codes fail closed.
+    Every returned slug is still independently normalized and mapped below.
+    """
+    code_path = Path(__file__).resolve().parents[1] / "parallax/data/cfb_pmus_team_codes.json"
+    source_codes = json.loads(code_path.read_text(encoding="utf-8"))
+    team_codes: dict[str, str] = {}
+    ambiguous: set[str] = set()
+    for name, code in source_codes.items():
+        canonical = _canonical_team(name)
+        if canonical in team_codes and team_codes[canonical] != code:
+            ambiguous.add(canonical)
+        else:
+            team_codes[canonical] = code
+    for name in ambiguous:
+        team_codes.pop(name, None)
+
+    now = utcnow()
+    horizon = now + timedelta(days=8)
+    slugs: list[str] = []
+    unknown_games = 0
+    scheduled = 0
+    for game in games:
+        kickoff = datetime.fromisoformat(game.kickoff.replace("Z", "+00:00")).astimezone(UTC)
+        if not now < kickoff <= horizon or (
+            game.home_classification != "fbs" or game.away_classification != "fbs"
+        ):
+            continue
+        scheduled += 1
+        away = team_codes.get(_canonical_team(game.away_team))
+        home = team_codes.get(_canonical_team(game.home_team))
+        if not away or not home or away == home:
+            unknown_games += 1
+            continue
+        local_date = kickoff.astimezone(ZoneInfo("America/New_York")).date().isoformat()
+        slugs.append(f"aec-cfb-{away}-{home}-{local_date}")
+    slugs = list(dict.fromkeys(slugs))
+    limited = len(slugs) > 100
+    slugs = slugs[:100]
+    if not slugs:
+        return [], {
+            "state": "PARTIAL" if scheduled else "COMPLETE",
+            "reason": "no supported schedule-derived PMUS game-winner slugs",
+            "scheduled_games": scheduled, "unknown_team_games": unknown_games,
+            "candidate_slugs": 0, "request_count": 0,
+        }
+
+    rows = client.markets_page(
+        limit=len(slugs), offset=0, slugs=slugs,
+        retry_transport_errors=False,
+    )
+    unexpected = [r for r in rows if str(r.get("slug") or "") not in slugs]
+    if unexpected:
+        raise ValueError("PMUS exact CFB discovery response escaped requested slug scope")
+    supported = [
+        row for row in rows
+        if row.get("active") and not row.get("closed") and _is_cfb(row, row.get("raw", {}))
+    ]
+    return supported, {
+        "state": "PARTIAL" if limited or unknown_games else "TARGETED",
+        "reason": "exact schedule-derived PMUS CFB winner slugs queried",
+        "scheduled_games": scheduled, "unknown_team_games": unknown_games,
+        "candidate_slugs": len(slugs),
+        "markets_returned": len(rows), "moneyline_candidates": len(supported),
+        "request_count": 1,
+    }
+
+
 def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
     """Reserve Kalshi's existing per-client request budget for executable books.
 
@@ -165,9 +237,8 @@ def _scan(*, alert_dispatcher=None) -> dict:
             alert_dispatcher = None
     pmus_client = PolymarketUSPublicClient()
     try:
-        raw_pmus, coverage = paginate(pmus_client.markets_page, page_size=100, max_pages=10, max_rows=CFB_MARKET_DISCOVERY_LIMIT)
-        pmus_rows = [r for r in raw_pmus if r.get("active") and not r.get("closed") and _is_cfb(r, r.get("raw", {}))]
-        result["venues"]["PMUS"] = {"coverage": coverage.__dict__, "discovered": len(pmus_rows)}
+        pmus_rows, coverage = _scope_pmus(pmus_client, games)
+        result["venues"]["PMUS"] = {"coverage": coverage, "discovered": len(pmus_rows)}
     finally:
         pmus_client.close()
     kalshi_client = KalshiPublicClient()
@@ -232,7 +303,7 @@ def _scan(*, alert_dispatcher=None) -> dict:
                         ex = play.retail_examples[index]
                         example_rows[f"net_ev_{stake}"] = (play.model_probability * ex.estimated_payout_if_correct - ex.total_cost) if play.model_probability is not None and ex.available and ex.total_cost is not None else None
                     selected_team = _selected_team(mapping, side)
-                    cfb_safety = play.edge_points is not None and play.edge_points > VALIDATION_ECE + 1e-9
+                    cfb_safety = play.edge_points is not None and play.edge_points > VALIDATION_ECE * 100 + 1e-9
                     evidence_certified = bool(
                         play.evidence
                         and play.evidence.source == "CollegeFootballData"
