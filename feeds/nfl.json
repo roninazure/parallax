@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-11-22T20:09:33.591020+00:00",
+  "generated_at": "2026-11-22T20:14:10.125514+00:00",
   "lane": "NFL",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 18.32434958,
-      "market_id": "2304829",
-      "matchup": "NYJ at LAC",
-      "model_probability": 0.7907434957944528,
-      "price": 0.6075,
+      "edge_pp": 14.78214268,
+      "market_id": "2349621",
+      "matchup": "CIN at WAS",
+      "model_probability": 0.425321426774917,
+      "price": 0.2775,
       "sport": "NFL",
-      "start_time": "2026-11-22T21:05:00+00:00",
+      "start_time": "2026-11-24T01:15:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -26,22 +26,33 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 14.78214268,
-      "market_id": "2349621",
-      "matchup": "CIN at WAS",
-      "model_probability": 0.425321426774917,
-      "price": 0.2775,
+      "edge_pp": 18.32434958,
+      "market_id": "2304829",
+      "matchup": "NYJ at LAC",
+      "model_probability": 0.7907434957944528,
+      "price": 0.6075,
       "sport": "NFL",
-      "start_time": "2026-11-24T01:15:00+00:00",
+      "start_time": "2026-11-22T21:05:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 18.27032978,
+      "market_id": "2555509",
+      "matchup": "BAL at HOU",
+      "model_probability": 0.465203297758246,
+      "price": 0.2825,
+      "sport": "NFL",
+      "start_time": "2026-11-29T18:00:00+00:00",
       "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
-      "edge_pp": 29.68275375,
+      "edge_pp": 28.93275375,
       "market_id": "2454046",
       "matchup": "CHI at DET",
       "model_probability": 0.6993275375053833,
-      "price": 0.4025,
+      "price": 0.41,
       "sport": "NFL",
       "start_time": "2026-11-26T18:00:00+00:00",
       "venue": "POLYMARKET"
@@ -59,30 +70,19 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 17.52032978,
-      "market_id": "KXNFLGAME-26NOV29BALHOU-BAL",
-      "matchup": "BAL at HOU",
-      "model_probability": 0.465203297758246,
-      "price": 0.29,
+      "edge_pp": 28.50829515,
+      "market_id": "2454047",
+      "matchup": "PHI at DAL",
+      "model_probability": 0.5175829515177167,
+      "price": 0.2325,
       "sport": "NFL",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 33.11067513,
-      "market_id": "2555507",
-      "matchup": "NYG at IND",
-      "model_probability": 0.616106751283731,
-      "price": 0.285,
-      "sport": "NFL",
-      "start_time": "2026-11-29T18:00:00+00:00",
+      "start_time": "2026-11-26T21:30:00+00:00",
       "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-22T20:09:07.079288+00:00",
+  "source_feed_generated_at": "2026-11-22T20:14:07.874692+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
