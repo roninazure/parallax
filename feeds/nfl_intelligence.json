@@ -139,7 +139,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-22T03:44:22.281492+00:00",
+  "generated_at": "2026-11-22T03:50:09.145481+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -166,36 +166,6 @@
       "contract_side": "YES",
       "failed_gates": [
         "fees_unknown",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV22ARIKC-ARI",
-      "market_title": "Arizona wins",
-      "resolution_time": "2026-11-22T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "fees_unknown",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV22ARIKC-KC",
-      "market_title": "Kansas City wins",
-      "resolution_time": "2026-11-22T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
         "risk_reward"
       ],
       "fees_status": "UNCERTIFIED",
@@ -205,34 +175,6 @@
       "resolution_time": "2026-11-22T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV22BALCAR-BAL",
-      "market_title": "Baltimore wins",
-      "resolution_time": "2026-11-22T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV22BALCAR-CAR",
-      "market_title": "Carolina wins",
-      "resolution_time": "2026-11-22T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -265,6 +207,38 @@
       "venue": "PMUS"
     },
     {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22MIABUF-BUF",
+      "market_title": "Buffalo wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22MIABUF-MIA",
+      "market_title": "Miami wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
       "contract_side": "YES",
       "failed_gates": [
         "fees_unknown",
@@ -286,11 +260,69 @@
       ],
       "fees_status": "UNCERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22NOCHI-CHI",
+      "market_title": "Chicago wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22NOCHI-NO",
+      "market_title": "New Orleans wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "2304823",
       "market_title": "Who will win in the upcoming football event Tampa Bay Buccaneers vs Detroit Lions scheduled for November 22, 2026 at 6:00 PM UTC?",
       "resolution_time": "2026-11-22T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22TBDET-DET",
+      "market_title": "Detroit wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22TBDET-TB",
+      "market_title": "Tampa Bay wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -309,6 +341,38 @@
       "venue": "PMUS"
     },
     {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22TENDAL-DAL",
+      "market_title": "Dallas wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22TENDAL-TEN",
+      "market_title": "Tennessee wins",
+      "resolution_time": "2026-11-22T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
       "contract_side": "NO",
       "failed_gates": [
         "fees_unknown",
@@ -321,6 +385,34 @@
       "resolution_time": "2026-11-22T21:05:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22NYJLAC-LAC",
+      "market_title": "Los Angeles C wins",
+      "resolution_time": "2026-11-22T21:05:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22NYJLAC-NYJ",
+      "market_title": "New York J wins",
+      "resolution_time": "2026-11-22T21:05:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -337,6 +429,38 @@
       "resolution_time": "2026-11-22T21:25:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22LVDEN-DEN",
+      "market_title": "Denver wins",
+      "resolution_time": "2026-11-22T21:25:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "fees_unknown",
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "UNCERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV22LVDEN-LV",
+      "market_title": "Las Vegas wins",
+      "resolution_time": "2026-11-22T21:25:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -414,34 +538,6 @@
       "venue": "PMUS"
     },
     {
-      "contract_side": "NO",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV26CHIDET-CHI",
-      "market_title": "Chicago wins",
-      "resolution_time": "2026-11-26T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV26CHIDET-DET",
-      "market_title": "Detroit wins",
-      "resolution_time": "2026-11-26T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "YES",
       "failed_gates": [
         "fees_unknown",
@@ -458,35 +554,6 @@
     {
       "contract_side": "NO",
       "failed_gates": [
-        "liquidity",
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV26PHIDAL-DAL",
-      "market_title": "Dallas wins",
-      "resolution_time": "2026-11-26T21:30:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV26PHIDAL-PHI",
-      "market_title": "Philadelphia wins",
-      "resolution_time": "2026-11-26T21:30:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
         "fees_unknown",
         "risk_reward"
       ],
@@ -497,34 +564,6 @@
       "resolution_time": "2026-11-27T01:20:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV26KCBUF-BUF",
-      "market_title": "Buffalo wins",
-      "resolution_time": "2026-11-27T01:20:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV26KCBUF-KC",
-      "market_title": "Kansas City wins",
-      "resolution_time": "2026-11-27T01:20:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -540,41 +579,10 @@
       "resolution_time": "2026-11-27T20:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
-        "fees_unknown",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV27DENPIT-DEN",
-      "market_title": "Denver wins",
-      "resolution_time": "2026-11-27T20:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV27DENPIT-PIT",
-      "market_title": "Pittsburgh wins",
-      "resolution_time": "2026-11-27T20:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-22T03:43:48.975303+00:00",
+  "source_feed_generated_at": "2026-11-22T03:49:48.499796+00:00",
   "state": "LIVE",
   "summary": {
     "buy": 0,
