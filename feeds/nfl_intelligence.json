@@ -3,14 +3,6 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "ARI",
-      "game_id": "2026_11_ARI_KC",
-      "home_team": "KC",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-22T18:00:00+00:00",
-      "status": "WATCH"
-    },
-    {
       "away_team": "BAL",
       "game_id": "2026_11_BAL_CAR",
       "home_team": "CAR",
@@ -89,6 +81,14 @@
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-23T01:20:00+00:00",
       "status": "WATCH"
+    },
+    {
+      "away_team": "ARI",
+      "game_id": "2026_11_ARI_KC",
+      "home_team": "KC",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WITHHELD_INELIGIBLE"
     },
     {
       "away_team": "CIN",
@@ -219,59 +219,11 @@
       "status": "DATA_UNAVAILABLE"
     }
   ],
-  "generated_at": "2026-11-22T06:40:25.444741+00:00",
+  "generated_at": "2026-11-22T06:44:56.916806+00:00",
   "lane": "NFL",
-  "market_coverage": {
-    "KALSHI": "PARTIAL",
-    "PMUS": "COMPLETE"
-  },
+  "market_coverage": {},
   "read_only": true,
   "research_candidates": [
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2304821",
-      "market_title": "Who will win in the upcoming football event Arizona Cardinals vs Kansas City Chiefs scheduled for November 22, 2026 at 6:00 PM UTC?",
-      "resolution_time": "2026-11-22T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "fees_unknown",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV22ARIKC-KC",
-      "market_title": "Kansas City wins",
-      "resolution_time": "2026-11-22T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV22ARIKC-ARI",
-      "market_title": "Arizona wins",
-      "resolution_time": "2026-11-22T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
     {
       "contract_side": "YES",
       "failed_gates": [
@@ -1164,13 +1116,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-22T06:39:23.006093+00:00",
+  "source_feed_generated_at": "2026-11-22T06:44:54.681978+00:00",
   "state": "LIVE",
   "summary": {
     "buy": 0,
     "games": 27,
-    "pass": 63,
-    "research_candidates": 63,
-    "watch": 63
+    "pass": 60,
+    "research_candidates": 60,
+    "watch": 60
   }
 }
