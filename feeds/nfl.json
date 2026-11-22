@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-22T21:55:49.442176+00:00",
+  "generated_at": "2026-11-22T22:01:28.091822+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -37,17 +37,6 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 33.61067513,
-      "market_id": "2555507",
-      "matchup": "NYG at IND",
-      "model_probability": 0.616106751283731,
-      "price": 0.28,
-      "sport": "NFL",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
       "edge_pp": 30.98675663,
       "market_id": "2555511",
       "matchup": "NYJ at MIA",
@@ -59,11 +48,11 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 22.07294058,
+      "edge_pp": 21.07294058,
       "market_id": "2555514",
       "matchup": "WAS at ARI",
       "model_probability": 0.4782294057744818,
-      "price": 0.2575,
+      "price": 0.2675,
       "sport": "NFL",
       "start_time": "2026-11-29T21:25:00+00:00",
       "venue": "POLYMARKET"
@@ -71,10 +60,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-22T21:55:41.677630+00:00",
+  "source_feed_generated_at": "2026-11-22T22:00:57.792292+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 6
+    "buy": 5
   }
 }
