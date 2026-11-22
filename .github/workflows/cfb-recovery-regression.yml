@@ -24,7 +24,7 @@ jobs:
       - name: Install project dependencies
         run: python -m pip install -e . 'pytest>=8,<9'
       - name: Validate production recovery shell syntax
-        run: bash -n scripts/finish_cfb_recovery.sh
+        run: bash -n scripts/finish_cfb_recovery.sh scripts/finish_cfb_recovery_v2.sh
       - name: Run CFB regressions
         env:
           PYTHONDONTWRITEBYTECODE: '1'
