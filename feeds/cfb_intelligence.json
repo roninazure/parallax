@@ -2,17 +2,17 @@
   "fees_status": "UNCERTIFIED",
   "freshness_seconds": 900,
   "games": [],
-  "generated_at": "2026-11-22T08:03:40.360630+00:00",
+  "generated_at": "2026-11-22T08:56:31.035257+00:00",
   "lane": "CFB",
   "market_coverage": {
-    "KALSHI": "COMPLETE",
+    "KALSHI": "PARTIAL",
     "PMUS": "BOUNDED"
   },
   "read_only": true,
   "research_candidates": [],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-22T07:47:45.786785+00:00",
-  "state": "STALE",
+  "source_feed_generated_at": "2026-11-22T08:55:52.549969+00:00",
+  "state": "LIVE",
   "summary": {
     "buy": 0,
     "games": 0,
