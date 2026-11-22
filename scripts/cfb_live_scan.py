@@ -5,6 +5,7 @@ import json
 import re
 import sys
 from collections import Counter
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -26,6 +27,40 @@ from parallax.track_record import TrackRecord
 
 CFB_MARKET_DISCOVERY_LIMIT = 1_000
 PROSPECTIVE_DB = Path("data/parallax-commercial/prospective.sqlite")
+
+# Reviewed directly against https://docs.polymarket.us/fees on 2026-11-22.
+# Effective 2026-11-14: tier 1 has the highest taker coefficient (0.095).
+# Exclude API/onboarding rebates to produce an account-independent upper bound.
+# Short-lived CFB-only policy: do not mutate the NFL/global fee schedule.
+CFB_PMUS_FEE_REVIEWED = datetime.fromisoformat("2026-11-22T00:00:00+00:00")
+CFB_PMUS_FEE_EXPIRES = datetime.fromisoformat("2026-11-29T00:00:00+00:00")
+
+
+def _attach_cfb_pmus_fees(market, now):
+    """Apply a documented worst-tier CFB-only taker fee; expire closed."""
+    if not CFB_PMUS_FEE_REVIEWED <= now < CFB_PMUS_FEE_EXPIRES:
+        return attach_fees(market, now)
+    source = "https://docs.polymarket.us/fees"
+    mechanics = replace(
+        market.mechanics,
+        fee_rate=0.095,
+        fee_source=source,
+        fee_rounding="HALF_EVEN",
+        fee_status="VERIFIED_UPPER_BOUND",
+        fee_observed_at=now.isoformat(),
+        fee_valid_until=CFB_PMUS_FEE_EXPIRES.isoformat(),
+        fee_buffer_per_contract=0,
+    )
+    provenance = {
+        "schedule": source,
+        "reviewed_at": CFB_PMUS_FEE_REVIEWED.isoformat(),
+        "review_expires": CFB_PMUS_FEE_EXPIRES.isoformat(),
+        "reason": "2026-11-14 tier-1 taker theta 0.095; excludes API and onboarding rebates",
+        "status": "VERIFIED_UPPER_BOUND",
+        "scope": "CFB full-game standard taker entry; no rebates assumed",
+    }
+    return replace(market, mechanics=mechanics,
+                   original_metadata={**market.original_metadata, "fee_provenance": provenance})
 
 
 def _dispatch_eligible_buy_alert(
@@ -323,7 +358,7 @@ def _scan(*, alert_dispatcher=None) -> dict:
                     pmus_book_count += 1
                     book = pmus_book_client.book(raw["slug"])
                     market = normalize_pmus(raw, book, utcnow().isoformat())
-                    market = attach_fees(market, utcnow())
+                    market = _attach_cfb_pmus_fees(market, utcnow())
                 else:
                     if kalshi_client.request_count >= kalshi_client.max_requests:
                         statuses[venue_name]["ACQUISITION_BUDGET_EXHAUSTED"] += 1
