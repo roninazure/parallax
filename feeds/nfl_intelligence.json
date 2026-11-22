@@ -3,12 +3,12 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "NYJ",
-      "game_id": "2026_11_NYJ_LAC",
-      "home_team": "LAC",
+      "away_team": "MIN",
+      "game_id": "2026_11_MIN_SF",
+      "home_team": "SF",
       "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-22T21:05:00+00:00",
-      "status": "BUY"
+      "start_time": "2026-11-23T01:20:00+00:00",
+      "status": "WATCH"
     },
     {
       "away_team": "JAX",
@@ -19,20 +19,20 @@
       "status": "BUY"
     },
     {
+      "away_team": "NYJ",
+      "game_id": "2026_11_NYJ_LAC",
+      "home_team": "LAC",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T21:05:00+00:00",
+      "status": "BUY"
+    },
+    {
       "away_team": "LV",
       "game_id": "2026_11_LV_DEN",
       "home_team": "DEN",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-22T21:25:00+00:00",
-      "status": "WATCH"
-    },
-    {
-      "away_team": "MIN",
-      "game_id": "2026_11_MIN_SF",
-      "home_team": "SF",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-23T01:20:00+00:00",
-      "status": "WATCH"
+      "status": "WITHHELD_INELIGIBLE"
     },
     {
       "away_team": "CIN",
@@ -40,7 +40,7 @@
       "home_team": "WAS",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-24T01:15:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "GB",
@@ -64,7 +64,7 @@
       "home_team": "DAL",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T21:30:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "KC",
@@ -96,7 +96,7 @@
       "home_team": "HOU",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "NO",
@@ -163,29 +163,11 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-22T18:48:41.862225+00:00",
+  "generated_at": "2026-11-22T18:55:31.011211+00:00",
   "lane": "NFL",
-  "market_coverage": {
-    "KALSHI": "PARTIAL",
-    "PMUS": "COMPLETE"
-  },
+  "market_coverage": {},
   "read_only": true,
   "research_candidates": [
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2304830",
-      "market_title": "Who will win in the upcoming football event Las Vegas Raiders vs Denver Broncos scheduled for November 22, 2026 at 9:25 PM UTC?",
-      "resolution_time": "2026-11-22T21:25:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
     {
       "contract_side": "YES",
       "failed_gates": [
@@ -230,6 +212,20 @@
     {
       "contract_side": "NO",
       "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2349621",
+      "market_title": "Who will win in the upcoming football event Cincinnati Bengals vs Washington Commanders scheduled for November 24, 2026 at 1:15 AM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.2775 at 2026-11-22T18:47:32.382753+00:00; that executable quote expired at 2026-11-22T18:48:28.052966+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-24T01:15:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
         "liquidity",
         "risk_reward"
       ],
@@ -238,6 +234,20 @@
       "market_id": "2454046",
       "market_title": "Who will win in the upcoming football event Chicago Bears vs Detroit Lions scheduled for November 26, 2026 at 6:00 PM UTC?",
       "resolution_time": "2026-11-26T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2454047",
+      "market_title": "Who will win in the upcoming football event Philadelphia Eagles vs Dallas Cowboys scheduled for November 26, 2026 at 9:30 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.2300 at 2026-11-22T18:47:32.468257+00:00; that executable quote expired at 2026-11-22T18:48:28.062989+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-26T21:30:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
     },
@@ -280,6 +290,20 @@
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "2555508",
       "market_title": "Who will win in the upcoming football event Atlanta Falcons vs Minnesota Vikings scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555509",
+      "market_title": "Who will win in the upcoming football event Baltimore Ravens vs Houston Texans scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.2825 at 2026-11-22T18:47:32.578828+00:00; that executable quote expired at 2026-11-22T18:48:26.840316+00:00. Revalidation is required before acting.",
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
@@ -431,13 +455,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-22T18:47:46.872194+00:00",
+  "source_feed_generated_at": "2026-11-22T18:55:28.421550+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 5,
+    "buy": 2,
     "games": 20,
-    "pass": 39,
-    "research_candidates": 18,
-    "watch": 18
+    "pass": 30,
+    "research_candidates": 20,
+    "watch": 20
   }
 }
