@@ -134,8 +134,8 @@ plutil -lint "$PLIST"
   --entrypoint "$RELEASE/scripts/parallax_unattended.py" \
   --manifest "$MANIFEST"
 
-sudo launchctl print "$SERVICE" | grep -F "$OLD_SHA" >/dev/null ||
-    fail "Active service changed during staging; refusing cutover."
+sudo launchctl print "$SERVICE" | grep -F "$LIVE_SHA" >/dev/null ||
+    fail "Active service changed during staging; expected 46e87dfa release; refusing cutover."
 log "Running previously accepted guarded deployment utility with automatic rollback."
 sudo "$TEST_PY" "$SRC/scripts/deploy_parallax_sports.py" \
   --apply --authorize-cutover "$NEW_SHA" --sha "$NEW_SHA" \
