@@ -200,7 +200,7 @@ def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
 
             def game_date(event):
                 ticker = str(event.get("ticker") or event.get("event_ticker") or "").upper()
-                found = re.search(r"-(\\d{2}[A-Z]{3}\\d{2})", ticker)
+                found = re.search(r"-(\d{2}[A-Z]{3}\d{2})", ticker)
                 if found:
                     try:
                         return datetime.strptime(found.group(1), "%y%b%d").date()
