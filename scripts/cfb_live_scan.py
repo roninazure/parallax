@@ -186,6 +186,12 @@ def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
         item for item in series
         if str(item.get("ticker") or "").upper() in {"KXNCAAFGAME", "KXCFBGAME"}
     ]
+    # The /series first page is not an exhaustive index. If no CFB series
+    # appears there, query the two known full-game series directly rather than
+    # incorrectly reporting complete coverage and zero available markets.
+    direct_series_fallback = not cfb_series
+    if direct_series_fallback:
+        cfb_series = [{"ticker": ticker} for ticker in ("KXNCAAFGAME", "KXCFBGAME")]
     rows: list[dict] = []
     failures: list[str] = []
     budget_reached = False
@@ -246,8 +252,9 @@ def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
     # Deliberately report partial coverage, even if the first page appeared complete.
     # Uninspected event pages and scopes must never be counted as complete.
     return rows, {
-        "state": "PARTIAL" if budget_reached or failures or cfb_series else "COMPLETE",
-        "reason": "bounded discovery reserves public requests for executable books",
+        "state": "PARTIAL" if budget_reached or failures or direct_series_fallback or cfb_series else "COMPLETE",
+        "reason": "bounded discovery with direct known-series fallback and reserved book budget",
+        "direct_series_fallback": direct_series_fallback,
         "series_pages": coverage.pages,
         "cfb_series": len(cfb_series),
         "discovery_requests": client.request_count,
@@ -283,6 +290,11 @@ def _scan(*, alert_dispatcher=None) -> dict:
 
     statuses: dict[str, Counter] = {"PMUS": Counter(), "KALSHI": Counter()}
     scored: list[dict] = []
+    result["scoring_sqlite_errors"] = Counter()
+    # One client across all PMUS public books preserves the per-minute meter.
+    pmus_book_client = PolymarketUSPublicClient(timeout_seconds=8)
+    pmus_book_limit = 12
+    pmus_book_count = 0
     for venue_name, raw_rows in (("PMUS", pmus_rows), ("KALSHI", kalshi_rows)):
         for raw in raw_rows:
             event = raw.get("_discovery_event") if venue_name == "KALSHI" else None
@@ -305,11 +317,11 @@ def _scan(*, alert_dispatcher=None) -> dict:
                 continue
             try:
                 if venue_name == "PMUS":
-                    client = PolymarketUSPublicClient(timeout_seconds=8)
-                    try:
-                        book = client.book(raw["slug"])
-                    finally:
-                        client.close()
+                    if pmus_book_count >= pmus_book_limit:
+                        statuses[venue_name]["ACQUISITION_BUDGET_EXHAUSTED"] += 1
+                        continue
+                    pmus_book_count += 1
+                    book = pmus_book_client.book(raw["slug"])
                     market = normalize_pmus(raw, book, utcnow().isoformat())
                     market = attach_fees(market, utcnow())
                 else:
@@ -377,6 +389,14 @@ def _scan(*, alert_dispatcher=None) -> dict:
                             statuses[venue_name]["ALERT_ERROR"] += 1
             except Exception as exc:
                 statuses[venue_name][f"SCORING_{type(exc).__name__}"] += 1
+                if type(exc).__name__ == "OperationalError":
+                    # SQLite symbolic error names contain no query or secrets.
+                    code = getattr(exc, "sqlite_errorname", None) or "UNCLASSIFIED"
+                    result["scoring_sqlite_errors"][str(code)[:48]] += 1
+    pmus_book_client.close()
+    result["scoring_sqlite_errors"] = dict(result["scoring_sqlite_errors"])
+    result["venues"]["PMUS"]["book_request_budget"] = pmus_book_limit
+    result["venues"]["PMUS"]["book_requests_made"] = pmus_book_count
     for venue, data in result["venues"].items():
         counts = statuses[venue]
         result["venues"][venue].update({"eligible": counts["ELIGIBLE_MONEYLINE"], "mapped": counts["MAPPED"], "evidence": counts["EVIDENCE"], "model_probability": counts["EVIDENCE"], "executable_book": counts["EXECUTABLE_BOOK"], "fee": sum(1 for row in scored if row["venue"] == venue and row["fee_status"] in {"VERIFIED_UPPER_BOUND", "VERIFIED_SCHEDULE", "REVIEWED"}), "edge": sum(1 for row in scored if row["venue"] == venue and row["raw_edge"] is not None), "economics": sum(1 for row in scored if row["venue"] == venue and row["net_ev_25"] is not None), "fully_scored_sides": counts["FULLY_SCORED_SIDES"], "BUY": counts["BUY"], "WATCH": counts["WATCH"], "PASS": counts["PASS"], "status_counts": dict(counts)})
