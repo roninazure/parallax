@@ -135,3 +135,28 @@ def test_pmus_rejects_unexpected_provider_market(monkeypatch):
 
     with pytest.raises(ValueError, match="escaped requested slug scope"):
         cfb_live_scan._scope_pmus(PMUS(), [game])
+
+
+def test_kalshi_direct_series_fallback_when_first_series_page_is_empty():
+    class Client(_PublicClient):
+        def series_page(self, *, limit, cursor=""):
+            self._request()
+            return {"series": [], "cursor": ""}
+
+        def events_page(self, *, series_ticker, limit, cursor=""):
+            self._request()
+            return {
+                "events": [{"ticker": series_ticker + "-26NOV27-EXAMPLE"}],
+                "cursor": "",
+            }
+
+    client = Client()
+    rows, coverage = _scope_kalshi(client)
+    assert rows
+    assert coverage["direct_series_fallback"] is True
+    assert coverage["state"] == "PARTIAL"
+    assert coverage["discovery_requests"] <= 8
+    assert coverage["reserved_book_requests"] >= 32
+    assert {row["_discovery_series"]["ticker"] for row in rows} == {
+        "KXNCAAFGAME", "KXCFBGAME",
+    }
