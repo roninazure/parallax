@@ -3,14 +3,6 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "ARI",
-      "game_id": "2026_11_ARI_KC",
-      "home_team": "KC",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-22T18:00:00+00:00",
-      "status": "WATCH"
-    },
-    {
       "away_team": "BAL",
       "game_id": "2026_11_BAL_CAR",
       "home_team": "CAR",
@@ -89,6 +81,14 @@
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-23T01:20:00+00:00",
       "status": "WATCH"
+    },
+    {
+      "away_team": "ARI",
+      "game_id": "2026_11_ARI_KC",
+      "home_team": "KC",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-22T18:00:00+00:00",
+      "status": "WITHHELD_INELIGIBLE"
     },
     {
       "away_team": "CIN",
@@ -219,29 +219,11 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-22T08:12:43.013369+00:00",
+  "generated_at": "2026-11-22T08:17:15.232878+00:00",
   "lane": "NFL",
-  "market_coverage": {
-    "KALSHI": "PARTIAL",
-    "PMUS": "COMPLETE"
-  },
+  "market_coverage": {},
   "read_only": true,
   "research_candidates": [
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2304821",
-      "market_title": "Who will win in the upcoming football event Arizona Cardinals vs Kansas City Chiefs scheduled for November 22, 2026 at 6:00 PM UTC?",
-      "resolution_time": "2026-11-22T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
     {
       "contract_side": "YES",
       "failed_gates": [
@@ -813,13 +795,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-22T08:11:41.280943+00:00",
+  "source_feed_generated_at": "2026-11-22T08:17:13.596604+00:00",
   "state": "LIVE",
   "summary": {
     "buy": 0,
     "games": 27,
-    "pass": 39,
-    "research_candidates": 39,
-    "watch": 39
+    "pass": 38,
+    "research_candidates": 38,
+    "watch": 38
   }
 }
