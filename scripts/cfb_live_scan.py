@@ -330,6 +330,7 @@ def _scan(*, alert_dispatcher=None) -> dict:
     pmus_book_client = PolymarketUSPublicClient(timeout_seconds=8)
     pmus_book_limit = 12
     pmus_book_count = 0
+    pmus_provider_limited = False
     for venue_name, raw_rows in (("PMUS", pmus_rows), ("KALSHI", kalshi_rows)):
         for raw in raw_rows:
             event = raw.get("_discovery_event") if venue_name == "KALSHI" else None
@@ -352,6 +353,9 @@ def _scan(*, alert_dispatcher=None) -> dict:
                 continue
             try:
                 if venue_name == "PMUS":
+                    if pmus_provider_limited:
+                        statuses[venue_name]["ACQUISITION_PROVIDER_RATE_LIMIT"] += 1
+                        continue
                     if pmus_book_count >= pmus_book_limit:
                         statuses[venue_name]["ACQUISITION_BUDGET_EXHAUSTED"] += 1
                         continue
@@ -424,6 +428,8 @@ def _scan(*, alert_dispatcher=None) -> dict:
                             statuses[venue_name]["ALERT_ERROR"] += 1
             except Exception as exc:
                 statuses[venue_name][f"SCORING_{type(exc).__name__}"] += 1
+                if venue_name == "PMUS" and type(exc).__name__ == "PolymarketUSRateLimit":
+                    pmus_provider_limited = True
                 if type(exc).__name__ == "OperationalError":
                     # SQLite symbolic error names contain no query or secrets.
                     code = getattr(exc, "sqlite_errorname", None) or "UNCLASSIFIED"
