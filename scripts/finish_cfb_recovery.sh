@@ -32,8 +32,8 @@ git -C "$SRC" cat-file -e "$OLD_SHA^{commit}" ||
 
 log "Fetching exact CI-passed CFB patch $PATCH_SHA (no checkout of live source)."
 git -C "$SRC" fetch --no-tags https://github.com/roninazure/parallax.git "$PATCH_BRANCH"
-[[ "$(git -C "$SRC" rev-parse FETCH_HEAD)" == "$PATCH_SHA" ]] ||
-    fail "Remote CFB patch changed since regression acceptance."
+git -C "$SRC" cat-file -e "$PATCH_SHA^{commit}" ||
+    fail "Pinned CI-accepted CFB patch was not fetched from GitHub."
 
 mkdir -p "$BASE/staging"
 WORKROOT="$(mktemp -d "$BASE/staging/cfb-recovery.XXXXXX")"
