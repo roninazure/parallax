@@ -29,3 +29,17 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -m pytest -q tests/test_cfb_kalshi_discovery_budget.py tests/test_parallax_live_cfb.py tests/test_parallax_cfb.py
+
+      - name: Validate actual NFL-baseline overlay used by production cutover
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin eeb1c6215e880efc2cb0446b0e174d01886ec416
+          git worktree add --detach /tmp/cfb-production-overlay eeb1c6215e880efc2cb0446b0e174d01886ec416
+          for path in scripts/cfb_live_scan.py parallax/data/cfb_pmus_team_codes.json tests/test_cfb_kalshi_discovery_budget.py tests/test_parallax_live_cfb.py; do
+            mkdir -p "/tmp/cfb-production-overlay/$(dirname "$path")"
+            cp "$GITHUB_WORKSPACE/$path" "/tmp/cfb-production-overlay/$path"
+          done
+          cd /tmp/cfb-production-overlay
+          PYTHONPATH=/tmp/cfb-production-overlay python -m pytest -q tests/test_cfb_kalshi_discovery_budget.py tests/test_parallax_live_cfb.py tests/test_parallax_cfb.py tests/test_parallax_nfl.py
