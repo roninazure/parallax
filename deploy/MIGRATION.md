@@ -27,7 +27,7 @@ launchctl kickstart -k gui/$(id -u)/com.swarmedge.runner
 
 The commands above are documentation only in Gate 1; they were not executed.
 
-## Rollback commands (attended, future)
+## Rollback commands (LEGACY ONLY — DO NOT USE FOR SPORTS)
 
 ```sh
 launchctl kill SIGTERM gui/$(id -u)/com.swarmedge.runner
