@@ -8,7 +8,7 @@
       "home_team": "WAS",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-24T01:15:00+00:00",
-      "status": "WATCH"
+      "status": "BUY"
     },
     {
       "away_team": "GB",
@@ -32,7 +32,7 @@
       "home_team": "DAL",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T21:30:00+00:00",
-      "status": "WATCH"
+      "status": "BUY"
     },
     {
       "away_team": "KC",
@@ -88,7 +88,7 @@
       "home_team": "MIA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "TEN",
@@ -112,7 +112,7 @@
       "home_team": "SF",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "WATCH"
+      "status": "PASS"
     },
     {
       "away_team": "WAS",
@@ -120,7 +120,7 @@
       "home_team": "ARI",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "LV",
@@ -139,7 +139,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-23T10:23:58.182163+00:00",
+  "generated_at": "2026-11-23T10:29:41.123990+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -148,32 +148,17 @@
   "read_only": true,
   "research_candidates": [
     {
-      "contract_side": "YES",
+      "contract_side": "NO",
       "failed_gates": [
-        "stale_data"
+        "nfl_calibration_safety"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV23CINWAS-WAS",
-      "market_title": "Washington wins",
-      "reason": "PARALLAX previously certified a BUY at $0.2800 at 2026-11-23T10:21:59.966623+00:00; that executable quote expired at 2026-11-23T10:22:59.945762+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-24T01:15:00+00:00",
+      "market_id": "KXNFLGAME-26NOV27DENPIT-DEN",
+      "market_title": "Denver wins",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
       "sport": "NFL",
       "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "stale_data"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2454047",
-      "market_title": "Who will win in the upcoming football event Philadelphia Eagles vs Dallas Cowboys scheduled for November 26, 2026 at 9:30 PM UTC?",
-      "reason": "PARALLAX previously certified a BUY at $0.2150 at 2026-11-23T10:22:10.783002+00:00; that executable quote expired at 2026-11-23T10:22:58.227686+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-26T21:30:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
     },
     {
       "contract_side": "YES",
@@ -184,19 +169,6 @@
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "KXNFLGAME-26NOV27DENPIT-PIT",
       "market_title": "Pittsburgh wins",
-      "resolution_time": "2026-11-27T20:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV27DENPIT-DEN",
-      "market_title": "Denver wins",
       "resolution_time": "2026-11-27T20:00:00+00:00",
       "sport": "NFL",
       "venue": "KALSHI"
@@ -219,36 +191,6 @@
     {
       "contract_side": "YES",
       "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29ATLMIN-MIN",
-      "market_title": "Minnesota wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29ATLMIN-ATL",
-      "market_title": "Atlanta wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
         "nfl_calibration_safety"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
@@ -258,34 +200,6 @@
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29NOCIN-NO",
-      "market_title": "New Orleans wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29NOCIN-CIN",
-      "market_title": "Cincinnati wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -319,22 +233,6 @@
       "contract_side": "NO",
       "failed_gates": [
         "liquidity",
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29SEASF-SF",
-      "market_title": "San Francisco wins",
-      "resolution_time": "2026-11-29T21:25:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
         "risk_reward"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
@@ -359,42 +257,16 @@
       "resolution_time": "2026-12-01T01:15:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV30CARTB-TB",
-      "market_title": "Tampa Bay wins",
-      "resolution_time": "2026-12-01T01:15:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV30CARTB-CAR",
-      "market_title": "Carolina wins",
-      "resolution_time": "2026-12-01T01:15:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-23T10:23:06.538623+00:00",
+  "source_feed_generated_at": "2026-11-23T10:29:06.301848+00:00",
   "state": "LIVE",
   "summary": {
     "buy": 7,
     "games": 17,
-    "pass": 60,
-    "research_candidates": 17,
-    "watch": 17
+    "pass": 35,
+    "research_candidates": 8,
+    "watch": 8
   }
 }
