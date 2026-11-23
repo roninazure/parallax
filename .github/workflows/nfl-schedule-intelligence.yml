@@ -1,0 +1,21 @@
+name: NFL schedule-intelligence isolation
+on:
+  push:
+    branches:
+      - fix/nfl-intelligence-not-buy-gated-20261122
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  nfl-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install -e . 'pytest>=8,<9'
+      - name: Verify NFL schedule projection and existing NFL tests
+        run: python -m pytest -q tests/test_nfl_schedule_intelligence.py tests/test_parallax_nfl.py
