@@ -24,7 +24,7 @@
       "home_team": "DET",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "PHI",
@@ -32,7 +32,7 @@
       "home_team": "DAL",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T21:30:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "KC",
@@ -80,7 +80,7 @@
       "home_team": "IND",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "NYJ",
@@ -88,7 +88,7 @@
       "home_team": "MIA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "TEN",
@@ -120,7 +120,7 @@
       "home_team": "ARI",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "BUY"
+      "status": "WITHHELD_INCOMPLETE_DATA"
     },
     {
       "away_team": "LV",
@@ -139,12 +139,9 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-23T19:23:39.238652+00:00",
+  "generated_at": "2026-11-23T19:28:11.679985+00:00",
   "lane": "NFL",
-  "market_coverage": {
-    "KALSHI": "PARTIAL",
-    "PMUS": "COMPLETE"
-  },
+  "market_coverage": {},
   "read_only": true,
   "research_candidates": [
     {
@@ -159,6 +156,34 @@
       "market_id": "2422412",
       "market_title": "Who will win in the upcoming football event Green Bay Packers vs Los Angeles Rams scheduled for November 26, 2026 at 1:00 AM UTC?",
       "resolution_time": "2026-11-26T01:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2454046",
+      "market_title": "Who will win in the upcoming football event Chicago Bears vs Detroit Lions scheduled for November 26, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.4475 at 2026-11-23T19:22:45.513818+00:00; that executable quote expired at 2026-11-23T19:23:43.040338+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-26T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2454047",
+      "market_title": "Who will win in the upcoming football event Philadelphia Eagles vs Dallas Cowboys scheduled for November 26, 2026 at 9:30 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.2150 at 2026-11-23T19:22:45.541412+00:00; that executable quote expired at 2026-11-23T19:23:43.055372+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-26T21:30:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
     },
@@ -229,6 +254,34 @@
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "2555510",
       "market_title": "Who will win in the upcoming football event New Orleans Saints vs Cincinnati Bengals scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555507",
+      "market_title": "Who will win in the upcoming football event New York Giants vs Indianapolis Colts scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.2525 at 2026-11-23T19:22:45.691652+00:00; that executable quote expired at 2026-11-23T19:23:43.054765+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555511",
+      "market_title": "Who will win in the upcoming football event New York Jets vs Miami Dolphins scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.3400 at 2026-11-23T19:22:45.720377+00:00; that executable quote expired at 2026-11-23T19:23:43.055056+00:00. Revalidation is required before acting.",
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
@@ -363,13 +416,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-23T19:23:08.053477+00:00",
+  "source_feed_generated_at": "2026-11-23T19:28:11.198236+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 6,
+    "buy": 1,
     "games": 17,
-    "pass": 35,
-    "research_candidates": 15,
-    "watch": 15
+    "pass": 32,
+    "research_candidates": 19,
+    "watch": 19
   }
 }
