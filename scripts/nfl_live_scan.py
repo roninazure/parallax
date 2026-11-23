@@ -37,6 +37,7 @@ from parallax.inbox import default_inbox_store
 from parallax.models import Action, Side, timestamp, utcnow
 from parallax.nfl import (
     VALIDATION_ECE,
+    MODEL_VERSION,
     NFLEvidenceProvider,
     NFL_TEAM_NAMES,
     economic_team_for_side,
@@ -130,7 +131,7 @@ def _schedule_intelligence(games, scheduled: list[dict], market_rows: list[dict]
             "home_win_probability": probability,
             "away_win_probability": 1 - probability if probability is not None else None,
             "forecast_kind": "RESEARCH_ONLY" if probability is not None else "UNAVAILABLE",
-            "forecast_model": "NFL_V1" if probability is not None else None,
+            "forecast_model": MODEL_VERSION if probability is not None else None,
             "certified_buy": any(
                 row.get("verdict") == "BUY" and row.get("publication_eligible") is True
                 for row in positions
