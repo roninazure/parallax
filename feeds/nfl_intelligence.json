@@ -112,7 +112,7 @@
       "home_team": "SF",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "WATCH"
+      "status": "PASS"
     },
     {
       "away_team": "WAS",
@@ -120,7 +120,7 @@
       "home_team": "ARI",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "LV",
@@ -139,7 +139,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-23T09:36:44.638526+00:00",
+  "generated_at": "2026-11-23T09:42:31.659134+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -147,6 +147,32 @@
   },
   "read_only": true,
   "research_candidates": [
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "nfl_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV27DENPIT-DEN",
+      "market_title": "Denver wins",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "nfl_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV27DENPIT-PIT",
+      "market_title": "Pittsburgh wins",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
     {
       "contract_side": "NO",
       "failed_gates": [
@@ -207,22 +233,6 @@
       "contract_side": "NO",
       "failed_gates": [
         "liquidity",
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29SEASF-SF",
-      "market_title": "San Francisco wins",
-      "resolution_time": "2026-11-29T21:25:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
         "risk_reward"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
@@ -247,42 +257,16 @@
       "resolution_time": "2026-12-01T01:15:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV30CARTB-CAR",
-      "market_title": "Carolina wins",
-      "resolution_time": "2026-12-01T01:15:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV30CARTB-TB",
-      "market_title": "Tampa Bay wins",
-      "resolution_time": "2026-12-01T01:15:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-23T09:36:13.472099+00:00",
+  "source_feed_generated_at": "2026-11-23T09:41:59.692373+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 8,
+    "buy": 7,
     "games": 17,
-    "pass": 38,
-    "research_candidates": 9,
-    "watch": 9
+    "pass": 35,
+    "research_candidates": 8,
+    "watch": 8
   }
 }
