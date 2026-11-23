@@ -953,7 +953,7 @@ def _public_expired_nfl_signal(
     return public
 
 
-def _public_nfl_game_intelligence(value: object) -> list[dict[str, Any]]:
+def _public_nfl_game_intelligence(value: object, now: datetime) -> list[dict[str, Any]]:
     """Expose schedule-first research without weakening BUY authorization.
 
     The forecast is model research, not an executable trade signal. Unverified
@@ -1002,12 +1002,16 @@ def _public_nfl_game_intelligence(value: object) -> list[dict[str, Any]]:
                     if _text(quote.get(field)):
                         published[field] = quote[field]
                 price = _number(quote.get("executable_price"))
+                observed_at = _parse_timestamp(quote.get("quote_observed_at"))
                 if (
                     quote.get("quote_state") == "FRESH"
+                    and observed_at is not None
+                    and timedelta(0) <= now - observed_at <= timedelta(seconds=60)
                     and price is not None and math.isfinite(price)
                     and 0 < price < 1
                 ):
                     published["executable_price"] = price
+                    published["quote_observed_at"] = observed_at.isoformat()
                     published["quote_state"] = "FRESH"
                 game["venue_quotes"].append(published)
         # BUY status must come from _eligible_nfl_buy_indexes, not scan hints.
@@ -1099,7 +1103,7 @@ def sanitize_completed_scan(
     }
     if normalized_lane == "nfl":
         result["game_intelligence"] = _public_nfl_game_intelligence(
-            decoded.get("game_intelligence")
+            decoded.get("game_intelligence"), now
         )
     if market_data_complete is not None:
         result["market_data_complete"] = market_data_complete
