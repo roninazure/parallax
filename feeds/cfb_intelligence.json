@@ -2,170 +2,22 @@
   "fees_status": "UNCERTIFIED",
   "freshness_seconds": 900,
   "games": [],
-  "generated_at": "2026-11-23T08:20:17.830606+00:00",
+  "generated_at": "2026-11-23T08:35:19.210581+00:00",
   "lane": "CFB",
   "market_coverage": {
     "KALSHI": "PARTIAL",
     "PMUS": "PARTIAL"
   },
   "read_only": true,
-  "research_candidates": [
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "liquidity",
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2498224",
-      "matchup": "Mississippi State at Ole Miss",
-      "resolution_time": "2026-11-27T17:00:00+00:00",
-      "sport": "CFB",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "liquidity",
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2485107",
-      "matchup": "TCU at Texas Tech",
-      "resolution_time": "2026-11-27T01:00:00+00:00",
-      "sport": "CFB",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2534166",
-      "matchup": "Michigan at Ohio State",
-      "resolution_time": "2026-11-28T17:00:00+00:00",
-      "sport": "CFB",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2498226",
-      "matchup": "Nebraska at Iowa",
-      "resolution_time": "2026-11-27T17:00:00+00:00",
-      "sport": "CFB",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNCAAFGAME-26NOV27BUFFAKR-BUFF",
-      "matchup": "Buffalo at Akron",
-      "resolution_time": "2026-11-27T17:00:00+00:00",
-      "sport": "CFB",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNCAAFGAME-26NOV27BUFFAKR-AKR",
-      "matchup": "Buffalo at Akron",
-      "resolution_time": "2026-11-27T17:00:00+00:00",
-      "sport": "CFB",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNCAAFGAME-26NOV26TCUTTU-TTU",
-      "matchup": "TCU at Texas Tech",
-      "resolution_time": "2026-11-27T01:00:00+00:00",
-      "sport": "CFB",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNCAAFGAME-26NOV26TCUTTU-TCU",
-      "matchup": "TCU at Texas Tech",
-      "resolution_time": "2026-11-27T01:00:00+00:00",
-      "sport": "CFB",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "fees_unknown",
-        "edge",
-        "cfb_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2607512",
-      "matchup": "USC at UCLA",
-      "resolution_time": "2026-11-28T20:30:00+00:00",
-      "sport": "CFB",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "fees_unknown",
-        "edge",
-        "cfb_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "UNCERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNCAAFGAME-26NOV27NEBIOWA-NEB",
-      "matchup": "Nebraska at Iowa",
-      "resolution_time": "2026-11-27T17:00:00+00:00",
-      "sport": "CFB",
-      "venue": "KALSHI"
-    }
-  ],
+  "research_candidates": [],
   "schema_version": "parallax.intelligence.v1",
   "source_feed_generated_at": "2026-11-23T08:20:13.551561+00:00",
-  "state": "LIVE",
+  "state": "STALE",
   "summary": {
     "buy": 0,
     "games": 0,
     "pass": 12,
-    "research_candidates": 10,
+    "research_candidates": 0,
     "watch": 10
   }
 }
