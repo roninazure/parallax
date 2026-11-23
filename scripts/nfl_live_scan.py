@@ -124,6 +124,7 @@ def _schedule_intelligence(games, scheduled: list[dict], market_rows: list[dict]
                 "side": row.get("side"),
                 "market_id": row.get("market_id"),
                 "executable_price": price,
+                "quote_observed_at": row.get("updated_at") if price is not None else None,
                 "quote_state": "FRESH" if price is not None else "UNVERIFIED",
             })
         out.append({
