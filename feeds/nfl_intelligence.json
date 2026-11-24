@@ -8,22 +8,6 @@
       "home_team": "LA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T01:00:00+00:00",
-      "status": "WITHHELD_INELIGIBLE"
-    },
-    {
-      "away_team": "PHI",
-      "game_id": "2026_12_PHI_DAL",
-      "home_team": "DAL",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-26T21:30:00+00:00",
-      "status": "WATCH"
-    },
-    {
-      "away_team": "KC",
-      "game_id": "2026_12_KC_BUF",
-      "home_team": "BUF",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-27T01:20:00+00:00",
       "status": "WATCH"
     },
     {
@@ -32,6 +16,22 @@
       "home_team": "DET",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T18:00:00+00:00",
+      "status": "BUY"
+    },
+    {
+      "away_team": "PHI",
+      "game_id": "2026_12_PHI_DAL",
+      "home_team": "DAL",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-26T21:30:00+00:00",
+      "status": "BUY"
+    },
+    {
+      "away_team": "KC",
+      "game_id": "2026_12_KC_BUF",
+      "home_team": "BUF",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-27T01:20:00+00:00",
       "status": "BUY"
     },
     {
@@ -56,7 +56,7 @@
       "home_team": "HOU",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "WATCH"
+      "status": "BUY"
     },
     {
       "away_team": "NO",
@@ -64,7 +64,7 @@
       "home_team": "CIN",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "WATCH"
+      "status": "BUY"
     },
     {
       "away_team": "NYG",
@@ -72,7 +72,7 @@
       "home_team": "IND",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "WATCH"
+      "status": "BUY"
     },
     {
       "away_team": "NYJ",
@@ -80,7 +80,7 @@
       "home_team": "MIA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "WATCH"
+      "status": "BUY"
     },
     {
       "away_team": "TEN",
@@ -104,7 +104,7 @@
       "home_team": "SF",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "WATCH"
+      "status": "PASS"
     },
     {
       "away_team": "WAS",
@@ -112,7 +112,7 @@
       "home_team": "ARI",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "WATCH"
+      "status": "BUY"
     },
     {
       "away_team": "LV",
@@ -131,38 +131,58 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-24T18:09:45.722693+00:00",
+  "generated_at": "2026-11-24T18:10:50.949183+00:00",
   "lane": "NFL",
-  "market_coverage": {},
+  "market_coverage": {
+    "KALSHI": "PARTIAL",
+    "PMUS": "COMPLETE"
+  },
   "read_only": true,
   "research_candidates": [
     {
-      "contract_side": "YES",
+      "contract_side": "NO",
       "failed_gates": [
-        "liquidity",
+        "edge",
+        "nfl_calibration_safety",
         "risk_reward"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2454047",
-      "market_title": "Who will win in the upcoming football event Philadelphia Eagles vs Dallas Cowboys scheduled for November 26, 2026 at 9:30 PM UTC?",
-      "resolution_time": "2026-11-26T21:30:00+00:00",
+      "market_id": "2422412",
+      "market_title": "Who will win in the upcoming football event Green Bay Packers vs Los Angeles Rams scheduled for November 26, 2026 at 1:00 AM UTC?",
+      "resolution_time": "2026-11-26T01:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
     },
     {
       "contract_side": "NO",
       "failed_gates": [
-        "stale_data"
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2454048",
-      "market_title": "Who will win in the upcoming football event Kansas City Chiefs vs Buffalo Bills scheduled for November 27, 2026 at 1:20 AM UTC?",
-      "reason": "PARALLAX previously certified a BUY at $0.5875 at 2026-11-24T18:03:33.670253+00:00; that executable quote expired at 2026-11-24T18:04:33.563404+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-27T01:20:00+00:00",
+      "market_id": "KXNFLGAME-26NOV25GBLAR-GB",
+      "market_title": "Green Bay wins",
+      "resolution_time": "2026-11-26T01:00:00+00:00",
       "sport": "NFL",
-      "venue": "PMUS"
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV25GBLAR-LAR",
+      "market_title": "Los Angeles R wins",
+      "resolution_time": "2026-11-26T01:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -194,100 +214,17 @@
       "venue": "PMUS"
     },
     {
-      "contract_side": "NO",
-      "failed_gates": [
-        "stale_data"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29BALHOU-HOU",
-      "market_title": "Houston wins",
-      "reason": "PARALLAX previously certified a BUY at $0.2700 at 2026-11-24T18:03:36.014624+00:00; that executable quote expired at 2026-11-24T18:04:35.986051+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "YES",
       "failed_gates": [
-        "stale_data"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555510",
-      "market_title": "Who will win in the upcoming football event New Orleans Saints vs Cincinnati Bengals scheduled for November 29, 2026 at 6:00 PM UTC?",
-      "reason": "PARALLAX previously certified a BUY at $0.1675 at 2026-11-24T18:03:36.074701+00:00; that executable quote expired at 2026-11-24T18:04:33.420705+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "stale_data"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29NYGIND-NYG",
-      "market_title": "New York G wins",
-      "reason": "PARALLAX previously certified a BUY at $0.2500 at 2026-11-24T18:03:44.616801+00:00; that executable quote expired at 2026-11-24T18:04:44.586104+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "stale_data"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29NYJMIA-NYJ",
-      "market_title": "New York J wins",
-      "reason": "PARALLAX previously certified a BUY at $0.3400 at 2026-11-24T18:03:48.758309+00:00; that executable quote expired at 2026-11-24T18:04:48.730074+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "nfl_calibration_safety"
+        "liquidity",
+        "nfl_calibration_safety",
+        "risk_reward"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "2555512",
       "market_title": "Who will win in the upcoming football event Tennessee Titans vs Jacksonville Jaguars scheduled for November 29, 2026 at 9:05 PM UTC?",
       "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29SEASF-SF",
-      "market_title": "San Francisco wins",
-      "resolution_time": "2026-11-29T21:25:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "stale_data"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555514",
-      "market_title": "Who will win in the upcoming football event Washington Commanders vs Arizona Cardinals scheduled for November 29, 2026 at 9:25 PM UTC?",
-      "reason": "PARALLAX previously certified a BUY at $0.2250 at 2026-11-24T18:03:57.406298+00:00; that executable quote expired at 2026-11-24T18:04:53.201352+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-29T21:25:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
     },
@@ -305,16 +242,42 @@
       "resolution_time": "2026-12-01T01:15:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "nfl_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV30CARTB-CAR",
+      "market_title": "Carolina wins",
+      "resolution_time": "2026-12-01T01:15:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "nfl_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV30CARTB-TB",
+      "market_title": "Tampa Bay wins",
+      "resolution_time": "2026-12-01T01:15:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-24T18:09:45.650353+00:00",
+  "source_feed_generated_at": "2026-11-24T18:10:03.904371+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 1,
+    "buy": 8,
     "games": 16,
-    "pass": 32,
-    "research_candidates": 12,
-    "watch": 12
+    "pass": 33,
+    "research_candidates": 9,
+    "watch": 9
   }
 }
