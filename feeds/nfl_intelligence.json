@@ -8,7 +8,7 @@
       "home_team": "LA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T01:00:00+00:00",
-      "status": "WATCH"
+      "status": "WITHHELD_INELIGIBLE"
     },
     {
       "away_team": "CHI",
@@ -16,6 +16,14 @@
       "home_team": "DET",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T18:00:00+00:00",
+      "status": "WITHHELD_INELIGIBLE"
+    },
+    {
+      "away_team": "KC",
+      "game_id": "2026_12_KC_BUF",
+      "home_team": "BUF",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-27T01:20:00+00:00",
       "status": "BUY"
     },
     {
@@ -24,15 +32,7 @@
       "home_team": "DAL",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T21:30:00+00:00",
-      "status": "BUY"
-    },
-    {
-      "away_team": "KC",
-      "game_id": "2026_12_KC_BUF",
-      "home_team": "BUF",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-27T01:20:00+00:00",
-      "status": "NO_MARKET"
+      "status": "WITHHELD_INELIGIBLE"
     },
     {
       "away_team": "DEN",
@@ -40,31 +40,7 @@
       "home_team": "PIT",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-27T20:00:00+00:00",
-      "status": "NO_MARKET"
-    },
-    {
-      "away_team": "ATL",
-      "game_id": "2026_12_ATL_MIN",
-      "home_team": "MIN",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "NO_MARKET"
-    },
-    {
-      "away_team": "BAL",
-      "game_id": "2026_12_BAL_HOU",
-      "home_team": "HOU",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "NO_MARKET"
-    },
-    {
-      "away_team": "NO",
-      "game_id": "2026_12_NO_CIN",
-      "home_team": "CIN",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "NO_MARKET"
+      "status": "BUY"
     },
     {
       "away_team": "NYG",
@@ -112,7 +88,7 @@
       "home_team": "ARI",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "LV",
@@ -123,6 +99,30 @@
       "status": "PASS"
     },
     {
+      "away_team": "ATL",
+      "game_id": "2026_12_ATL_MIN",
+      "home_team": "MIN",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-29T18:00:00+00:00",
+      "status": "WITHHELD_INELIGIBLE"
+    },
+    {
+      "away_team": "BAL",
+      "game_id": "2026_12_BAL_HOU",
+      "home_team": "HOU",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-29T18:00:00+00:00",
+      "status": "BUY"
+    },
+    {
+      "away_team": "NO",
+      "game_id": "2026_12_NO_CIN",
+      "home_team": "CIN",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-29T18:00:00+00:00",
+      "status": "BUY"
+    },
+    {
       "away_team": "CAR",
       "game_id": "2026_12_CAR_TB",
       "home_team": "TB",
@@ -131,69 +131,22 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-24T11:28:07.497711+00:00",
+  "generated_at": "2026-11-24T11:33:52.690527+00:00",
   "lane": "NFL",
-  "market_coverage": {
-    "KALSHI": "PARTIAL",
-    "PMUS": "PARTIAL"
-  },
+  "market_coverage": {},
   "read_only": true,
   "research_candidates": [
     {
       "contract_side": "NO",
       "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
+        "stale_data"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV25GBLAR-GB",
-      "market_title": "Green Bay wins",
-      "resolution_time": "2026-11-26T01:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV25GBLAR-LAR",
-      "market_title": "Los Angeles R wins",
-      "resolution_time": "2026-11-26T01:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV26CHIDET-CHI",
-      "market_title": "Chicago wins",
-      "resolution_time": "2026-11-26T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "liquidity",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV26PHIDAL-DAL",
-      "market_title": "Dallas wins",
-      "resolution_time": "2026-11-26T21:30:00+00:00",
+      "market_id": "KXNFLGAME-26NOV29WASARI-WAS",
+      "market_title": "Washington wins",
+      "reason": "PARALLAX previously certified a BUY at $0.2200 at 2026-11-24T11:27:37.858482+00:00; that executable quote expired at 2026-11-24T11:28:37.830096+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T21:25:00+00:00",
       "sport": "NFL",
       "venue": "KALSHI"
     },
@@ -225,13 +178,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-24T11:27:46.440637+00:00",
+  "source_feed_generated_at": "2026-11-24T11:33:50.855380+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 3,
+    "buy": 4,
     "games": 16,
-    "pass": 14,
-    "research_candidates": 6,
-    "watch": 6
+    "pass": 8,
+    "research_candidates": 3,
+    "watch": 3
   }
 }
