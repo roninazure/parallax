@@ -40,7 +40,7 @@
       "home_team": "PIT",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-27T20:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "ATL",
@@ -96,7 +96,7 @@
       "home_team": "LAC",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:05:00+00:00",
-      "status": "WATCH"
+      "status": "PASS"
     },
     {
       "away_team": "SEA",
@@ -131,7 +131,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-24T22:15:29.174992+00:00",
+  "generated_at": "2026-11-24T22:21:15.398290+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -151,6 +151,50 @@
       "market_id": "2422412",
       "market_title": "Who will win in the upcoming football event Green Bay Packers vs Los Angeles Rams scheduled for November 26, 2026 at 1:00 AM UTC?",
       "resolution_time": "2026-11-26T01:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV25GBLAR-GB",
+      "market_title": "Green Bay wins",
+      "resolution_time": "2026-11-26T01:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV25GBLAR-LAR",
+      "market_title": "Los Angeles R wins",
+      "resolution_time": "2026-11-26T01:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "liquidity",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2485096",
+      "market_title": "Who will win in the upcoming football event Denver Broncos vs Pittsburgh Steelers scheduled for November 27, 2026 at 8:00 PM UTC?",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
     },
@@ -185,7 +229,7 @@
       "venue": "PMUS"
     },
     {
-      "contract_side": "NO",
+      "contract_side": "YES",
       "failed_gates": [
         "liquidity",
         "edge",
@@ -194,26 +238,11 @@
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555515",
-      "market_title": "Who will win in the upcoming football event New England Patriots vs Los Angeles Chargers scheduled for November 30, 2026 at 1:20 AM UTC?",
-      "resolution_time": "2026-11-29T21:05:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29SEASF-SF",
-      "market_title": "San Francisco wins",
+      "market_id": "2555513",
+      "market_title": "Who will win in the upcoming football event Seattle Seahawks vs San Francisco 49ers scheduled for November 29, 2026 at 9:25 PM UTC?",
       "resolution_time": "2026-11-29T21:25:00+00:00",
       "sport": "NFL",
-      "venue": "KALSHI"
+      "venue": "PMUS"
     },
     {
       "contract_side": "YES",
@@ -234,9 +263,7 @@
     {
       "contract_side": "NO",
       "failed_gates": [
-        "liquidity",
-        "nfl_calibration_safety",
-        "risk_reward"
+        "nfl_calibration_safety"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
@@ -245,16 +272,42 @@
       "resolution_time": "2026-12-01T01:15:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "nfl_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV30CARTB-CAR",
+      "market_title": "Carolina wins",
+      "resolution_time": "2026-12-01T01:15:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "nfl_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV30CARTB-TB",
+      "market_title": "Tampa Bay wins",
+      "resolution_time": "2026-12-01T01:15:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-24T22:14:45.845187+00:00",
+  "source_feed_generated_at": "2026-11-24T22:20:52.244529+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 9,
+    "buy": 8,
     "games": 16,
-    "pass": 32,
-    "research_candidates": 7,
-    "watch": 7
+    "pass": 31,
+    "research_candidates": 11,
+    "watch": 11
   }
 }
