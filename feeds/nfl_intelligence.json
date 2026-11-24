@@ -1,5 +1,5 @@
 {
-  "fees_status": "SEE_CERTIFIED_BUY_FEED",
+  "fees_status": "UNCERTIFIED",
   "freshness_seconds": 900,
   "games": [
     {
@@ -8,7 +8,7 @@
       "home_team": "LA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T01:00:00+00:00",
-      "status": "WATCH"
+      "status": "WITHHELD_INELIGIBLE"
     },
     {
       "away_team": "CHI",
@@ -16,7 +16,7 @@
       "home_team": "DET",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WITHHELD_INCOMPLETE_DATA"
     },
     {
       "away_team": "PHI",
@@ -24,7 +24,7 @@
       "home_team": "DAL",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T21:30:00+00:00",
-      "status": "BUY"
+      "status": "WITHHELD_INCOMPLETE_DATA"
     },
     {
       "away_team": "KC",
@@ -32,7 +32,7 @@
       "home_team": "BUF",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-27T01:20:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "DEN",
@@ -40,7 +40,7 @@
       "home_team": "PIT",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-27T20:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "ATL",
@@ -56,7 +56,7 @@
       "home_team": "HOU",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "NO",
@@ -64,7 +64,7 @@
       "home_team": "CIN",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WITHHELD_INCOMPLETE_DATA"
     },
     {
       "away_team": "NYG",
@@ -72,7 +72,7 @@
       "home_team": "IND",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "NYJ",
@@ -80,7 +80,7 @@
       "home_team": "MIA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "TEN",
@@ -112,7 +112,7 @@
       "home_team": "ARI",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "LV",
@@ -131,44 +131,11 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-24T11:40:37.288797+00:00",
+  "generated_at": "2026-11-24T11:46:18.780811+00:00",
   "lane": "NFL",
-  "market_coverage": {
-    "KALSHI": "PARTIAL",
-    "PMUS": "PARTIAL"
-  },
+  "market_coverage": {},
   "read_only": true,
   "research_candidates": [
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV25GBLAR-LAR",
-      "market_title": "Los Angeles R wins",
-      "resolution_time": "2026-11-26T01:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV25GBLAR-GB",
-      "market_title": "Green Bay wins",
-      "resolution_time": "2026-11-26T01:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
     {
       "contract_side": "NO",
       "failed_gates": [
@@ -194,6 +161,34 @@
       "market_id": "KXNFLGAME-26NOV26PHIDAL-DAL",
       "market_title": "Dallas wins",
       "resolution_time": "2026-11-26T21:30:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV26KCBUF-BUF",
+      "market_title": "Buffalo wins",
+      "reason": "PARALLAX previously certified a BUY at $0.5900 at 2026-11-24T11:39:49.641954+00:00; that executable quote expired at 2026-11-24T11:40:49.620039+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-27T01:20:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV27DENPIT-PIT",
+      "market_title": "Pittsburgh wins",
+      "reason": "PARALLAX previously certified a BUY at $0.4200 at 2026-11-24T11:39:51.789078+00:00; that executable quote expired at 2026-11-24T11:40:51.768352+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
       "sport": "NFL",
       "venue": "KALSHI"
     },
@@ -230,6 +225,20 @@
     {
       "contract_side": "NO",
       "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV29BALHOU-HOU",
+      "market_title": "Houston wins",
+      "reason": "PARALLAX previously certified a BUY at $0.2700 at 2026-11-24T11:40:00.397700+00:00; that executable quote expired at 2026-11-24T11:41:00.370258+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
         "liquidity",
         "risk_reward"
       ],
@@ -237,6 +246,34 @@
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "KXNFLGAME-26NOV29NOCIN-CIN",
       "market_title": "Cincinnati wins",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV29NYGIND-NYG",
+      "market_title": "New York G wins",
+      "reason": "PARALLAX previously certified a BUY at $0.2500 at 2026-11-24T11:40:08.995208+00:00; that executable quote expired at 2026-11-24T11:41:08.965334+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV29NYJMIA-NYJ",
+      "market_title": "New York J wins",
+      "reason": "PARALLAX previously certified a BUY at $0.3400 at 2026-11-24T11:40:13.287544+00:00; that executable quote expired at 2026-11-24T11:41:13.261243+00:00. Revalidation is required before acting.",
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "KALSHI"
@@ -273,6 +310,20 @@
       "venue": "KALSHI"
     },
     {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV29WASARI-WAS",
+      "market_title": "Washington wins",
+      "reason": "PARALLAX previously certified a BUY at $0.2200 at 2026-11-24T11:40:26.193518+00:00; that executable quote expired at 2026-11-24T11:41:26.164087+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T21:25:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
       "contract_side": "YES",
       "failed_gates": [
         "nfl_calibration_safety"
@@ -300,13 +351,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-24T11:40:36.909153+00:00",
+  "source_feed_generated_at": "2026-11-24T11:46:16.075694+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 9,
+    "buy": 0,
     "games": 16,
-    "pass": 34,
-    "research_candidates": 11,
-    "watch": 11
+    "pass": 32,
+    "research_candidates": 15,
+    "watch": 15
   }
 }
