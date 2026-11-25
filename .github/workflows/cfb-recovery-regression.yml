@@ -24,7 +24,7 @@ jobs:
       - name: Install project dependencies
         run: python -m pip install -e . 'pytest>=8,<9'
       - name: Validate production recovery shell syntax
-        run: bash -n scripts/finish_cfb_recovery.sh scripts/finish_cfb_recovery_v2.sh
+        run: bash -n scripts/finish_cfb_recovery.sh scripts/finish_cfb_recovery_v2.sh scripts/stage_cfb_recovery_v3.sh
       - name: Verify both production cutover guards target current release
         run: |
           python - <<'PY'
@@ -33,6 +33,20 @@ jobs:
           correct = 'sudo launchctl print "$SERVICE" | grep -F "$LIVE_SHA" >/dev/null'
           assert source.count(correct) == 2, "both release guards must match current production"
           assert 'sudo launchctl print "$SERVICE" | grep -F "$OLD_SHA"' not in source
+          PY
+      - name: Verify safe stage-only CFB recovery pins validated release
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("scripts/stage_cfb_recovery_v3.sh").read_text()
+          assert 'LIVE_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"' in source
+          assert 'BASE_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"' in source
+          assert 'PATCH_SHA="ab305cd348208dd6ef46f04352fd4ab19997821e"' in source
+          assert 'git -C "$SRC" worktree add --detach "$WT" "$BASE_SHA"' in source
+          assert '--apply' not in source
+          assert 'launchctl bootout' not in source
+          assert 'launchctl bootstrap' not in source
+          assert 'sudo "$TEST_PY" "$SRC/scripts/deploy_parallax_sports.py"' not in source
           PY
       - name: Run CFB regressions
         env:
