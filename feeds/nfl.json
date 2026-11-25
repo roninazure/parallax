@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-11-25T20:49:51.897679+00:00",
+  "generated_at": "2026-11-25T20:55:14.611582+00:00",
   "lane": "NFL",
   "plays": [
     {
       "contract_side": "NO",
-      "edge_pp": 21.63389048,
-      "market_id": "2454046",
+      "edge_pp": 21.88389048,
+      "market_id": "KXNFLGAME-26NOV26CHIDET-CHI",
       "matchup": "CHI at DET",
       "model_probability": 0.6988389048279224,
-      "price": 0.4825,
+      "price": 0.48,
       "sport": "NFL",
       "start_time": "2026-11-26T18:00:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -36,17 +36,6 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
-      "edge_pp": 14.8152832,
-      "market_id": "2485096",
-      "matchup": "DEN at PIT",
-      "model_probability": 0.5031528320028407,
-      "price": 0.355,
-      "sport": "NFL",
-      "start_time": "2026-11-27T20:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
       "contract_side": "YES",
       "edge_pp": 19.01439443,
       "market_id": "2555509",
@@ -56,17 +45,6 @@
       "sport": "NFL",
       "start_time": "2026-11-29T18:00:00+00:00",
       "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 8.49208121,
-      "market_id": "KXNFLGAME-26NOV29NOCIN-CIN",
-      "matchup": "NO at CIN",
-      "model_probability": 0.254920812147292,
-      "price": 0.17,
-      "sport": "NFL",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "KALSHI"
     },
     {
       "contract_side": "NO",
@@ -81,14 +59,14 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 36.11472786,
-      "market_id": "KXNFLGAME-26NOV29NYJMIA-NYJ",
+      "edge_pp": 35.11472786,
+      "market_id": "2555511",
       "matchup": "NYJ at MIA",
       "model_probability": 0.7011472785961826,
-      "price": 0.34,
+      "price": 0.35,
       "sport": "NFL",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -104,10 +82,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-25T20:48:50.149131+00:00",
+  "source_feed_generated_at": "2026-11-25T20:55:12.920149+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 9
+    "buy": 7
   }
 }
