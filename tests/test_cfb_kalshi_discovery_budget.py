@@ -17,6 +17,10 @@ class _PublicClient:
         self._request()
         return {"series": [{"ticker": "KXNCAAFGAME"}], "cursor": ""}
 
+    def series(self, ticker):
+        self._request()
+        return {"ticker": ticker, "fee_type": "quadratic", "fee_multiplier": 1}
+
     def events_page(self, *, series_ticker, limit, cursor=""):
         self._request()
         return {
@@ -39,7 +43,7 @@ def test_cfb_discovery_reserves_at_least_half_public_request_budget():
     assert coverage["state"] == "PARTIAL"
     assert coverage["discovery_requests"]  <= 8
     assert coverage["reserved_book_requests"]  >= 32
-    assert len(rows) == 6
+    assert len(rows) == 5
     assert all("_discovery_event" in row and "_discovery_series" in row for row in rows)
 
 
@@ -189,3 +193,55 @@ def test_cfb_pmus_fee_worst_tier_is_reviewed_and_expires_closed():
     assert reviewed.mechanics.fee_valid_until == "2026-11-29T00:00:00+00:00"
     assert "rebates" in reviewed.original_metadata["fee_provenance"]["reason"]
     assert market.mechanics.fee_rate is None
+
+
+def test_cfb_kalshi_review_is_scoped_and_expires_closed(monkeypatch):
+    from dataclasses import dataclass, field
+    from datetime import UTC, datetime
+    from scripts import cfb_live_scan
+
+    @dataclass
+    class Mechanics:
+        fee_rate: float | None = None
+        fee_source: str = ""
+        fee_rounding: str = ""
+        fee_status: str = "UNVERIFIED"
+        fee_observed_at: str = ""
+        fee_valid_until: str | None = None
+        fee_buffer_per_contract: int = 0
+        fee_balance_precision: float = 0.01
+
+    @dataclass
+    class Market:
+        event: str = "KXNCAAFGAME-26NOV28-TEST"
+        venue_market_id: str = "KXNCAAFGAME-26NOV28-TEST-GA"
+        data_timestamp: str = "2026-11-25T00:00:00+00:00"
+        mechanics: Mechanics = field(default_factory=Mechanics)
+        original_metadata: dict = field(default_factory=lambda: {"market": {
+            "ticker": "KXNCAAFGAME-26NOV28-TEST-GA",
+            "event_ticker": "KXNCAAFGAME-26NOV28-TEST",
+        }})
+
+    # Keep this regression independent of expired NFL/global fee review.
+    monkeypatch.setattr(cfb_live_scan, "attach_fees", lambda market, now, **kwargs: market)
+    market = Market()
+    event = {"ticker": market.event, "series_ticker": "KXNCAAFGAME"}
+    series = {"ticker": "KXNCAAFGAME", "fee_type": "quadratic", "fee_multiplier": 1}
+    now = datetime(2026, 11, 25, tzinfo=UTC)
+    approved = cfb_live_scan._attach_cfb_kalshi_fees(market, now, event=event, series=series)
+    assert approved.mechanics.fee_rate == 0.07
+    assert approved.mechanics.fee_status == "VERIFIED_UPPER_BOUND"
+    assert approved.mechanics.fee_valid_until == "2026-11-25T00:01:00+00:00"
+    assert market.mechanics.fee_status == "UNVERIFIED"
+    unsupported = cfb_live_scan._attach_cfb_kalshi_fees(
+        market, now, event=event, series={**series, "fee_type": "flat"},
+    )
+    assert unsupported.mechanics.fee_status == "UNVERIFIED"
+    unknown = cfb_live_scan._attach_cfb_kalshi_fees(
+        market, now, event=event, series={"ticker": "KXNCAAFGAME"},
+    )
+    assert unknown.mechanics.fee_status == "UNVERIFIED"
+    expired = cfb_live_scan._attach_cfb_kalshi_fees(
+        market, datetime(2026, 12, 1, tzinfo=UTC), event=event, series=series,
+    )
+    assert expired.mechanics.fee_status == "UNVERIFIED"
