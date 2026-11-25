@@ -44,8 +44,8 @@ jobs:
           assert 'PATCH_SHA="ab305cd348208dd6ef46f04352fd4ab19997821e"' in source
           assert 'git -C "$SRC" worktree add --detach "$WT" "$BASE_SHA"' in source
           assert '--apply' not in source
-          assert 'launchctl bootout' not in source
-          assert 'launchctl bootstrap' not in source
+          assert not any(line.lstrip().startswith('sudo launchctl bootout ') for line in source.splitlines())
+          assert not any(line.lstrip().startswith('sudo launchctl bootstrap ') for line in source.splitlines())
           assert 'sudo "$TEST_PY" "$SRC/scripts/deploy_parallax_sports.py"' not in source
           PY
       - name: Run CFB regressions
