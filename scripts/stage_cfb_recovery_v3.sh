@@ -6,7 +6,7 @@ umask 077
 
 BASE_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"
 LIVE_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"
-PATCH_SHA="ab305cd348208dd6ef46f04352fd4ab19997821e"
+PATCH_SHA="3731658d8f1774dc3f8b2e2ee127ebef70056f1f"
 PATCH_BRANCH="fix/cfb-reserve-kalshi-book-budget-20261122"
 SRC="/Users/scottsteele/swarm-runtime/swarm-edge"
 BASE="$HOME/Library/Application Support/SwarmEdge"
