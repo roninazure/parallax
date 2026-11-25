@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from maker_spread_economics.polymarket_us import PolymarketUSPublicClient
+from maker_spread_economics.polymarket_us import PolymarketUSPublicClient, PolymarketUSRateLimit, PolymarketUSDiscoveryFailure
 from parallax.alerts import AlertDeliveryStore, AlertDispatcher, dispatch_scored_buy
 from parallax.cfb import MODEL_VERSION, VALIDATION_ECE, VALIDATION_REFERENCE, CFBEvidenceProvider, _canonical_team, active_cfb_season, fetch_games, is_supported_market, map_market_to_game, probability_for_game
 from parallax.discovery import MAX_ACTIVE_MARKETS_PER_VENUE, paginate, paginate_collection
@@ -397,6 +397,14 @@ def _scan(*, alert_dispatcher=None) -> dict:
     try:
         pmus_rows, coverage = _scope_pmus(pmus_client, games)
         result["venues"]["PMUS"] = {"coverage": coverage, "discovered": len(pmus_rows)}
+    except (PolymarketUSRateLimit, PolymarketUSDiscoveryFailure) as exc:
+        # Provider outage/rate limit must not suppress the independent Kalshi lane.
+        # Never turn unavailable PMUS quotes into fabricated or cached BUYs.
+        pmus_rows = []
+        result["venues"]["PMUS"] = {
+            "coverage": {"state": "UNAVAILABLE", "reason": "provider_discovery_failure", "error_type": type(exc).__name__},
+            "discovered": 0,
+        }
     finally:
         pmus_client.close()
     kalshi_client = KalshiPublicClient()
