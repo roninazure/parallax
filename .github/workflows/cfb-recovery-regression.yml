@@ -48,6 +48,19 @@ jobs:
           assert not any(line.lstrip().startswith('sudo launchctl bootstrap ') for line in source.splitlines())
           assert 'sudo "$TEST_PY" "$SRC/scripts/deploy_parallax_sports.py"' not in source
           PY
+      - name: Verify isolated CFB live probe safeguards
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          source = Path("scripts/probe_cfb_staged.py").read_text()
+          ast.parse(source)
+          assert 'tempfile.TemporaryDirectory' in source
+          assert 'scan.PROSPECTIVE_DB = Path(tmp)' in source
+          assert 'scan._dispatch_eligible_buy_alert = lambda' in source
+          assert 'scan._scan(alert_dispatcher=object())' in source
+          assert 'PARALLAX_CFB_PROBE_RELEASE' in source
+          PY
       - name: Run CFB regressions
         env:
           PYTHONDONTWRITEBYTECODE: '1'
