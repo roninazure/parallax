@@ -245,3 +245,38 @@ def test_cfb_kalshi_review_is_scoped_and_expires_closed(monkeypatch):
         market, datetime(2026, 12, 1, tzinfo=UTC), event=event, series=series,
     )
     assert expired.mechanics.fee_status == "UNVERIFIED"
+
+
+def test_cfb_pmus_rate_limit_does_not_abort_kalshi_discovery(monkeypatch):
+    from maker_spread_economics.polymarket_us import PolymarketUSRateLimit
+    from scripts import cfb_live_scan
+
+    class NoNetwork:
+        max_requests = 40
+        request_count = 0
+        def __init__(self, *args, **kwargs):
+            pass
+        def close(self):
+            pass
+
+    monkeypatch.setattr(cfb_live_scan, "TrackRecord", lambda *args: object())
+    monkeypatch.setattr(cfb_live_scan, "fetch_games", lambda *args: [])
+    monkeypatch.setattr(cfb_live_scan, "PolymarketUSPublicClient", NoNetwork)
+    monkeypatch.setattr(cfb_live_scan, "KalshiPublicClient", NoNetwork)
+    monkeypatch.setattr(cfb_live_scan, "_scope_pmus", lambda *args: (_ for _ in ()).throw(
+        PolymarketUSRateLimit("simulated provider 429")
+    ))
+    kalshi_called = []
+    def kalshi_ok(*args):
+        kalshi_called.append(True)
+        return [], {"state": "PARTIAL", "reason": "simulated"}
+    monkeypatch.setattr(cfb_live_scan, "_scope_kalshi", kalshi_ok)
+
+    result = cfb_live_scan._scan(alert_dispatcher=object())
+    assert kalshi_called == [True]
+    assert result["venues"]["PMUS"]["coverage"]["state"] == "UNAVAILABLE"
+    assert result["venues"]["PMUS"]["coverage"]["error_type"] == "PolymarketUSRateLimit"
+    assert result["venues"]["PMUS"]["discovered"] == 0
+    assert result["venues"]["KALSHI"]["coverage"]["state"] == "PARTIAL"
+    assert result["alerts"] == 0
+    assert result["rows"] == []
