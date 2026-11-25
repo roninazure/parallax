@@ -41,7 +41,7 @@ jobs:
           source = Path("scripts/stage_cfb_recovery_v3.sh").read_text()
           assert 'LIVE_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"' in source
           assert 'BASE_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"' in source
-          assert 'PATCH_SHA="ab305cd348208dd6ef46f04352fd4ab19997821e"' in source
+          assert 'PATCH_SHA="3731658d8f1774dc3f8b2e2ee127ebef70056f1f"' in source
           assert 'git -C "$SRC" worktree add --detach "$WT" "$BASE_SHA"' in source
           assert '--apply' not in source
           assert not any(line.lstrip().startswith('sudo launchctl bootout ') for line in source.splitlines())
