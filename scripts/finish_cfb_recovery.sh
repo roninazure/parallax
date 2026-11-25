@@ -16,6 +16,8 @@ log() { printf '[CFB RECOVERY] %s\n' "$*"; }
 fail() { printf '[CFB RECOVERY] BLOCKED: %s\n' "$*" >&2; exit 1; }
 trap 'printf "[CFB RECOVERY] FAILED at line %s. Existing immutable release and backup retained.\n" "$LINENO" >&2' ERR
 
+fail "This automatic CFB cutover is retired after the failed launchd bootstrap. Use scripts/stage_cfb_recovery_v3.sh for staging only; production apply requires separately verified same-domain rollback. "
+
 [[ "$(id -un)" == "scottsteele" ]] || fail "Run from the scottsteele Mac mini account."
 [[ -x "$OLD_PY" ]] || fail "Known-good production Python missing."
 [[ -d "$SRC" ]] || fail "Mac mini source repository missing."
