@@ -88,8 +88,11 @@ def _attach_cfb_kalshi_fees(market, now, *, event, series):
         return fallback
     if raw.get("ticker") != market.venue_market_id:
         return fallback
-    observed = datetime.fromisoformat(market.data_timestamp.replace("Z", "+00:00"))
-    if observed.tzinfo is None or not 0 <= (now - observed).total_seconds() < 60:
+    try:
+        observed = datetime.fromisoformat(market.data_timestamp.replace("Z", "+00:00"))
+        if observed.tzinfo is None or not 0 <= (now - observed).total_seconds() < 60:
+            return fallback
+    except (AttributeError, TypeError, ValueError):
         return fallback
     if any(k.startswith("fee_") and v is not None for k, v in raw.items()):
         return fallback  # waiver/market-specific exceptions require independent verification
