@@ -64,7 +64,7 @@
       "home_team": "CIN",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "NYG",
@@ -131,7 +131,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-25T10:31:44.656635+00:00",
+  "generated_at": "2026-11-25T10:38:11.822338+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -200,36 +200,6 @@
       "venue": "PMUS"
     },
     {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29ATLMIN-ATL",
-      "market_title": "Atlanta wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29ATLMIN-MIN",
-      "market_title": "Minnesota wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
       "contract_side": "YES",
       "failed_gates": [
         "liquidity",
@@ -242,19 +212,6 @@
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29NOCIN-NO",
-      "market_title": "New Orleans wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -288,13 +245,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-25T10:31:14.266061+00:00",
+  "source_feed_generated_at": "2026-11-25T10:37:36.394576+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 9,
+    "buy": 8,
     "games": 16,
-    "pass": 31,
-    "research_candidates": 10,
-    "watch": 10
+    "pass": 35,
+    "research_candidates": 7,
+    "watch": 7
   }
 }
