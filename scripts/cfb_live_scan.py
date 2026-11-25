@@ -63,6 +63,78 @@ def _attach_cfb_pmus_fees(market, now):
                    original_metadata={**market.original_metadata, "fee_provenance": provenance})
 
 
+
+# Independent, expiring CFB-only Kalshi review. Never refresh this date from a quote.
+# Source: https://kalshi.com/fee-schedule, reviewed 2026-11-24.
+CFB_KALSHI_FEE_REVIEWED = datetime.fromisoformat("2026-11-24T00:00:00+00:00")
+CFB_KALSHI_FEE_EXPIRES = datetime.fromisoformat("2026-12-01T00:00:00+00:00")
+
+
+def _attach_cfb_kalshi_fees(market, now, *, event, series):
+    """Conservative quadratic taker estimate only for proven live CFB metadata.
+
+    Unknown fee overrides, stale quotes, unsupported types and missing per-series
+    metadata retain the global fail-closed UNVERIFIED status.
+    """
+    fallback = attach_fees(market, now, event=event, series=series)
+    if not CFB_KALSHI_FEE_REVIEWED <= now < CFB_KALSHI_FEE_EXPIRES:
+        return fallback
+    raw = market.original_metadata.get("market") or {}
+    sid = (series or {}).get("ticker")
+    eid = (event or {}).get("event_ticker") or (event or {}).get("ticker")
+    if not sid or sid not in {"KXNCAAFGAME", "KXCFBGAME"}:
+        return fallback
+    if not eid or market.event != eid or raw.get("event_ticker") != eid:
+        return fallback
+    if raw.get("ticker") != market.venue_market_id:
+        return fallback
+    observed = datetime.fromisoformat(market.data_timestamp.replace("Z", "+00:00"))
+    if observed.tzinfo is None or not 0 <= (now - observed).total_seconds() < 60:
+        return fallback
+    if any(k.startswith("fee_") and v is not None for k, v in raw.items()):
+        return fallback  # waiver/market-specific exceptions require independent verification
+    kind = (event or {}).get("fee_type_override")
+    if kind is None:
+        kind = series.get("fee_type")
+    multiplier = (event or {}).get("fee_multiplier_override")
+    if multiplier is None:
+        multiplier = series.get("fee_multiplier")
+    try:
+        from decimal import Decimal
+        if isinstance(multiplier, bool):
+            return fallback
+        m = Decimal(str(multiplier))
+        if not m.is_finite() or m < 0 or m > 10:
+            return fallback
+    except (TypeError, ValueError, ArithmeticError):
+        return fallback
+    if kind not in {"quadratic", "quadratic_with_maker_fees"}:
+        return fallback
+    mechanics = replace(
+        market.mechanics,
+        fee_rate=float(Decimal("0.07") * m),
+        fee_source="https://kalshi.com/fee-schedule",
+        fee_rounding="KALSHI_BALANCE",
+        fee_status="VERIFIED_UPPER_BOUND",
+        fee_observed_at=now.isoformat(),
+        fee_valid_until=min(CFB_KALSHI_FEE_EXPIRES, observed + timedelta(seconds=60)).isoformat(),
+        fee_buffer_per_contract=0,
+        fee_balance_precision=0.01,
+    )
+    return replace(market, mechanics=mechanics, original_metadata={
+        **market.original_metadata,
+        "fee_provenance": {
+            "schedule": "https://kalshi.com/fee-schedule",
+            "reviewed_at": CFB_KALSHI_FEE_REVIEWED.isoformat(),
+            "review_expires": CFB_KALSHI_FEE_EXPIRES.isoformat(),
+            "verified_series": sid,
+            "effective_multiplier": str(m),
+            "fee_type": kind,
+            "status": "VERIFIED_UPPER_BOUND",
+            "scope": "CFB quadratic taker entry; no rebates or waivers",
+        },
+    })
+
 def _dispatch_eligible_buy_alert(
     dispatcher,
     play,
@@ -236,6 +308,15 @@ def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
             break
         sid = str(series_row.get("ticker") or series_row.get("id") or "")
         try:
+            # Direct-series fallback lacks fee metadata; retrieve its live series document.
+            if not series_row.get("fee_type") or series_row.get("fee_multiplier") is None:
+                if client.request_count + 1 >= discovery_budget:
+                    budget_reached = True
+                    break
+                series_row = client.series(sid)
+                if series_row.get("ticker") != sid:
+                    failures.append("SERIES_METADATA_MISMATCH")
+                    continue
             events = list(client.events_page(series_ticker=sid, limit=100).get("events", []))
             local_today = utcnow().astimezone(ZoneInfo("America/New_York")).date()
 
@@ -368,7 +449,7 @@ def _scan(*, alert_dispatcher=None) -> dict:
                         statuses[venue_name]["ACQUISITION_BUDGET_EXHAUSTED"] += 1
                         continue
                     book = kalshi_client.book(raw["ticker"])
-                    market = attach_fees(normalize_kalshi(raw, book, utcnow().isoformat(), event=event), utcnow(), event=event, series=series)
+                    market = _attach_cfb_kalshi_fees(normalize_kalshi(raw, book, utcnow().isoformat(), event=event), utcnow(), event=event, series=series)
                 statuses[venue_name]["EXECUTABLE_BOOK"] += 1
                 evidence = CFBEvidenceProvider(lambda games=games: games).assess(market)
                 if evidence is None:
