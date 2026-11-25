@@ -10,7 +10,12 @@ from collections import Counter
 from pathlib import Path
 
 def main():
-    root = Path(__file__).resolve().parents[1]
+    root_value = os.environ.get("PARALLAX_CFB_PROBE_RELEASE")
+    if not root_value:
+        raise SystemExit("BLOCKED: PARALLAX_CFB_PROBE_RELEASE is required")
+    root = Path(root_value).resolve()
+    if not (root / "scripts/cfb_live_scan.py").is_file():
+        raise SystemExit("BLOCKED: staged CFB scanner not found")
     sys.path.insert(0, str(root))
     from scripts.parallax_unattended import load_runtime_env
     from scripts import cfb_live_scan as scan
