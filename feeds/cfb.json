@@ -1,13 +1,135 @@
 {
-  "generated_at": "2026-11-26T01:48:31.149927+00:00",
+  "generated_at": "2026-11-26T02:14:19.168838+00:00",
   "lane": "CFB",
-  "plays": [],
+  "plays": [
+    {
+      "contract_side": "YES",
+      "edge_pp": 57.18337177,
+      "market_id": "2485107",
+      "matchup": "TCU at Texas Tech",
+      "model_probability": 0.7118337176916699,
+      "price": 0.14,
+      "sport": "CFB",
+      "start_time": "2026-11-27T01:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 48.27711861,
+      "market_id": "2607508",
+      "matchup": "Notre Dame at Syracuse",
+      "model_probability": 0.5327711860867119,
+      "price": 0.05,
+      "sport": "CFB",
+      "start_time": "2026-11-28T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 39.45525933,
+      "market_id": "2534166",
+      "matchup": "Michigan at Ohio State",
+      "model_probability": 0.6245525933407059,
+      "price": 0.23,
+      "sport": "CFB",
+      "start_time": "2026-11-28T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 29.94385774,
+      "market_id": "2498226",
+      "matchup": "Nebraska at Iowa",
+      "model_probability": 0.6494385774008345,
+      "price": 0.35,
+      "sport": "CFB",
+      "start_time": "2026-11-27T17:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 17.24805034,
+      "market_id": "KXNCAAFGAME-26NOV27BUFFAKR-AKR",
+      "matchup": "Buffalo at Akron",
+      "model_probability": 0.4524805034391437,
+      "price": 0.28,
+      "sport": "CFB",
+      "start_time": "2026-11-27T17:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 16.96230595,
+      "market_id": "2505889",
+      "matchup": "App State at South Alabama",
+      "model_probability": 0.5746230594609018,
+      "price": 0.405,
+      "sport": "CFB",
+      "start_time": "2026-11-27T20:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 16.44420784,
+      "market_id": "KXNCAAFGAME-26NOV27TOLOHIO-TOL",
+      "matchup": "Toledo at Ohio",
+      "model_probability": 0.5744420784183579,
+      "price": 0.41,
+      "sport": "CFB",
+      "start_time": "2026-11-27T17:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 16.24805034,
+      "market_id": "KXNCAAFGAME-26NOV27BUFFAKR-BUFF",
+      "matchup": "Buffalo at Akron",
+      "model_probability": 0.4524805034391437,
+      "price": 0.29,
+      "sport": "CFB",
+      "start_time": "2026-11-27T17:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 14.81662823,
+      "market_id": "KXNCAAFGAME-26NOV26TCUTTU-TTU",
+      "matchup": "TCU at Texas Tech",
+      "model_probability": 0.2881662823083301,
+      "price": 0.14,
+      "sport": "CFB",
+      "start_time": "2026-11-27T01:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 14.81662823,
+      "market_id": "KXNCAAFGAME-26NOV26TCUTTU-TCU",
+      "matchup": "TCU at Texas Tech",
+      "model_probability": 0.2881662823083301,
+      "price": 0.14,
+      "sport": "CFB",
+      "start_time": "2026-11-27T01:00:00+00:00",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 12.10928605,
+      "market_id": "2609609",
+      "matchup": "Army at Rice",
+      "model_probability": 0.48609286051515943,
+      "price": 0.365,
+      "sport": "CFB",
+      "start_time": "2026-11-28T19:00:00+00:00",
+      "venue": "POLYMARKET"
+    }
+  ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-26T01:47:50.779081+00:00",
+  "source_feed_generated_at": "2026-11-26T02:14:10.992902+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 0
+    "buy": 11
   }
 }
