@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T14:40:16.259509+00:00",
+  "generated_at": "2026-11-26T14:46:44.206252+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -25,9 +25,9 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
+      "contract_side": "NO",
       "edge_pp": 8.51323161,
-      "market_id": "KXNFLGAME-26NOV26KCBUF-BUF",
+      "market_id": "KXNFLGAME-26NOV26KCBUF-KC",
       "matchup": "KC at BUF",
       "model_probability": 0.6851323161008271,
       "price": 0.6,
@@ -93,7 +93,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-26T14:39:58.476058+00:00",
+  "source_feed_generated_at": "2026-11-26T14:46:22.806836+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
