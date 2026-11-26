@@ -8,7 +8,7 @@ BASE="$HOME/Library/Application Support/SwarmEdge"
 REPO="$HOME/swarm-runtime/swarm-edge"
 NFL_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"
 CFB_SHA="a52d71f2f30c708782bd67bf8f7e3f8fee870923"
-WORKER_SHA="c272762549e542a887a0f500a814d58e674051e4"
+WORKER_SHA="9fb07003b5a3ea17e00fc63f0e5ae09d8a084b10"
 NFL_JOB="system/com.swarmedge.parallax-sports"
 CFB_LABEL="com.swarmedge.parallax-cfb-restore"
 CFB_JOB="system/$CFB_LABEL"
@@ -19,6 +19,7 @@ PY="$BASE/venvs/$CFB_SHA/bin/python"
 ENV_FILE="$BASE/config/runtime.env"
 STATE="$BASE/state/parallax"
 HEALTH="$STATE/cfb_recovery_bridge_health.json"
+PHASE="$STATE/cfb_recovery_bridge_phase.json"
 PLIST="/Library/LaunchDaemons/$CFB_LABEL.plist"
 LOGS="$HOME/Library/Logs/SwarmEdge"
 BACKUP="$OPS/runtime.env.before-cfb-bridge"
@@ -105,12 +106,20 @@ BRIDGE_LOADED=1
 sudo launchctl print "$CFB_JOB" >/dev/null || fail "CFB job not loaded"
 
 # Require a real completed scan and feed export before switching CFB ownership.
-for attempt in $(seq 1 150); do
+for attempt in $(seq 1 360); do
   [[ -s "$HEALTH" ]] && break
   if ! sudo launchctl print "$CFB_JOB" >/dev/null; then fail "CFB job disappeared"; fi
   sleep 2
 done
-[[ -s "$HEALTH" ]] || fail "CFB scan did not pass. Original CFB remains enabled; inspect restore logs."
+if [[ ! -s "$HEALTH" ]]; then
+  echo "=== CFB bridge phase ===" >&2
+  [[ -s "$PHASE" ]] && cat "$PHASE" >&2 || echo "Bridge worker did not report startup" >&2
+  echo "=== CFB worker errors ===" >&2
+  tail -n 30 "$LOGS/parallax-cfb-restore.err.log" >&2 || true
+  echo "=== CFB worker output ===" >&2
+  tail -n 20 "$LOGS/parallax-cfb-restore.log" >&2 || true
+  fail "CFB scan failed or timed out without valid health. Original CFB remains enabled."
+fi
 "$PY" - "$HEALTH" "$CFB_SHA" <<'PY'
 import json, sys
 from pathlib import Path
