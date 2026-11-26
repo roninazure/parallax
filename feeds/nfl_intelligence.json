@@ -3,14 +3,6 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "CHI",
-      "game_id": "2026_12_CHI_DET",
-      "home_team": "DET",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-26T18:00:00+00:00",
-      "status": "BUY"
-    },
-    {
       "away_team": "PHI",
       "game_id": "2026_12_PHI_DAL",
       "home_team": "DAL",
@@ -131,7 +123,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-26T17:56:10.984121+00:00",
+  "generated_at": "2026-11-26T18:00:30.158043+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -302,7 +294,7 @@
   "state": "LIVE",
   "summary": {
     "buy": 9,
-    "games": 16,
+    "games": 15,
     "pass": 31,
     "research_candidates": 11,
     "watch": 11
