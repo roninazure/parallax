@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T21:01:03.012641+00:00",
+  "generated_at": "2026-11-26T21:07:29.986002+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -69,15 +69,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
+      "contract_side": "NO",
       "edge_pp": 38.11472786,
-      "market_id": "KXNFLGAME-26NOV29NYJMIA-MIA",
+      "market_id": "2555511",
       "matchup": "NYJ at MIA",
       "model_probability": 0.7011472785961826,
       "price": 0.32,
       "sport": "NFL",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -93,7 +93,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-26T21:00:26.816936+00:00",
+  "source_feed_generated_at": "2026-11-26T21:07:09.723290+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
