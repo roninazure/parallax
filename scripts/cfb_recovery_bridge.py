@@ -59,6 +59,13 @@ def main() -> int:
     state = args.state_dir.resolve()
     state.mkdir(parents=True, exist_ok=True)
     lock_path = state / "cfb_recovery_bridge.lock"
+    phase_path = state / "cfb_recovery_bridge_phase.json"
+    atomic_json(phase_path, {
+        "status": "STARTING",
+        "updated_at": datetime.now(UTC).isoformat(),
+        "release": release.name,
+    })
+    print("CFB BRIDGE: entering independent scan", flush=True)
     with lock_path.open("a+") as lock:
         try:
             fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -68,6 +75,12 @@ def main() -> int:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(release)
         env["PARALLAX_PUBLIC_FEED_STATE_DIR"] = str(state)
+        atomic_json(phase_path, {
+            "status": "SCANNING",
+            "updated_at": datetime.now(UTC).isoformat(),
+            "release": release.name,
+        })
+        print("CFB BRIDGE: live scan started; scanner output captured until completion", flush=True)
         result = subprocess.run(
             [sys.executable, str(executable)],
             cwd=state,
@@ -109,9 +122,15 @@ def main() -> int:
             "feed": str(state / "public_feed/cfb.json"),
         }
         atomic_json(state / "cfb_recovery_bridge_health.json", health)
+        atomic_json(phase_path, {**health, "status": "PASS"})
         print(json.dumps(health, sort_keys=True))
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except Exception as exc:
+        # Avoid printing runtime environment or transport credentials to a launchd log.
+        print(f"CFB BRIDGE FAILED: {type(exc).__name__}", file=sys.stderr, flush=True)
+        raise
