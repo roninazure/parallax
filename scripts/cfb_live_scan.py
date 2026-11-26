@@ -280,6 +280,32 @@ def _scope_pmus(client: PolymarketUSPublicClient, games) -> tuple[list[dict], di
     }
 
 
+
+def _unique_kalshi_discoveries(rows: list[dict]) -> tuple[list[dict], int, int]:
+    """Deduplicate identical contracts and fail closed on conflicting identities.
+
+    A ticker is the contract identity, not an event or selected team. A conflict
+    across discovery paths disqualifies that ticker from acquisition entirely.
+    """
+    selected: dict[str, dict] = {}
+    conflicts: set[str] = set()
+    duplicates = 0
+    for row in rows:
+        ticker = str(row.get("ticker") or "").strip()
+        if not ticker:
+            continue
+        if ticker in conflicts:
+            continue
+        previous = selected.get(ticker)
+        if previous is None:
+            selected[ticker] = row
+        elif previous == row:
+            duplicates += 1
+        else:
+            conflicts.add(ticker)
+            selected.pop(ticker, None)
+    return list(selected.values()), duplicates, len(conflicts)
+
 def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
     """Reserve Kalshi's existing per-client request budget for executable books.
 
@@ -368,6 +394,9 @@ def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
             failures.append(type(exc).__name__)
         if budget_reached:
             break
+    # A contract discovered by multiple paths must only be scored once.
+    # Conflicting discovery metadata is excluded rather than guessed.
+    rows, duplicate_contracts, conflicting_contracts = _unique_kalshi_discoveries(rows)
     # Deliberately report partial coverage, even if the first page appeared complete.
     # Uninspected event pages and scopes must never be counted as complete.
     return rows, {
@@ -379,6 +408,8 @@ def _scope_kalshi(client: KalshiPublicClient) -> tuple[list[dict], dict]:
         "discovery_requests": client.request_count,
         "reserved_book_requests": max(0, client.max_requests - client.request_count),
         "failed_scopes": dict(Counter(failures)),
+        "duplicate_contracts_skipped": duplicate_contracts,
+        "conflicting_contracts_excluded": conflicting_contracts,
     }
 
 def _scan(*, alert_dispatcher=None) -> dict:
