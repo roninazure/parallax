@@ -61,6 +61,26 @@ jobs:
           assert 'scan._scan(alert_dispatcher=object())' in source
           assert 'PARALLAX_CFB_PROBE_RELEASE' in source
           PY
+      - name: Validate independent CFB recovery bridge
+        run: |
+          bash -n scripts/activate_cfb_recovery_bridge.sh
+          python -m py_compile scripts/cfb_recovery_bridge.py
+          python - <<'PY'
+          from pathlib import Path
+          shell = Path("scripts/activate_cfb_recovery_bridge.sh").read_text()
+          worker = Path("scripts/cfb_recovery_bridge.py").read_text()
+          assert 'NFL_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"' in shell
+          assert 'CFB_SHA="a52d71f2f30c708782bd67bf8f7e3f8fee870923"' in shell
+          assert 'scripts/cfb_recovery_bridge.py' in shell
+          assert 'sudo launchctl bootstrap system "$PLIST"' in shell
+          assert 'PARALLAX_CFB_ENABLED' in shell
+          assert 'cfb_recovery_bridge_health.json' in shell
+          assert 'bootout "$NFL_JOB"' not in shell
+          assert 'kickstart "$NFL_JOB"' not in shell
+          assert 'export_completed_scan("cfb", result.stdout, state)' in worker
+          assert 'config.mode not in {"ntfy", "webhook"}' in worker
+          assert 'timeout=600' in worker
+          PY
       - name: Run CFB regressions
         env:
           PYTHONDONTWRITEBYTECODE: '1'
