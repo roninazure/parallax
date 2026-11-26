@@ -36,6 +36,7 @@ PUBLIC_PLAY_FIELDS = (
     "contract_side",
     "contract_label",
     "position_label",
+    "selected_team",
     "action",
     "price",
     "model_probability",
@@ -795,9 +796,28 @@ def _expired_nfl_buy_indexes(
 def _eligible_cfb_buy_indexes(
     rows: list[Mapping[str, Any]], now: datetime
 ) -> set[int]:
+    """Publish one executable CFB BUY per verified economic outcome.
+
+    BUY YES(team A) and BUY NO(team B) can both select team A.
+    Their different Kalshi contract IDs must not produce duplicate plays.
+    """
+    grouped: dict[str, list[tuple[int, Mapping[str, Any]]]] = {}
+    for index, row in enumerate(rows):
+        if _cfb_buy_source_eligible(row, now):
+            grouped.setdefault(str(row["economic_key"]), []).append((index, row))
     return {
-        index for index, row in enumerate(rows)
-        if _cfb_buy_source_eligible(row, now)
+        min(
+            equivalents,
+            key=lambda item: (
+                float(item[1]["executable_price"]),
+                -float(item[1]["raw_edge"]),
+                -float(item[1]["liquidity"]),
+                str(item[1]["venue"]),
+                str(item[1]["market_id"]),
+                str(item[1]["side"]),
+            ),
+        )[0]
+        for equivalents in grouped.values()
     }
 
 
@@ -856,6 +876,14 @@ def _public_play(row: Mapping[str, Any], lane: str) -> dict[str, Any] | None:
     for key, value in simple_text.items():
         if value is not None:
             public[key] = value
+
+    # A CFB YES/NO contract cannot be named accurately from the ticker alone.
+    # Export the already-verified winning-team selection as a public text field.
+    # Other sports remain unchanged.
+    if lane == "cfb" and action == "BUY" and row.get("publication_eligible") is True:
+        selected = _text(row.get("selected_team"))
+        if selected is not None:
+            public["selected_team"] = selected
 
     label = simple_text["contract_label"]
     if side and label:
