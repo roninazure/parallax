@@ -3429,3 +3429,24 @@ def test_kalshi_lar_ticker_suffix_maps_to_official_la_rams_identity():
     assert mapping.status == "MAPPED_GAME_WINNER"
     assert mapping.game is game
     assert mapping.selected_team == "LA"
+
+
+def test_p1_nfl_publication_hold_withholds_otherwise_eligible_buy_and_ntfy(monkeypatch):
+    """A production incident hold blocks BUY publication without changing scoring."""
+    now = datetime(2026, 10, 3, 11, 12, tzinfo=UTC)
+    candidate = _publication_candidate(now)
+    kwargs = {
+        "scheduled_game_ids": {"2026_04_IND_WAS"},
+        "blocked_game_ids": set(),
+        "now": now,
+    }
+
+    monkeypatch.delenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", raising=False)
+    assert nfl_live_scan._publication_candidates([candidate], **kwargs) == [candidate]
+
+    monkeypatch.setenv("PARALLAX_NFL_BUY_PUBLICATION_HOLD", "1")
+    eligible = nfl_live_scan._publication_candidates([candidate], **kwargs)
+    assert eligible == []
+    assert nfl_live_scan._dispatch_eligible_buy_alerts(object(), eligible) == {
+        "sent": 0, "deduplicated": 0, "failed": 0, "withheld": 0,
+    }

@@ -46,6 +46,7 @@ from parallax.nfl import (
     probability_for_game,
 )
 from parallax.normalization import normalize_kalshi, normalize_pmus
+from parallax.nfl_publication_control import nfl_buy_publication_hold_active
 from parallax.nfl_runtime_state import KALSHI_REFRESH_MAX_MARKETS, NFLRuntimeState, kalshi_kickoff_tier
 from parallax.pmus_acquisition import PMUSAcquisition
 from parallax.pmus_market_data import (
@@ -268,6 +269,8 @@ def _buy_candidate_publication_eligible(
     now: datetime,
 ) -> bool:
     """Fail closed unless this economic BUY is independently safe to publish."""
+    if nfl_buy_publication_hold_active():
+        return False
     play, market, mapping, _detected_at, economic_key, selected_team = candidate
     game = getattr(mapping, "game", None)
     if (
