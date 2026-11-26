@@ -42,8 +42,8 @@ def convert_cfb_feed(feed, *, now=None):
     current = (now or datetime.now(UTC)).astimezone(UTC)
     if feed.get("read_only") is not True or feed.get("lane") != "CFB":
         raise ValueError("Expected sanitized read-only CFB feed")
-    if feed.get("runtime_state") in {"PAUSED", "STALE"}:
-        raise ValueError("CFB feed not running")
+    if feed.get("runtime_state") != "LIVE":
+        raise ValueError("CFB feed is not verified LIVE")
     generated_at = parse_time(feed.get("generated_at"))
     if not -timedelta(minutes=1) <= current - generated_at <= MAX_AGE:
         raise ValueError("CFB feed stale or future-dated")
@@ -94,7 +94,7 @@ def convert_cfb_feed(feed, *, now=None):
         "contract_version": "1.0",
         "snapshot_id": "px-cfb-" + hashlib.sha256((feed["generated_at"] + "|" + str(len(output))).encode()).hexdigest()[:16],
         "mode": "live", "generated_at": generated_at.isoformat(),
-        "read_only": True, "execution_enabled": False, "source_state": "RUNNING",
+        "read_only": True, "execution_enabled": False, "source_state": "LIVE",
         "data_quality": {
             "verified_fields_only": True, "schedule_metadata_verified": False,
             "policy": "CFB-only certified BUYs; stale or ambiguous positions withheld.",
