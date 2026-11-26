@@ -1,36 +1,13 @@
 {
-  "generated_at": "2026-11-26T20:46:03.471429+00:00",
+  "generated_at": "2026-11-26T21:48:25.272476+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 17.24805034,
-      "market_id": "KXNCAAFGAME-26NOV27BUFFAKR-AKR",
-      "matchup": "Buffalo at Akron",
-      "model_probability": 0.4524805034391437,
-      "price": 0.28,
-      "sport": "CFB",
-      "start_time": "2026-11-27T17:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 16.44420784,
-      "market_id": "KXNCAAFGAME-26NOV27TOLOHIO-OHIO",
-      "matchup": "Toledo at Ohio",
-      "model_probability": 0.5744420784183579,
-      "price": 0.41,
-      "sport": "CFB",
-      "start_time": "2026-11-27T17:00:00+00:00",
-      "venue": "KALSHI"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-26T20:45:03.315515+00:00",
+  "source_feed_generated_at": "2026-11-26T21:47:23.785589+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 2
+    "buy": 0
   }
 }
