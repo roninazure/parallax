@@ -1,0 +1,27 @@
+name: PARALLAX LIVE CFB feed integration tests
+
+on:
+  push:
+    branches:
+      - fix/parallax-live-cfb-public-feed-20261125
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e . 'pytest>=8,<9'
+      - name: Run CFB public contract tests
+        run: python -m pytest -q tests/test_cfb_public_selected_team.py tests/test_parallax_live_cfb_adapter.py
+      - name: Compile adapter without network access
+        run: python -m py_compile integrations/parallax_live/cfb_v02_adapter.py
