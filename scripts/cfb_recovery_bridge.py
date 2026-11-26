@@ -84,14 +84,28 @@ def main() -> int:
             raise SystemExit("BLOCKED: CFB safety invariant failed")
         if not isinstance(payload.get("rows"), list) or not payload["rows"]:
             raise SystemExit("BLOCKED: no scored CFB rows")
+        eligible = sum(row.get("publication_eligible") is True for row in payload["rows"])
+        statuses = [
+            info.get("status_counts", {})
+            for info in payload.get("venues", {}).values()
+            if isinstance(info, dict)
+        ]
+        delivery_errors = sum(int(counts.get("ALERT_ERROR", 0)) for counts in statuses)
+        deduplicated = sum(int(counts.get("ALERT_DEDUPLICATED", 0)) for counts in statuses)
+        sent = int(payload.get("alerts", 0))
+        if delivery_errors:
+            raise SystemExit(f"BLOCKED: {delivery_errors} CFB notification errors")
+        if eligible and sent + deduplicated == 0:
+            raise SystemExit("BLOCKED: eligible CFB BUYs were neither notified nor deduplicated")
         export_completed_scan("cfb", result.stdout, state)
         health = {
             "status": "PASS",
             "scanned_at": datetime.now(UTC).isoformat(),
             "release": release.name,
             "scored_positions": len(payload["rows"]),
-            "buy_rows": sum(row.get("publication_eligible") is True for row in payload["rows"]),
-            "alerts_sent": payload.get("alerts", 0),
+            "buy_rows": eligible,
+            "alerts_sent": sent,
+            "alerts_deduplicated": deduplicated,
             "feed": str(state / "public_feed/cfb.json"),
         }
         atomic_json(state / "cfb_recovery_bridge_health.json", health)
