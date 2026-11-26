@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 from statistics import median
 
 from .devig import devig_two_way
@@ -28,10 +29,18 @@ def consensus_two_way_moneyline(
     max_age_seconds: float = 120.0,
     min_books: int = 2,
 ) -> ConsensusFairValue | None:
-    fair = []
+    # One independent observation per bookmaker. A duplicated book must not
+    # turn a single source into artificial two-book corroboration.
+    by_book: dict[str, tuple[str, float, float, float]] = {}
 
     for quote in quotes:
-        if quote.age_seconds < 0 or quote.age_seconds > max_age_seconds:
+        book = str(quote.bookmaker).strip()
+        if (
+            not book
+            or not isfinite(quote.age_seconds)
+            or quote.age_seconds < 0
+            or quote.age_seconds > max_age_seconds
+        ):
             continue
 
         try:
@@ -39,11 +48,17 @@ def consensus_two_way_moneyline(
                 quote.outcome_a_decimal,
                 quote.outcome_b_decimal,
             )
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not (isfinite(pa) and isfinite(pb)):
             continue
 
-        fair.append((quote.bookmaker, pa, pb))
+        key = book.casefold()
+        existing = by_book.get(key)
+        if existing is None or quote.age_seconds < existing[3]:
+            by_book[key] = (book, pa, pb, quote.age_seconds)
 
+    fair = sorted(by_book.values(), key=lambda row: row[0].casefold())
     if len(fair) < min_books:
         return None
 

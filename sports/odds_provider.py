@@ -50,14 +50,18 @@ def _header_int(headers, name: str) -> int | None:
 
 
 def _parse_utc(value: str) -> datetime:
-    return datetime.fromisoformat(
-        value.replace("Z", "+00:00")
-    ).astimezone(timezone.utc)
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError("odds update timestamp must include timezone")
+    return parsed.astimezone(timezone.utc)
 
 
 def _quote_age_seconds(updated_at: str, now: datetime) -> float:
     updated = _parse_utc(updated_at)
-    return max(0.0, (now - updated).total_seconds())
+    if now.tzinfo is None:
+        raise ValueError("evaluation timestamp must include timezone")
+    # Preserve negative age: future-dated quotes are not fresh corroboration.
+    return (now - updated).total_seconds()
 
 
 def fetch_odds_with_quota(

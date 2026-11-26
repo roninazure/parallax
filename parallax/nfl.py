@@ -102,13 +102,22 @@ def _int(value: Any) -> int | None:
 
 
 def _date(value: Any) -> str:
+    """Use NFL Eastern schedule semantics, never the runner's local timezone.
+
+    Date-only fallback retains the historic midnight-Eastern convention.
+    A missing actual kickoff time is not proof of a scheduled kickoff and
+    must be handled by downstream schedule certification separately.
+    """
     text = str(value or "").strip()
     if not text:
         return ""
     try:
-        return datetime.fromisoformat(text.replace("Z", "+00:00")).astimezone(UTC).isoformat()
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError:
-        return text
+        return ""
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=ZoneInfo("America/New_York"))
+    return parsed.astimezone(UTC).isoformat()
 
 
 def _kickoff(raw: dict[str, Any]) -> str:
