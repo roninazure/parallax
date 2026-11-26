@@ -11,19 +11,19 @@
       "status": "BUY"
     },
     {
-      "away_team": "KC",
-      "game_id": "2026_12_KC_BUF",
-      "home_team": "BUF",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-27T01:20:00+00:00",
-      "status": "BUY"
-    },
-    {
       "away_team": "PHI",
       "game_id": "2026_12_PHI_DAL",
       "home_team": "DAL",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-26T21:30:00+00:00",
+      "status": "BUY"
+    },
+    {
+      "away_team": "KC",
+      "game_id": "2026_12_KC_BUF",
+      "home_team": "BUF",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-27T01:20:00+00:00",
       "status": "BUY"
     },
     {
@@ -35,12 +35,44 @@
       "status": "BUY"
     },
     {
+      "away_team": "ATL",
+      "game_id": "2026_12_ATL_MIN",
+      "home_team": "MIN",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-29T18:00:00+00:00",
+      "status": "WATCH"
+    },
+    {
+      "away_team": "BAL",
+      "game_id": "2026_12_BAL_HOU",
+      "home_team": "HOU",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-29T18:00:00+00:00",
+      "status": "BUY"
+    },
+    {
+      "away_team": "NO",
+      "game_id": "2026_12_NO_CIN",
+      "home_team": "CIN",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-29T18:00:00+00:00",
+      "status": "BUY"
+    },
+    {
+      "away_team": "NYG",
+      "game_id": "2026_12_NYG_IND",
+      "home_team": "IND",
+      "schedule_status": "SCHEDULED",
+      "start_time": "2026-11-29T18:00:00+00:00",
+      "status": "BUY"
+    },
+    {
       "away_team": "NYJ",
       "game_id": "2026_12_NYJ_MIA",
       "home_team": "MIA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "WATCH"
+      "status": "BUY"
     },
     {
       "away_team": "TEN",
@@ -80,39 +112,7 @@
       "home_team": "CLE",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-30T01:20:00+00:00",
-      "status": "WATCH"
-    },
-    {
-      "away_team": "ATL",
-      "game_id": "2026_12_ATL_MIN",
-      "home_team": "MIN",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "WITHHELD_INELIGIBLE"
-    },
-    {
-      "away_team": "BAL",
-      "game_id": "2026_12_BAL_HOU",
-      "home_team": "HOU",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
-    },
-    {
-      "away_team": "NO",
-      "game_id": "2026_12_NO_CIN",
-      "home_team": "CIN",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
-    },
-    {
-      "away_team": "NYG",
-      "game_id": "2026_12_NYG_IND",
-      "home_team": "IND",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "PASS"
     },
     {
       "away_team": "CAR",
@@ -131,24 +131,83 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-26T07:37:47.959634+00:00",
+  "generated_at": "2026-11-26T07:38:52.512300+00:00",
   "lane": "NFL",
-  "market_coverage": {},
+  "market_coverage": {
+    "KALSHI": "PARTIAL",
+    "PMUS": "COMPLETE"
+  },
   "read_only": true,
   "research_candidates": [
     {
       "contract_side": "NO",
       "failed_gates": [
-        "stale_data"
+        "edge",
+        "nfl_calibration_safety",
+        "risk_reward"
       ],
       "fees_status": "NOT_BUY_CERTIFIED",
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555511",
-      "market_title": "Who will win in the upcoming football event New York Jets vs Miami Dolphins scheduled for November 29, 2026 at 6:00 PM UTC?",
-      "reason": "PARALLAX previously certified a BUY at $0.3225 at 2026-11-26T07:31:26.849287+00:00; that executable quote expired at 2026-11-26T07:32:03.010554+00:00. Revalidation is required before acting.",
+      "market_id": "2555508",
+      "market_title": "Who will win in the upcoming football event Atlanta Falcons vs Minnesota Vikings scheduled for November 29, 2026 at 6:00 PM UTC?",
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "liquidity",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555510",
+      "market_title": "Who will win in the upcoming football event New Orleans Saints vs Cincinnati Bengals scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "nfl_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV29NOCIN-NO",
+      "market_title": "New Orleans wins",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "liquidity",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV29NYGIND-NYG",
+      "market_title": "New York G wins",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "liquidity",
+        "risk_reward"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "KXNFLGAME-26NOV29NYJMIA-NYJ",
+      "market_title": "New York J wins",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -193,22 +252,6 @@
       "venue": "PMUS"
     },
     {
-      "contract_side": "YES",
-      "failed_gates": [
-        "liquidity",
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555506",
-      "market_title": "Who will win in the upcoming football event Las Vegas Raiders vs Cleveland Browns scheduled for November 29, 2026 at 6:00 PM UTC?",
-      "resolution_time": "2026-11-30T01:20:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
       "contract_side": "NO",
       "failed_gates": [
         "nfl_calibration_safety",
@@ -239,13 +282,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-26T07:37:47.662507+00:00",
+  "source_feed_generated_at": "2026-11-26T07:37:53.256704+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 7,
+    "buy": 8,
     "games": 16,
-    "pass": 9,
-    "research_candidates": 7,
-    "watch": 7
+    "pass": 30,
+    "research_candidates": 10,
+    "watch": 10
   }
 }
