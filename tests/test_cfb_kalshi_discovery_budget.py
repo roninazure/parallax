@@ -280,3 +280,67 @@ def test_cfb_pmus_rate_limit_does_not_abort_kalshi_discovery(monkeypatch):
     assert result["venues"]["KALSHI"]["coverage"]["state"] == "PARTIAL"
     assert result["alerts"] == 0
     assert result["rows"] == []
+
+
+def test_kalshi_same_contract_discovered_twice_only_scores_once():
+    from scripts.cfb_live_scan import _unique_kalshi_discoveries
+
+    event = {"ticker": "KXNCAAFGAME-26NOV27-OH"}
+    series = {"ticker": "KXNCAAFGAME", "fee_type": "quadratic"}
+    contract = {
+        "ticker": "KXNCAAFGAME-26NOV27-OH-OH",
+        "event_ticker": event["ticker"],
+        "_discovery_event": event,
+        "_discovery_series": series,
+    }
+    unrelated = {**contract, "ticker": "KXNCAAFGAME-26NOV27-OH-TOLEDO"}
+    unique, duplicates, conflicts = _unique_kalshi_discoveries(
+        [contract, dict(contract), unrelated]
+    )
+    assert [row["ticker"] for row in unique] == [
+        contract["ticker"], unrelated["ticker"],
+    ]
+    assert duplicates == 1
+    assert conflicts == 0
+
+
+def test_kalshi_conflicting_duplicate_contract_is_excluded():
+    from scripts.cfb_live_scan import _unique_kalshi_discoveries
+
+    original = {
+        "ticker": "KXNCAAFGAME-26NOV27-OH-OH",
+        "_discovery_event": {"ticker": "KXNCAAFGAME-26NOV27-OH"},
+        "_discovery_series": {"ticker": "KXNCAAFGAME", "fee_multiplier": 1},
+    }
+    conflict = {
+        **original,
+        "_discovery_series": {"ticker": "KXNCAAFGAME", "fee_multiplier": 2},
+    }
+    unique, duplicates, conflicts = _unique_kalshi_discoveries(
+        [original, conflict, original]
+    )
+    assert unique == []
+    assert duplicates == 0
+    assert conflicts == 1
+
+
+def test_kalshi_discovery_deduplicates_repeated_event_markets():
+    class Client(_PublicClient):
+        def events_page(self, *, series_ticker, limit, cursor=""):
+            self._request()
+            return {
+                "events": [{"ticker": series_ticker + "-26NOV27-TEST"}],
+                "cursor": "",
+            }
+
+        def event_markets_page(self, *, event_ticker, limit, cursor=""):
+            self._request()
+            return {"markets": [
+                {"ticker": event_ticker + "-OH", "event_ticker": event_ticker},
+                {"ticker": event_ticker + "-OH", "event_ticker": event_ticker},
+            ], "cursor": ""}
+
+    rows, coverage = _scope_kalshi(Client())
+    assert len(rows) == 1
+    assert coverage["duplicate_contracts_skipped"] == 1
+    assert coverage["conflicting_contracts_excluded"] == 0
