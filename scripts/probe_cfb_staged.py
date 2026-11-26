@@ -45,9 +45,10 @@ def main():
         "fees": dict(Counter(row.get("fee_status") for row in rows)),
         "failed_gates": dict(Counter(gate for row in rows for gate in row.get("failed_gates", []))),
         "eligible_buy_rows": sum(1 for row in rows if row.get("publication_eligible")),
+        "duplicate_contract_side_rows": sum(count - 1 for count in Counter((row.get("venue"), row.get("market_id"), row.get("side")) for row in rows).values() if count > 1),
         "samples": [
             {k: row.get(k) for k in (
-                "venue", "matchup", "selected_team", "cfb_v1_probability",
+                "venue", "market_id", "side", "matchup", "selected_team", "cfb_v1_probability",
                 "executable_price", "fee_status", "raw_edge", "verdict",
                 "publication_eligible", "failed_gates"
             )}
