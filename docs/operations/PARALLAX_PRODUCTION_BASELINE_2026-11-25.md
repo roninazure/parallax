@@ -63,3 +63,50 @@ If CFB health stops advancing, investigate logs and exit status first. Do not cl
 4. Review minimal permanent source diff, CI results, and impact on NFL/CFB shared runtime and alerts.
 
 This file records observed operation; it does not assert that PARALLAX LIVE website ingestion is functioning or that the latest GitHub `main` is deployed.
+
+## CFB deduplication release — operator-confirmed November 26, 2026
+
+**Source:** Mac mini terminal results supplied by the operator on November 26 (America/New_York). These observations are not a fresh remote inspection and do not establish successful subsequent feed refresh or website ingestion.
+
+### Problem and correction
+
+Before the cutover, the independent CFB feed contained seven public BUY signals, including three pairs of equivalent Kalshi YES/NO contracts (Buffalo/Akron, Toledo/Ohio, and TCU/Texas Tech). Public BUY records did not include `selected_team`; the feed reported `runtime_state: UNKNOWN`, which alone did not prove the worker had failed.
+
+The production publisher's `_eligible_cfb_buy_indexes` selected every eligible row without grouping by `economic_key`. The staging change instead chooses one eligible row per economic outcome, ranking by executable price, raw edge, liquidity, and stable identifiers. `_public_play` was changed to export verified `selected_team` for CFB eligible BUYs. An initial staging test exposed a missing `selected_team` entry in `PUBLIC_PLAY_FIELDS`; that allowlist was corrected before proceeding. The operator subsequently reported these targeted functional tests as passing:
+
+- Equivalent Kalshi outcomes consolidated to one published index.
+- Selected CFB team survived public export filtering.
+- Candidate publisher loaded from the staged release.
+
+**Limits of this test:** The checks used synthetic records and temporarily mocked CFB eligibility inside the test process. They did not prove the full scheduled scanner or public website consumer. The running CFB bridge, external market source, and NFL code were not modified as part of the patch.
+
+### Cutover evidence
+
+- Former release: `releases/a52d71f2f30c708782bd67bf8f7e3f8fee870923`
+- Candidate release: `releases/cfb-kalshi-dedup-20261126`
+- Independent launchd service: `system/com.swarmedge.parallax-cfb-restore`
+- Rollback plist: `staging/cfb-restore-original.plist`
+- CFB bridge script and runtime state path unchanged.
+
+An initial cutover attempt stopped at the safety check because launchd reported an active scanner (PID 79106, run count 4, last exit code 0). The operator allowed that run to finish normally, then observed `CFB scanner idle — cutover window available`.
+
+The second cutover command reported:
+
+```text
+PASS: CFB RELEASE SWITCHED
+PASS: Original release preserved
+PASS: Rollback plist preserved
+PASS: launchd loaded new CFB release
+NFL and website unchanged
+```
+
+These PASS messages verify that the launchd configuration switched to the candidate path and that backup materials were retained. They are **not** proof that the next scheduled scan successfully produced the corrected CFB JSON, nor that the Sites dashboard consumed it.
+
+### Required acceptance / follow-up
+
+1. At the next normal scheduled scan, inspect `state/parallax/cfb_recovery_bridge_health.json`, the feed's generation timestamp, and launchd's last exit code. Do not manually trigger another scan solely for this check; notifications could repeat.
+2. For each public eligible CFB BUY, require a nonempty `selected_team`; for each `economic_key`, require at most one published BUY. If the normal slate has changed, do not hard-code four expected BUYs.
+3. If checks fail, use the saved `staging/cfb-restore-original.plist` and the untouched `a52d71f2...` release as rollback evidence. Before any rollback, confirm the CFB scanner is idle and inspect live launchd state. Do not change NFL, re-enable the original shared CFB scheduler, or invoke a broad deployment script.
+4. Reconcile PR #86 against the independently deployed CFB-only patch; do not merge its additional staging integration files or assume a public API exists without separate review.
+
+**Operational status as of the last supplied terminal output:** CFB-only switch loaded, **awaiting fresh scheduled-scan validation**. NFL and website were intentionally out of scope.
