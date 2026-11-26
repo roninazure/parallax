@@ -796,9 +796,28 @@ def _expired_nfl_buy_indexes(
 def _eligible_cfb_buy_indexes(
     rows: list[Mapping[str, Any]], now: datetime
 ) -> set[int]:
+    """Publish one executable CFB BUY per verified economic outcome.
+
+    BUY YES(team A) and BUY NO(team B) can both select team A.
+    Their different Kalshi contract IDs must not produce duplicate plays.
+    """
+    grouped: dict[str, list[tuple[int, Mapping[str, Any]]]] = {}
+    for index, row in enumerate(rows):
+        if _cfb_buy_source_eligible(row, now):
+            grouped.setdefault(str(row["economic_key"]), []).append((index, row))
     return {
-        index for index, row in enumerate(rows)
-        if _cfb_buy_source_eligible(row, now)
+        min(
+            equivalents,
+            key=lambda item: (
+                float(item[1]["executable_price"]),
+                -float(item[1]["raw_edge"]),
+                -float(item[1]["liquidity"]),
+                str(item[1]["venue"]),
+                str(item[1]["market_id"]),
+                str(item[1]["side"]),
+            ),
+        )[0]
+        for equivalents in grouped.values()
     }
 
 
