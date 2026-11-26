@@ -3,14 +3,6 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "GB",
-      "game_id": "2026_12_GB_LA",
-      "home_team": "LA",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-26T01:00:00+00:00",
-      "status": "WATCH"
-    },
-    {
       "away_team": "CHI",
       "game_id": "2026_12_CHI_DET",
       "home_team": "DET",
@@ -131,7 +123,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-26T00:56:54.215907+00:00",
+  "generated_at": "2026-11-26T01:00:10.989409+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -139,51 +131,6 @@
   },
   "read_only": true,
   "research_candidates": [
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2422412",
-      "market_title": "Who will win in the upcoming football event Green Bay Packers vs Los Angeles Rams scheduled for November 26, 2026 at 1:00 AM UTC?",
-      "resolution_time": "2026-11-26T01:00:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV25GBLAR-LAR",
-      "market_title": "Los Angeles R wins",
-      "resolution_time": "2026-11-26T01:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV25GBLAR-GB",
-      "market_title": "Green Bay wins",
-      "resolution_time": "2026-11-26T01:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
     {
       "contract_side": "YES",
       "failed_gates": [
@@ -449,9 +396,9 @@
   "state": "LIVE",
   "summary": {
     "buy": 6,
-    "games": 16,
+    "games": 15,
     "pass": 49,
-    "research_candidates": 21,
+    "research_candidates": 18,
     "watch": 21
   }
 }
