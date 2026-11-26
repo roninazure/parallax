@@ -36,6 +36,7 @@ PUBLIC_PLAY_FIELDS = (
     "contract_side",
     "contract_label",
     "position_label",
+    "selected_team",
     "action",
     "price",
     "model_probability",
@@ -856,6 +857,14 @@ def _public_play(row: Mapping[str, Any], lane: str) -> dict[str, Any] | None:
     for key, value in simple_text.items():
         if value is not None:
             public[key] = value
+
+    # A CFB YES/NO contract cannot be named accurately from the ticker alone.
+    # Export the already-verified winning-team selection as a public text field.
+    # Other sports remain unchanged.
+    if lane == "cfb" and action == "BUY" and row.get("publication_eligible") is True:
+        selected = _text(row.get("selected_team"))
+        if selected is not None:
+            public["selected_team"] = selected
 
     label = simple_text["contract_label"]
     if side and label:
