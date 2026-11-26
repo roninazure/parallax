@@ -19,7 +19,7 @@ def feed():
         "price": 0.41, "model_probability": 0.57, "edge_pp": 16.0,
     }
     return {
-        "read_only": True, "lane": "CFB", "runtime_state": "UNKNOWN",
+        "read_only": True, "lane": "CFB", "runtime_state": "LIVE",
         "generated_at": NOW.isoformat(), "source_as_of": NOW.isoformat(),
         "plays": [row],
     }
@@ -30,6 +30,7 @@ def test_certified_buy_maps_price_and_selection():
     assert result["plays"][0]["selection"] == "Ohio"
     assert result["plays"][0]["price_cents"] == 41.0
     assert result["read_only"] is True and result["execution_enabled"] is False
+    assert result["source_state"] == "LIVE"
 
 
 def test_missing_team_suppresses_buy():
@@ -61,4 +62,15 @@ def test_other_lane_rejected():
     payload = feed()
     payload["lane"] = "NFL"
     with pytest.raises(ValueError, match="CFB"):
+        convert_cfb_feed(payload, now=NOW)
+
+
+@pytest.mark.parametrize("runtime_state", ["UNKNOWN", "PAUSED", "STALE", "RUNNING", None])
+def test_unverified_runtime_state_fails_closed(runtime_state):
+    payload = feed()
+    if runtime_state is None:
+        del payload["runtime_state"]
+    else:
+        payload["runtime_state"] = runtime_state
+    with pytest.raises(ValueError, match="verified LIVE"):
         convert_cfb_feed(payload, now=NOW)
