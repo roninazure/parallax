@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-11-26T04:23:17.760338+00:00",
+  "generated_at": "2026-11-26T05:28:49.691246+00:00",
   "lane": "CFB",
   "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 29.44385774,
-      "market_id": "2498226",
-      "matchup": "Nebraska at Iowa",
-      "model_probability": 0.6494385774008345,
-      "price": 0.355,
-      "sport": "CFB",
-      "start_time": "2026-11-27T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "YES",
       "edge_pp": 17.24805034,
@@ -82,10 +71,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-26T04:22:56.580093+00:00",
+  "source_feed_generated_at": "2026-11-26T05:27:55.484336+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 7
+    "buy": 6
   }
 }
