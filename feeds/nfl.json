@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T14:08:02.683954+00:00",
+  "generated_at": "2026-11-26T14:14:29.015580+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -59,55 +59,44 @@
     },
     {
       "contract_side": "NO",
-      "edge_pp": 8.49208121,
-      "market_id": "KXNFLGAME-26NOV29NOCIN-CIN",
-      "matchup": "NO at CIN",
-      "model_probability": 0.254920812147292,
-      "price": 0.17,
-      "sport": "NFL",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
       "edge_pp": 31.92172764,
-      "market_id": "KXNFLGAME-26NOV29NYGIND-IND",
+      "market_id": "2555507",
       "matchup": "NYG at IND",
       "model_probability": 0.5992172763865012,
       "price": 0.28,
       "sport": "NFL",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 38.11472786,
-      "market_id": "KXNFLGAME-26NOV29NYJMIA-MIA",
-      "matchup": "NYJ at MIA",
-      "model_probability": 0.7011472785961826,
-      "price": 0.32,
-      "sport": "NFL",
-      "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
-      "edge_pp": 21.6749933,
-      "market_id": "2555514",
+      "edge_pp": 37.86472786,
+      "market_id": "2555511",
+      "matchup": "NYJ at MIA",
+      "model_probability": 0.7011472785961826,
+      "price": 0.3225,
+      "sport": "NFL",
+      "start_time": "2026-11-29T18:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 22.1749933,
+      "market_id": "KXNFLGAME-26NOV29WASARI-WAS",
       "matchup": "WAS at ARI",
       "model_probability": 0.4617499330208197,
-      "price": 0.245,
+      "price": 0.24,
       "sport": "NFL",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-26T14:07:32.206270+00:00",
+  "source_feed_generated_at": "2026-11-26T14:13:57.889484+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
-    "buy": 9
+    "buy": 8
   }
 }
