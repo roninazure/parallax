@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-11-26T14:33:50.687731+00:00",
+  "generated_at": "2026-11-26T15:38:26.042331+00:00",
   "lane": "NBA",
   "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-26T14:33:26.858187+00:00",
-  "source_schedule_state": "INCOMPLETE",
-  "state": "LIVE",
+  "source_feed_generated_at": "2026-11-26T15:38:27.004705+00:00",
+  "source_schedule_state": "STALE",
+  "state": "STALE",
   "summary": {
     "buy": 0
   }
