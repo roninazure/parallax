@@ -1,0 +1,90 @@
+name: CFB recovery regression checks
+
+on:
+  push:
+    branches:
+      - fix/cfb-reserve-kalshi-book-budget-20261122
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cfb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout candidate branch
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install project dependencies
+        run: python -m pip install -e . 'pytest>=8,<9'
+      - name: Validate production recovery shell syntax
+        run: bash -n scripts/finish_cfb_recovery.sh scripts/finish_cfb_recovery_v2.sh scripts/stage_cfb_recovery_v3.sh
+      - name: Verify both production cutover guards target current release
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("scripts/finish_cfb_recovery_v2.sh").read_text()
+          correct = 'sudo launchctl print "$SERVICE" | grep -F "$LIVE_SHA" >/dev/null'
+          assert source.count(correct) == 2, "both release guards must match current production"
+          assert 'sudo launchctl print "$SERVICE" | grep -F "$OLD_SHA"' not in source
+          PY
+      - name: Verify safe stage-only CFB recovery pins validated release
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("scripts/stage_cfb_recovery_v3.sh").read_text()
+          assert 'LIVE_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"' in source
+          assert 'BASE_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"' in source
+          assert 'PATCH_SHA="3731658d8f1774dc3f8b2e2ee127ebef70056f1f"' in source
+          assert 'git -C "$SRC" worktree add --detach "$WT" "$BASE_SHA"' in source
+          assert '--apply' not in source
+          assert not any(line.lstrip().startswith('sudo launchctl bootout ') for line in source.splitlines())
+          assert not any(line.lstrip().startswith('sudo launchctl bootstrap ') for line in source.splitlines())
+          assert 'sudo "$TEST_PY" "$SRC/scripts/deploy_parallax_sports.py"' not in source
+          PY
+      - name: Verify isolated CFB live probe safeguards
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          source = Path("scripts/probe_cfb_staged.py").read_text()
+          ast.parse(source)
+          assert 'tempfile.TemporaryDirectory' in source
+          assert 'scan.PROSPECTIVE_DB = Path(tmp)' in source
+          assert 'scan._dispatch_eligible_buy_alert = lambda' in source
+          assert 'scan._scan(alert_dispatcher=object())' in source
+          assert 'PARALLAX_CFB_PROBE_RELEASE' in source
+          PY
+      - name: Validate independent CFB recovery bridge
+        run: |
+          bash -n scripts/activate_cfb_recovery_bridge.sh
+          python -m py_compile scripts/cfb_recovery_bridge.py
+          python - <<'PY'
+          from pathlib import Path
+          shell = Path("scripts/activate_cfb_recovery_bridge.sh").read_text()
+          worker = Path("scripts/cfb_recovery_bridge.py").read_text()
+          assert 'NFL_SHA="46e87dfa7a7697488d14f19d83f4479031cde510"' in shell
+          assert 'CFB_SHA="a52d71f2f30c708782bd67bf8f7e3f8fee870923"' in shell
+          assert 'scripts/cfb_recovery_bridge.py' in shell
+          assert 'sudo launchctl bootstrap system "$PLIST"' in shell
+          assert 'PARALLAX_CFB_ENABLED' in shell
+          assert 'cfb_recovery_bridge_health.json' in shell
+          assert 'bootout "$NFL_JOB"' not in shell
+          assert 'kickstart "$NFL_JOB"' not in shell
+          assert 'export_completed_scan("cfb", result.stdout, state)' in worker
+          assert 'config.mode not in {"ntfy", "webhook"}' in worker
+          assert 'timeout=600' in worker
+          PY
+      - name: Run CFB regressions
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python -m pytest -q tests/test_cfb_kalshi_discovery_budget.py tests/test_parallax_live_cfb.py tests/test_parallax_cfb.py
+
+      # Historical NFL baseline eeb1c621 is Mac-local and not GitHub-fetchable.
+      # The guarded cutover runs this exact-overlay suite locally before apply.

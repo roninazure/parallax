@@ -178,6 +178,9 @@ def test_cfb_live_scan_fetches_exactly_one_active_season(monkeypatch):
     fetched = []
 
     class Client:
+        def __init__(self, **kwargs):
+            pass
+
         def markets_page(self, **kwargs):
             raise AssertionError("mock paginator must not call the provider client")
 
@@ -189,7 +192,7 @@ def test_cfb_live_scan_fetches_exactly_one_active_season(monkeypatch):
     monkeypatch.setattr(cfb_live_scan, "TrackRecord", lambda path: object())
     monkeypatch.setattr(cfb_live_scan, "PolymarketUSPublicClient", Client)
     monkeypatch.setattr(cfb_live_scan, "KalshiPublicClient", Client)
-    monkeypatch.setattr(cfb_live_scan, "paginate", lambda *args, **kwargs: ([], SimpleNamespace(pages=0)))
+    monkeypatch.setattr(cfb_live_scan, "_scope_pmus", lambda client, games: ([], {"state": "TARGETED"}))
     monkeypatch.setattr(cfb_live_scan, "_scope_kalshi", lambda client: ([], {"state": "COMPLETE"}))
 
     result = cfb_live_scan._scan(alert_dispatcher=object())
@@ -269,6 +272,29 @@ def test_qualifying_cfb_buy_alerts_once_and_duplicate_dedupes(tmp_path):
     assert duplicate["status"] == "SENT" and duplicate["deduplicated"] is True
     assert len(transport.calls) == 1
     assert "Sport: CFB" in transport.calls[0][1]["message"]
+
+
+
+def test_cfb_equivalent_opposite_contract_sides_do_not_double_alert(tmp_path):
+    """YES and NO on different team contracts can represent the same pick."""
+    transport = _AlertTransport()
+    dispatcher = _alert_dispatcher(tmp_path, transport)
+    detected_at = datetime(2026, 11, 25, 18, tzinfo=UTC)
+    mapping = _alert_mapping()
+    key = "CFB:game-1:alabama"
+    # Opposite YES/NO positions, different market IDs, same selected winner.
+    yes_play = _cfb_alert_play()
+    no_play = SimpleNamespace(
+        **{**vars(yes_play), "market_id": "KXNCAAFGAME-OTHERTEAM", "side": Side.NO}
+    )
+    for play in (yes_play, no_play):
+        result = cfb_live_scan._dispatch_eligible_buy_alert(
+            dispatcher, play, market(), mapping, detected_at,
+            publication_eligible=True, economic_key=key, selected_team="Alabama",
+        )
+        assert result is not None and result["status"] == "SENT"
+    assert len(transport.calls) == 1
+
 
 
 def test_cfb_watch_pass_and_uncertified_buy_are_silent(tmp_path):
