@@ -3,14 +3,6 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "PHI",
-      "game_id": "2026_12_PHI_DAL",
-      "home_team": "DAL",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-26T21:30:00+00:00",
-      "status": "WATCH"
-    },
-    {
       "away_team": "KC",
       "game_id": "2026_12_KC_BUF",
       "home_team": "BUF",
@@ -123,7 +115,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-26T21:27:55.661913+00:00",
+  "generated_at": "2026-11-26T21:30:06.195024+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "COMPLETE",
@@ -131,20 +123,6 @@
   },
   "read_only": true,
   "research_candidates": [
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "stale_data"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2454047",
-      "market_title": "Who will win in the upcoming football event Philadelphia Eagles vs Dallas Cowboys scheduled for November 26, 2026 at 9:30 PM UTC?",
-      "reason": "PARALLAX previously certified a BUY at $0.2050 at 2026-11-26T21:26:01.287259+00:00; that executable quote expired at 2026-11-26T21:27:01.185830+00:00. Revalidation is required before acting.",
-      "resolution_time": "2026-11-26T21:30:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
     {
       "contract_side": "NO",
       "failed_gates": [
@@ -417,9 +395,9 @@
   "state": "LIVE",
   "summary": {
     "buy": 3,
-    "games": 15,
+    "games": 14,
     "pass": 48,
-    "research_candidates": 20,
+    "research_candidates": 19,
     "watch": 20
   }
 }
