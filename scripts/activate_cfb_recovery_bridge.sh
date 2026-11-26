@@ -27,6 +27,7 @@ fail() { printf 'CFB BRIDGE BLOCKED: %s\n' "$*" >&2; exit 1; }
 [[ -x "$PY" && -f "$RELEASE/scripts/cfb_live_scan.py" ]] || fail "staged CFB v4 release missing"
 [[ -d "$REPO/.git" || -f "$REPO/.git" ]] || fail "Mac mini git repository missing"
 [[ -f "$ENV_FILE" ]] || fail "runtime.env unavailable"
+[[ -w "$ENV_FILE" ]] || fail "runtime.env is not writable by scottsteele"
 [[ ! -e "$BACKUP" && ! -e "$HEALTH" ]] || fail "bridge was already attempted; do not overwrite backups or health"
 [[ ! -e "$PLIST" ]] || fail "CFB launchd job already installed"
 sudo launchctl print "$CFB_JOB" >/dev/null 2>&1 && fail "CFB job already loaded"
@@ -46,6 +47,19 @@ PY
 mkdir -p "$OPS" "$LOGS" "$STATE"
 chmod 700 "$OPS"
 cp -p "$ENV_FILE" "$BACKUP"
+BRIDGE_LOADED=0
+BRIDGE_ACTIVATED=0
+cleanup_failure() {
+  code=$?
+  trap - EXIT
+  if [[ "$BRIDGE_ACTIVATED" != 1 && "$BRIDGE_LOADED" == 1 ]]; then
+    sudo launchctl bootout "$CFB_JOB" >/dev/null 2>&1 || true
+    sudo rm -f "$PLIST"
+    echo "CFB bridge was not activated; auxiliary job removed, original CFB setting retained." >&2
+  fi
+  exit "$code"
+}
+trap cleanup_failure EXIT
 git -C "$REPO" cat-file blob "$WORKER_SHA:scripts/cfb_recovery_bridge.py" > "$WORKER"
 head -1 "$WORKER" | grep -Fxq '#!/usr/bin/env python3' || fail "invalid recovery worker"
 "$PY" -m py_compile "$WORKER"
@@ -79,6 +93,7 @@ if ! sudo launchctl bootstrap system "$PLIST"; then
   echo "CFB bootstrap failed; original CFB remains enabled. NFL untouched." >&2
   exit 1
 fi
+BRIDGE_LOADED=1
 sudo launchctl print "$CFB_JOB" >/dev/null || fail "CFB job not loaded"
 
 # Require a real completed scan and feed export before switching CFB ownership.
@@ -126,6 +141,8 @@ if ! grep -Fq "PARALLAX_RELEASE_SHA => $NFL_SHA" <<< "$NFL_AFTER" || ! grep -Fq 
   cp -p "$BACKUP" "$ENV_FILE"
   fail "NFL service unexpected change: original runtime env restored"
 fi
+BRIDGE_ACTIVATED=1
+trap - EXIT
 echo "CFB BRIDGE ACTIVE: new CFB release scans hourly and publishes shared feed."
 echo "NFL service remains running on $NFL_SHA; original CFB lane disabled via runtime.env only."
 echo "Rollback config backup: $BACKUP"
