@@ -1,0 +1,62 @@
+name: NFL historical model versus market benchmark
+
+on:
+  push:
+    branches:
+      - fix/p1-nfl-model-market-benchmark-20261102
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-nfl-benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout benchmark branch
+        uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install project and test harness
+        run: python -m pip install -e . pytest
+      - name: Run no-network benchmark and existing odds model regressions
+        env:
+          TZ: UTC
+        run: |
+          python -m py_compile scripts/nfl_market_benchmark.py tests/test_nfl_market_benchmark.py
+          python -m pytest -q tests/test_nfl_market_benchmark.py tests/test_sports_fair_value.py tests/test_sports_odds_provider.py
+      - name: Fetch one read-only historical source snapshot
+        run: |
+          mkdir -p validation-output
+          curl --fail --silent --show-error --location --retry 0 --max-time 25 \
+            https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv \
+            -o validation-output/nflverse-games.csv
+          sha256sum validation-output/nflverse-games.csv
+      - name: Retrospective paired 2025 model-versus-market results
+        env:
+          TZ: UTC
+        run: |
+          python scripts/nfl_market_benchmark.py \
+            --csv validation-output/nflverse-games.csv \
+            --season 2025 --min-paired 100 \
+            --output validation-output/nfl-market-benchmark-2025.json
+      - name: Measure corrected playoff and tie semantics as an offline challenger
+        env:
+          TZ: UTC
+        run: |
+          python scripts/nfl_market_benchmark.py \
+            --csv validation-output/nflverse-games.csv \
+            --season 2025 --min-paired 100 \
+            --variant postseason_and_tie_corrected \
+            --output validation-output/nfl-market-challenger-2025.json
+      - name: Save reproducible source and result together
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nfl-p1-offline-2025-evidence
+          path: validation-output/
+          if-no-files-found: warn
+          retention-days: 30
