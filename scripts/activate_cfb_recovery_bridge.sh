@@ -52,10 +52,18 @@ BRIDGE_ACTIVATED=0
 cleanup_failure() {
   code=$?
   trap - EXIT
-  if [[ "$BRIDGE_ACTIVATED" != 1 && "$BRIDGE_LOADED" == 1 ]]; then
-    sudo launchctl bootout "$CFB_JOB" >/dev/null 2>&1 || true
+  if [[ "$BRIDGE_ACTIVATED" != 1 ]]; then
+    # Failure does not authorize replacing the original CFB runtime setting.
+    cp -p "$BACKUP" "$ENV_FILE" || true
+    if [[ "$BRIDGE_LOADED" == 1 ]]; then
+      sudo launchctl bootout "$CFB_JOB" >/dev/null 2>&1 || {
+        echo "WARNING: auxiliary CFB service could not be unloaded; manual inspection required." >&2
+        exit "$code"
+      }
+    fi
     sudo rm -f "$PLIST"
-    echo "CFB bridge was not activated; auxiliary job removed, original CFB setting retained." >&2
+    rm -f "$BACKUP"
+    echo "CFB bridge was not activated; auxiliary job cleaned up and original configuration retained." >&2
   fi
   exit "$code"
 }
