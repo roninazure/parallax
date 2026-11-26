@@ -2,7 +2,7 @@
   "fees_status": "SEE_CERTIFIED_BUY_FEED",
   "freshness_seconds": 900,
   "games": [],
-  "generated_at": "2026-11-26T15:19:02.101187+00:00",
+  "generated_at": "2026-11-26T15:34:08.184588+00:00",
   "lane": "CFB",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -12,7 +12,7 @@
   "research_candidates": [],
   "schema_version": "parallax.intelligence.v1",
   "source_feed_generated_at": "2026-11-26T15:18:44.129108+00:00",
-  "state": "LIVE",
+  "state": "STALE",
   "summary": {
     "buy": 3,
     "games": 0,
