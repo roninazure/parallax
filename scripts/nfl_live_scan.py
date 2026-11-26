@@ -37,6 +37,7 @@ from parallax.inbox import default_inbox_store
 from parallax.models import Action, Side, timestamp, utcnow
 from parallax.nfl import (
     VALIDATION_ECE,
+    MODEL_VERSION,
     NFLEvidenceProvider,
     NFL_TEAM_NAMES,
     economic_team_for_side,
@@ -90,6 +91,55 @@ def _upcoming_slate(games, now):
             }
         )
     return scheduled
+
+
+def _schedule_intelligence(games, scheduled: list[dict], market_rows: list[dict]) -> list[dict]:
+    """Customer-facing game research independent of BUY certification.
+
+    A calibrated trade decision requires quotes, fee provenance and evidence.
+    The schedule-derived model estimate is separate research, not a trade
+    recommendation. Never synthesize prices or edges from the forecast.
+    """
+    indexed = {game.game_id: game for game in games}
+    market_by_game: dict[str, list[dict]] = {}
+    for row in market_rows:
+        game_id = str(row.get("game_id") or "")
+        if game_id:
+            market_by_game.setdefault(game_id, []).append(row)
+    out: list[dict] = []
+    for game in scheduled:
+        identity = indexed.get(game["game_id"])
+        probability = probability_for_game(identity, games) if identity is not None else None
+        positions = market_by_game.get(game["game_id"], [])
+        quotes = []
+        for row in positions:
+            if row.get("venue") not in {"PMUS", "KALSHI"}:
+                continue
+            price = row.get("executable_price")
+            # Only publish a quote when it was acquired and remains FRESH.
+            if row.get("acquisition_status") != "ACQUIRED" or row.get("data_freshness") != "FRESH":
+                price = None
+            quotes.append({
+                "venue": row["venue"],
+                "side": row.get("side"),
+                "market_id": row.get("market_id"),
+                "executable_price": price,
+                "quote_observed_at": row.get("updated_at") if price is not None else None,
+                "quote_state": "FRESH" if price is not None else "UNVERIFIED",
+            })
+        out.append({
+            **game,
+            "home_win_probability": probability,
+            "away_win_probability": 1 - probability if probability is not None else None,
+            "forecast_kind": "RESEARCH_ONLY" if probability is not None else "UNAVAILABLE",
+            "forecast_model": MODEL_VERSION if probability is not None else None,
+            "certified_buy": any(
+                row.get("verdict") == "BUY" and row.get("publication_eligible") is True
+                for row in positions
+            ),
+            "venue_quotes": quotes,
+        })
+    return out
 
 
 def _venue_team_code(value: object) -> str:
@@ -1249,6 +1299,7 @@ def _scan(
             next_warm_cursor=refresh_selection["next_warm_cursor"],
             observed_at_by_ticker=kalshi_observed_at_by_ticker,
         )
+    result["game_intelligence"] = _schedule_intelligence(games, scheduled_for_discovery, rows_out)
     result["summary"] = {"nfl_markets_discovered": {"PMUS": len(pmus_rows), "KALSHI": len(kalshi_rows)}, "status_counts": dict(statuses), "rejection_counts": dict(rejection_reasons), "rows": rows_out}
     return result
 

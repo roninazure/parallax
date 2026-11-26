@@ -953,6 +953,72 @@ def _public_expired_nfl_signal(
     return public
 
 
+def _public_nfl_game_intelligence(value: object, now: datetime) -> list[dict[str, Any]]:
+    """Expose schedule-first research without weakening BUY authorization.
+
+    The forecast is model research, not an executable trade signal. Unverified
+    prices, fee estimates and edges are deliberately not manufactured.
+    """
+    if not isinstance(value, list):
+        return []
+    output: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, Mapping):
+            continue
+        required = ("game_id", "away_team", "home_team", "start_time")
+        if not all(_text(item.get(key)) for key in required):
+            continue
+        game = {key: item[key] for key in required}
+        for field in ("date", "schedule_status"):
+            if _text(item.get(field)):
+                game[field] = item[field]
+        home = _number(item.get("home_win_probability"))
+        away = _number(item.get("away_win_probability"))
+        if (
+            home is not None and away is not None
+            and math.isfinite(home) and math.isfinite(away)
+            and 0 <= home <= 1 and 0 <= away <= 1
+            and abs(home + away - 1) < 1e-6
+            and item.get("forecast_kind") == "RESEARCH_ONLY"
+        ):
+            game["home_win_probability"] = home
+            game["away_win_probability"] = away
+            game["forecast_kind"] = "RESEARCH_ONLY"
+            if _text(item.get("forecast_model")):
+                game["forecast_model"] = item["forecast_model"]
+        else:
+            game["forecast_kind"] = "UNAVAILABLE"
+        game["venue_quotes"] = []
+        quotes = item.get("venue_quotes")
+        if isinstance(quotes, list):
+            for quote in quotes:
+                if not isinstance(quote, Mapping):
+                    continue
+                venue = _text(quote.get("venue"))
+                if venue not in {"PMUS", "KALSHI"}:
+                    continue
+                published = {"venue": venue, "quote_state": "UNVERIFIED"}
+                for field in ("side", "market_id"):
+                    if _text(quote.get(field)):
+                        published[field] = quote[field]
+                price = _number(quote.get("executable_price"))
+                observed_at = _parse_timestamp(quote.get("quote_observed_at"))
+                if (
+                    quote.get("quote_state") == "FRESH"
+                    and observed_at is not None
+                    and timedelta(0) <= now - observed_at <= timedelta(seconds=60)
+                    and price is not None and math.isfinite(price)
+                    and 0 < price < 1
+                ):
+                    published["executable_price"] = price
+                    published["quote_observed_at"] = observed_at.isoformat()
+                    published["quote_state"] = "FRESH"
+                game["venue_quotes"].append(published)
+        # BUY status must come from _eligible_nfl_buy_indexes, not scan hints.
+        output.append(game)
+    return output
+
+
 def sanitize_completed_scan(
     lane: str,
     completed_stdout: str,
@@ -1035,6 +1101,10 @@ def sanitize_completed_scan(
         },
         "plays": plays,
     }
+    if normalized_lane == "nfl":
+        result["game_intelligence"] = _public_nfl_game_intelligence(
+            decoded.get("game_intelligence"), now
+        )
     if market_data_complete is not None:
         result["market_data_complete"] = market_data_complete
     eligible_nfl_game_ids = (

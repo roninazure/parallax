@@ -60,6 +60,36 @@ Validate the rendered plist before any cutover:
 plutil -lint "$RENDERED_PLIST"
 ```
 
+The legacy `scripts/migration_preflight.py` plist renderer is not compatible
+with the sports template: it does not substitute all required tokens.
+For the sports service use the dedicated **render-only** utility:
+
+```sh
+python scripts/render_parallax_sports_plist.py \
+  --template deploy/launchd/com.swarmedge.parallax-sports.plist.in \
+  --output "$RENDERED_PLIST" \
+  --release-root "$RELEASE" \
+  --python "$VENV/bin/python3" \
+  --state-dir "$STATE_DIR" \
+  --runtime-env "$RUNTIME_ENV" \
+  --log-dir "$LOG_DIR" \
+  --release-sha "$SHA"
+plutil -lint "$RENDERED_PLIST"
+```
+
+The renderer requires absolute paths and a full SHA matching the release
+directory, rejects unknown placeholders, and refuses to overwrite an existing
+plist. Rendering and linting do not start, stop, install, or reload launchd.
+
+**STOP:** Successful rendering is not cutover approval. Before attempting any
+production service changes, an authorized attended Mac mini session must
+confirm the current running SHA and live system-domain launchd job, preserve
+the active plist, and establish a tested same-domain rollback. The legacy
+`com.swarmedge.runner` LaunchAgent cutover in
+[`MIGRATION.md`](MIGRATION.md) is **not** a sports rollback procedure.
+A previous `launchctl bootstrap system` failure means no unattended
+cutover should be attempted until launchd state and permissions are confirmed.
+
 ## Generate the deployment manifest
 
 Bind the release, dependency lock, runtime environment, launchd plist, and scheduler entrypoint:
