@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T17:29:14.431331+00:00",
+  "generated_at": "2026-11-26T18:34:56.704266+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -25,9 +25,9 @@
       "venue": "KALSHI"
     },
     {
-      "contract_side": "NO",
+      "contract_side": "YES",
       "edge_pp": 12.81662823,
-      "market_id": "KXNCAAFGAME-26NOV26TCUTTU-TTU",
+      "market_id": "KXNCAAFGAME-26NOV26TCUTTU-TCU",
       "matchup": "TCU at Texas Tech",
       "model_probability": 0.2881662823083301,
       "price": 0.16,
@@ -38,7 +38,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-26T17:29:05.819897+00:00",
+  "source_feed_generated_at": "2026-11-26T18:34:11.543841+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
