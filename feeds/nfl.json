@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-27T06:57:40.398200+00:00",
+  "generated_at": "2026-11-27T07:04:05.320277+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -25,15 +25,15 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "YES",
-      "edge_pp": 30.92172764,
-      "market_id": "KXNFLGAME-26NOV29NYGIND-IND",
+      "contract_side": "NO",
+      "edge_pp": 31.67172764,
+      "market_id": "2555507",
       "matchup": "NYG at IND",
       "model_probability": 0.5992172763865012,
-      "price": 0.29,
+      "price": 0.2825,
       "sport": "NFL",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "venue": "KALSHI"
+      "venue": "POLYMARKET"
     },
     {
       "contract_side": "NO",
@@ -60,7 +60,7 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-27T06:57:08.490215+00:00",
+  "source_feed_generated_at": "2026-11-27T07:03:32.437747+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
