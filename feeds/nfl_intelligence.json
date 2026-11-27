@@ -32,7 +32,7 @@
       "home_team": "CIN",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "NYG",
@@ -48,7 +48,7 @@
       "home_team": "MIA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "TEN",
@@ -80,7 +80,7 @@
       "home_team": "ARI",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "LV",
@@ -107,12 +107,9 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-27T18:59:58.137977+00:00",
+  "generated_at": "2026-11-27T19:05:20.799407+00:00",
   "lane": "NFL",
-  "market_coverage": {
-    "KALSHI": "PARTIAL",
-    "PMUS": "COMPLETE"
-  },
+  "market_coverage": {},
   "read_only": true,
   "research_candidates": [
     {
@@ -175,6 +172,20 @@
       "venue": "PMUS"
     },
     {
+      "contract_side": "YES",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555510",
+      "market_title": "Who will win in the upcoming football event New Orleans Saints vs Cincinnati Bengals scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.1675 at 2026-11-27T18:58:54.842469+00:00; that executable quote expired at 2026-11-27T18:59:48.197947+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
       "contract_side": "NO",
       "failed_gates": [
         "liquidity",
@@ -184,6 +195,20 @@
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "2555507",
       "market_title": "Who will win in the upcoming football event New York Giants vs Indianapolis Colts scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555511",
+      "market_title": "Who will win in the upcoming football event New York Jets vs Miami Dolphins scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.3150 at 2026-11-27T18:58:54.895226+00:00; that executable quote expired at 2026-11-27T18:59:54.110198+00:00. Revalidation is required before acting.",
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
@@ -226,6 +251,20 @@
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "2555513",
       "market_title": "Who will win in the upcoming football event Seattle Seahawks vs San Francisco 49ers scheduled for November 29, 2026 at 9:25 PM UTC?",
+      "resolution_time": "2026-11-29T21:25:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555514",
+      "market_title": "Who will win in the upcoming football event Washington Commanders vs Arizona Cardinals scheduled for November 29, 2026 at 9:25 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.2525 at 2026-11-27T18:58:54.988396+00:00; that executable quote expired at 2026-11-27T18:59:48.206000+00:00. Revalidation is required before acting.",
       "resolution_time": "2026-11-29T21:25:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
@@ -315,13 +354,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-27T18:59:12.997251+00:00",
+  "source_feed_generated_at": "2026-11-27T19:05:20.451848+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 4,
+    "buy": 1,
     "games": 13,
-    "pass": 28,
-    "research_candidates": 14,
-    "watch": 14
+    "pass": 25,
+    "research_candidates": 17,
+    "watch": 17
   }
 }
