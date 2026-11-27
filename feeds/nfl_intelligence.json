@@ -3,14 +3,6 @@
   "freshness_seconds": 900,
   "games": [
     {
-      "away_team": "DEN",
-      "game_id": "2026_12_DEN_PIT",
-      "home_team": "PIT",
-      "schedule_status": "SCHEDULED",
-      "start_time": "2026-11-27T20:00:00+00:00",
-      "status": "BUY"
-    },
-    {
       "away_team": "ATL",
       "game_id": "2026_12_ATL_MIN",
       "home_team": "MIN",
@@ -107,7 +99,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-27T19:56:43.215085+00:00",
+  "generated_at": "2026-11-27T20:00:34.252868+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -277,7 +269,7 @@
   "state": "LIVE",
   "summary": {
     "buy": 6,
-    "games": 13,
+    "games": 12,
     "pass": 29,
     "research_candidates": 11,
     "watch": 11
