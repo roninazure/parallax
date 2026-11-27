@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-27T19:20:39.047916+00:00",
+  "generated_at": "2026-11-27T20:23:13.823149+00:00",
   "lane": "CFB",
   "plays": [
     {
@@ -26,13 +26,13 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 39.45525933,
-      "market_id": "2534166",
-      "matchup": "Michigan at Ohio State",
-      "model_probability": 0.6245525933407059,
-      "price": 0.23,
+      "edge_pp": 36.8975186,
+      "market_id": "2522372",
+      "matchup": "Minnesota at Wisconsin",
+      "model_probability": 0.6189751859626113,
+      "price": 0.25,
       "sport": "CFB",
-      "start_time": "2026-11-28T17:00:00+00:00",
+      "start_time": "2026-11-28T00:30:00+00:00",
       "venue": "POLYMARKET"
     },
     {
@@ -70,17 +70,6 @@
     },
     {
       "contract_side": "YES",
-      "edge_pp": 15.46230595,
-      "market_id": "2505889",
-      "matchup": "App State at South Alabama",
-      "model_probability": 0.5746230594609018,
-      "price": 0.42,
-      "sport": "CFB",
-      "start_time": "2026-11-27T20:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
       "edge_pp": 15.10303311,
       "market_id": "KXNCAAFGAME-26NOV27TEMMEM-TEM",
       "matchup": "Temple at Memphis",
@@ -89,25 +78,14 @@
       "sport": "CFB",
       "start_time": "2026-11-27T20:30:00+00:00",
       "venue": "KALSHI"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 12.60928605,
-      "market_id": "2609609",
-      "matchup": "Army at Rice",
-      "model_probability": 0.48609286051515943,
-      "price": 0.36,
-      "sport": "CFB",
-      "start_time": "2026-11-28T19:00:00+00:00",
-      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-27T19:20:38.529553+00:00",
+  "source_feed_generated_at": "2026-11-27T20:22:32.684752+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 9
+    "buy": 7
   }
 }
