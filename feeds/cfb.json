@@ -1,7 +1,18 @@
 {
-  "generated_at": "2026-11-27T04:15:21.301415+00:00",
+  "generated_at": "2026-11-27T05:20:58.131061+00:00",
   "lane": "CFB",
   "plays": [
+    {
+      "contract_side": "YES",
+      "edge_pp": 26.04949677,
+      "market_id": "2611610",
+      "matchup": "Kansas State at Iowa State",
+      "model_probability": 0.6304949677032917,
+      "price": 0.37,
+      "sport": "CFB",
+      "start_time": "2026-11-28T19:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "YES",
       "edge_pp": 17.24805034,
@@ -14,23 +25,34 @@
       "venue": "KALSHI"
     },
     {
-      "contract_side": "NO",
+      "contract_side": "YES",
       "edge_pp": 16.44420784,
-      "market_id": "KXNCAAFGAME-26NOV27TOLOHIO-TOL",
+      "market_id": "KXNCAAFGAME-26NOV27TOLOHIO-OHIO",
       "matchup": "Toledo at Ohio",
       "model_probability": 0.5744420784183579,
       "price": 0.41,
       "sport": "CFB",
       "start_time": "2026-11-27T17:00:00+00:00",
       "venue": "KALSHI"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 15.10303311,
+      "market_id": "KXNCAAFGAME-26NOV27TEMMEM-TEM",
+      "matchup": "Temple at Memphis",
+      "model_probability": 0.2610303311354927,
+      "price": 0.11,
+      "sport": "CFB",
+      "start_time": "2026-11-27T20:30:00+00:00",
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-27T04:15:03.093354+00:00",
+  "source_feed_generated_at": "2026-11-27T05:19:56.753918+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 2
+    "buy": 4
   }
 }
