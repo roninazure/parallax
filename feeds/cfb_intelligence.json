@@ -2,7 +2,7 @@
   "fees_status": "SEE_CERTIFIED_BUY_FEED",
   "freshness_seconds": 900,
   "games": [],
-  "generated_at": "2026-11-27T09:54:59.392068+00:00",
+  "generated_at": "2026-11-27T10:44:22.015417+00:00",
   "lane": "CFB",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -11,12 +11,12 @@
   "read_only": true,
   "research_candidates": [],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-27T09:38:56.864991+00:00",
-  "state": "STALE",
+  "source_feed_generated_at": "2026-11-27T10:43:50.880565+00:00",
+  "state": "LIVE",
   "summary": {
     "buy": 3,
     "games": 0,
-    "pass": 9,
+    "pass": 10,
     "research_candidates": 0,
     "watch": 0
   }
