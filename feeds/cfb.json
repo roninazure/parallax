@@ -1,91 +1,13 @@
 {
-  "generated_at": "2026-11-27T20:23:13.823149+00:00",
+  "generated_at": "2026-11-27T21:27:19.416604+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 48.78658683,
-      "market_id": "2799689",
-      "matchup": "Auburn at Alabama",
-      "model_probability": 0.6428658683059865,
-      "price": 0.155,
-      "sport": "CFB",
-      "start_time": "2026-11-29T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 48.27711861,
-      "market_id": "2607508",
-      "matchup": "Notre Dame at Syracuse",
-      "model_probability": 0.5327711860867119,
-      "price": 0.05,
-      "sport": "CFB",
-      "start_time": "2026-11-28T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 36.8975186,
-      "market_id": "2522372",
-      "matchup": "Minnesota at Wisconsin",
-      "model_probability": 0.6189751859626113,
-      "price": 0.25,
-      "sport": "CFB",
-      "start_time": "2026-11-28T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 29.48630201,
-      "market_id": "2799671",
-      "matchup": "LSU at Arkansas",
-      "model_probability": 0.4498630200544079,
-      "price": 0.155,
-      "sport": "CFB",
-      "start_time": "2026-11-28T17:45:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 26.54949677,
-      "market_id": "2611610",
-      "matchup": "Kansas State at Iowa State",
-      "model_probability": 0.6304949677032917,
-      "price": 0.365,
-      "sport": "CFB",
-      "start_time": "2026-11-28T19:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 22.90259922,
-      "market_id": "2539330",
-      "matchup": "UTEP at Northern Illinois",
-      "model_probability": 0.5990259922342545,
-      "price": 0.37,
-      "sport": "CFB",
-      "start_time": "2026-11-28T20:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 15.10303311,
-      "market_id": "KXNCAAFGAME-26NOV27TEMMEM-TEM",
-      "matchup": "Temple at Memphis",
-      "model_probability": 0.2610303311354927,
-      "price": 0.11,
-      "sport": "CFB",
-      "start_time": "2026-11-27T20:30:00+00:00",
-      "venue": "KALSHI"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-27T20:22:32.684752+00:00",
+  "source_feed_generated_at": "2026-11-27T21:27:16.077209+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 7
+    "buy": 0
   }
 }
