@@ -1,5 +1,5 @@
 {
-  "fees_status": "SEE_CERTIFIED_BUY_FEED",
+  "fees_status": "UNCERTIFIED",
   "freshness_seconds": 900,
   "games": [
     {
@@ -8,7 +8,7 @@
       "home_team": "PIT",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-27T20:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "ATL",
@@ -24,7 +24,7 @@
       "home_team": "HOU",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "NO",
@@ -32,7 +32,7 @@
       "home_team": "CIN",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "NYG",
@@ -48,7 +48,7 @@
       "home_team": "MIA",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T18:00:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "TEN",
@@ -80,7 +80,7 @@
       "home_team": "ARI",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "status": "BUY"
+      "status": "WATCH"
     },
     {
       "away_team": "LV",
@@ -107,14 +107,25 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-27T01:59:57.541611+00:00",
+  "generated_at": "2026-11-27T02:05:19.806256+00:00",
   "lane": "NFL",
-  "market_coverage": {
-    "KALSHI": "PARTIAL",
-    "PMUS": "COMPLETE"
-  },
+  "market_coverage": {},
   "read_only": true,
   "research_candidates": [
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2485096",
+      "market_title": "Who will win in the upcoming football event Denver Broncos vs Pittsburgh Steelers scheduled for November 27, 2026 at 8:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.3225 at 2026-11-27T01:58:53.156197+00:00; that executable quote expired at 2026-11-27T01:59:52.994432+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-27T20:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
     {
       "contract_side": "NO",
       "failed_gates": [
@@ -131,6 +142,34 @@
       "venue": "PMUS"
     },
     {
+      "contract_side": "YES",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555509",
+      "market_title": "Who will win in the upcoming football event Baltimore Ravens vs Houston Texans scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.2700 at 2026-11-27T01:58:53.217559+00:00; that executable quote expired at 2026-11-27T01:59:52.989450+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "YES",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555510",
+      "market_title": "Who will win in the upcoming football event New Orleans Saints vs Cincinnati Bengals scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.1700 at 2026-11-27T01:58:53.246201+00:00; that executable quote expired at 2026-11-27T01:59:52.997947+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
       "contract_side": "NO",
       "failed_gates": [
         "liquidity",
@@ -140,6 +179,20 @@
       "label": "RESEARCH ONLY \u2014 NOT A BUY",
       "market_id": "2555507",
       "market_title": "Who will win in the upcoming football event New York Giants vs Indianapolis Colts scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "resolution_time": "2026-11-29T18:00:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555511",
+      "market_title": "Who will win in the upcoming football event New York Jets vs Miami Dolphins scheduled for November 29, 2026 at 6:00 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.3200 at 2026-11-27T01:58:53.296320+00:00; that executable quote expired at 2026-11-27T01:59:52.999174+00:00. Revalidation is required before acting.",
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
@@ -248,6 +301,20 @@
     {
       "contract_side": "NO",
       "failed_gates": [
+        "stale_data"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2555514",
+      "market_title": "Who will win in the upcoming football event Washington Commanders vs Arizona Cardinals scheduled for November 29, 2026 at 9:25 PM UTC?",
+      "reason": "PARALLAX previously certified a BUY at $0.2525 at 2026-11-27T01:58:59.870817+00:00; that executable quote expired at 2026-11-27T01:59:53.025692+00:00. Revalidation is required before acting.",
+      "resolution_time": "2026-11-29T21:25:00+00:00",
+      "sport": "NFL",
+      "venue": "PMUS"
+    },
+    {
+      "contract_side": "NO",
+      "failed_gates": [
         "liquidity",
         "nfl_calibration_safety",
         "risk_reward"
@@ -333,13 +400,13 @@
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-27T01:59:17.970972+00:00",
+  "source_feed_generated_at": "2026-11-27T02:05:19.149068+00:00",
   "state": "LIVE",
   "summary": {
-    "buy": 5,
+    "buy": 0,
     "games": 13,
     "pass": 28,
-    "research_candidates": 15,
-    "watch": 15
+    "research_candidates": 20,
+    "watch": 20
   }
 }
