@@ -1,7 +1,62 @@
 {
-  "generated_at": "2026-11-28T16:23:23.422322+00:00",
+  "generated_at": "2026-11-28T17:23:52.870685+00:00",
   "lane": "CFB",
   "plays": [
+    {
+      "contract_side": "YES",
+      "edge_pp": 49.28658683,
+      "market_id": "2799689",
+      "matchup": "Auburn at Alabama",
+      "model_probability": 0.6428658683059865,
+      "price": 0.15,
+      "sport": "CFB",
+      "start_time": "2026-11-29T00:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 36.09994982,
+      "market_id": "2799686",
+      "matchup": "Tennessee at Vanderbilt",
+      "model_probability": 0.5309994982338051,
+      "price": 0.17,
+      "sport": "CFB",
+      "start_time": "2026-11-29T00:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 30.54949677,
+      "market_id": "2611610",
+      "matchup": "Kansas State at Iowa State",
+      "model_probability": 0.6304949677032917,
+      "price": 0.325,
+      "sport": "CFB",
+      "start_time": "2026-11-28T19:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 29.48630201,
+      "market_id": "2799671",
+      "matchup": "LSU at Arkansas",
+      "model_probability": 0.4498630200544079,
+      "price": 0.155,
+      "sport": "CFB",
+      "start_time": "2026-11-28T17:45:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 24.40259922,
+      "market_id": "2539330",
+      "matchup": "UTEP at Northern Illinois",
+      "model_probability": 0.5990259922342545,
+      "price": 0.355,
+      "sport": "CFB",
+      "start_time": "2026-11-28T20:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
     {
       "contract_side": "YES",
       "edge_pp": 22.42101195,
@@ -12,14 +67,69 @@
       "sport": "CFB",
       "start_time": "2026-11-28T17:30:00+00:00",
       "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 17.30388908,
+      "market_id": "2811876",
+      "matchup": "Texas State at Utah State",
+      "model_probability": 0.4530388908021544,
+      "price": 0.28,
+      "sport": "CFB",
+      "start_time": "2026-11-29T02:30:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 12.60928605,
+      "market_id": "2609609",
+      "matchup": "Army at Rice",
+      "model_probability": 0.48609286051515943,
+      "price": 0.36,
+      "sport": "CFB",
+      "start_time": "2026-11-28T19:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 9.23228576,
+      "market_id": "2607517",
+      "matchup": "Oklahoma at Missouri",
+      "model_probability": 0.5823228576432599,
+      "price": 0.49,
+      "sport": "CFB",
+      "start_time": "2026-11-28T21:15:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "YES",
+      "edge_pp": 8.78766429,
+      "market_id": "2609610",
+      "matchup": "UCF at Colorado",
+      "model_probability": 0.5528766429330191,
+      "price": 0.465,
+      "sport": "CFB",
+      "start_time": "2026-11-28T19:00:00+00:00",
+      "venue": "POLYMARKET"
+    },
+    {
+      "contract_side": "NO",
+      "edge_pp": 8.69276275,
+      "market_id": "2799672",
+      "matchup": "South Carolina at Clemson",
+      "model_probability": 0.38192762746081055,
+      "price": 0.295,
+      "sport": "CFB",
+      "start_time": "2026-11-28T20:00:00+00:00",
+      "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-28T16:23:02.897197+00:00",
+  "source_feed_generated_at": "2026-11-28T17:23:47.784997+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 1
+    "buy": 11
   }
 }
