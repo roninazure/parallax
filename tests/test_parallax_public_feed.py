@@ -988,6 +988,39 @@ def test_nfl_publisher_blocks_buy_when_own_game_has_localized_failure(own_status
     assert result["summary"]["buy"] == 0
 
 
+def test_cfb_verified_selected_team_exported_for_certified_buy():
+    payload = json.loads(completed_cfb_stdout())
+    payload["rows"] = [eligible_cfb_buy()]
+    result = sanitize_completed_scan("cfb", json.dumps(payload), generated_at=NOW)
+
+    assert result["summary"]["buy"] == 1
+    assert result["plays"][0]["selected_team"] == "Alabama"
+    assert "economic_key" not in result["plays"][0]
+
+
+def test_cfb_unverified_selected_team_is_never_published():
+    payload = json.loads(completed_cfb_stdout())
+    row = eligible_cfb_buy()
+    row["selected_team"] = "Texas"
+    payload["rows"] = [row]
+    result = sanitize_completed_scan("cfb", json.dumps(payload), generated_at=NOW)
+
+    assert result["summary"]["buy"] == 0
+    assert result["plays"] == []
+
+
+def test_cfb_nonbuy_does_not_disclose_unverified_selected_team():
+    payload = json.loads(completed_cfb_stdout())
+    row = eligible_cfb_buy()
+    row["verdict"] = "WATCH"
+    row["publication_eligible"] = False
+    payload["rows"] = [row]
+    result = sanitize_completed_scan("cfb", json.dumps(payload), generated_at=NOW)
+
+    assert result["summary"]["buy"] == 0
+    assert all("selected_team" not in play for play in result["plays"])
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     [
