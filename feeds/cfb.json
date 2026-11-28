@@ -1,25 +1,13 @@
 {
-  "generated_at": "2026-11-28T10:06:19.455693+00:00",
+  "generated_at": "2026-11-28T11:36:58.628736+00:00",
   "lane": "CFB",
-  "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 22.90259922,
-      "market_id": "2539330",
-      "matchup": "UTEP at Northern Illinois",
-      "model_probability": 0.5990259922342545,
-      "price": 0.37,
-      "sport": "CFB",
-      "start_time": "2026-11-28T20:30:00+00:00",
-      "venue": "POLYMARKET"
-    }
-  ],
+  "plays": [],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
   "source_feed_generated_at": "2026-11-28T10:05:55.174906+00:00",
-  "source_schedule_state": "UNVERIFIED",
-  "state": "LIVE",
+  "source_schedule_state": "STALE",
+  "state": "STALE",
   "summary": {
-    "buy": 1
+    "buy": 0
   }
 }
