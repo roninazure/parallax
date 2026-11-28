@@ -2,22 +2,36 @@
   "fees_status": "SEE_CERTIFIED_BUY_FEED",
   "freshness_seconds": 900,
   "games": [],
-  "generated_at": "2026-11-28T05:03:33.321128+00:00",
+  "generated_at": "2026-11-28T05:52:19.810492+00:00",
   "lane": "CFB",
   "market_coverage": {
     "KALSHI": "PARTIAL",
     "PMUS": "PARTIAL"
   },
   "read_only": true,
-  "research_candidates": [],
+  "research_candidates": [
+    {
+      "contract_side": "NO",
+      "failed_gates": [
+        "cfb_calibration_safety"
+      ],
+      "fees_status": "NOT_BUY_CERTIFIED",
+      "label": "RESEARCH ONLY \u2014 NOT A BUY",
+      "market_id": "2534163",
+      "matchup": "Central Michigan at Ball State",
+      "resolution_time": "2026-11-28T17:00:00+00:00",
+      "sport": "CFB",
+      "venue": "PMUS"
+    }
+  ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-28T04:48:13.486683+00:00",
-  "state": "STALE",
+  "source_feed_generated_at": "2026-11-28T05:51:37.047484+00:00",
+  "state": "LIVE",
   "summary": {
     "buy": 3,
     "games": 0,
     "pass": 4,
-    "research_candidates": 0,
+    "research_candidates": 1,
     "watch": 1
   }
 }
