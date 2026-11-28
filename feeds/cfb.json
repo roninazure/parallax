@@ -1,113 +1,25 @@
 {
-  "generated_at": "2026-11-28T15:19:31.966332+00:00",
+  "generated_at": "2026-11-28T16:23:23.422322+00:00",
   "lane": "CFB",
   "plays": [
     {
-      "contract_side": "NO",
-      "edge_pp": 48.27711861,
-      "market_id": "2607508",
-      "matchup": "Notre Dame at Syracuse",
-      "model_probability": 0.5327711860867119,
-      "price": 0.05,
-      "sport": "CFB",
-      "start_time": "2026-11-28T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
       "contract_side": "YES",
-      "edge_pp": 39.45525933,
-      "market_id": "2534166",
-      "matchup": "Michigan at Ohio State",
-      "model_probability": 0.6245525933407059,
-      "price": 0.23,
-      "sport": "CFB",
-      "start_time": "2026-11-28T17:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 36.09994982,
-      "market_id": "2799686",
-      "matchup": "Tennessee at Vanderbilt",
-      "model_probability": 0.5309994982338051,
-      "price": 0.17,
-      "sport": "CFB",
-      "start_time": "2026-11-29T00:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 29.48630201,
-      "market_id": "2799671",
-      "matchup": "LSU at Arkansas",
-      "model_probability": 0.4498630200544079,
-      "price": 0.155,
-      "sport": "CFB",
-      "start_time": "2026-11-28T17:45:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 28.04949677,
-      "market_id": "2611610",
-      "matchup": "Kansas State at Iowa State",
-      "model_probability": 0.6304949677032917,
-      "price": 0.35,
-      "sport": "CFB",
-      "start_time": "2026-11-28T19:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 21.92101195,
+      "edge_pp": 22.42101195,
       "market_id": "2607509",
       "matchup": "Illinois at Northwestern",
       "model_probability": 0.5892101194808217,
-      "price": 0.37,
+      "price": 0.365,
       "sport": "CFB",
       "start_time": "2026-11-28T17:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 12.60928605,
-      "market_id": "2609609",
-      "matchup": "Army at Rice",
-      "model_probability": 0.48609286051515943,
-      "price": 0.36,
-      "sport": "CFB",
-      "start_time": "2026-11-28T19:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "YES",
-      "edge_pp": 8.78766429,
-      "market_id": "2609610",
-      "matchup": "UCF at Colorado",
-      "model_probability": 0.5528766429330191,
-      "price": 0.465,
-      "sport": "CFB",
-      "start_time": "2026-11-28T19:00:00+00:00",
-      "venue": "POLYMARKET"
-    },
-    {
-      "contract_side": "NO",
-      "edge_pp": 7.69276275,
-      "market_id": "2799672",
-      "matchup": "South Carolina at Clemson",
-      "model_probability": 0.38192762746081055,
-      "price": 0.305,
-      "sport": "CFB",
-      "start_time": "2026-11-28T20:00:00+00:00",
       "venue": "POLYMARKET"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-28T15:18:30.967178+00:00",
+  "source_feed_generated_at": "2026-11-28T16:23:02.897197+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 9
+    "buy": 1
   }
 }
