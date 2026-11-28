@@ -80,7 +80,7 @@
       "home_team": "CLE",
       "schedule_status": "SCHEDULED",
       "start_time": "2026-11-30T01:20:00+00:00",
-      "status": "WATCH"
+      "status": "PASS"
     },
     {
       "away_team": "CAR",
@@ -99,7 +99,7 @@
       "status": "WATCH"
     }
   ],
-  "generated_at": "2026-11-28T01:18:22.518983+00:00",
+  "generated_at": "2026-11-28T01:24:05.418814+00:00",
   "lane": "NFL",
   "market_coverage": {
     "KALSHI": "PARTIAL",
@@ -123,50 +123,6 @@
       "venue": "PMUS"
     },
     {
-      "contract_side": "NO",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29ATLMIN-ATL",
-      "market_title": "Atlanta wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29ATLMIN-MIN",
-      "market_title": "Minnesota wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "liquidity",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555509",
-      "market_title": "Who will win in the upcoming football event Baltimore Ravens vs Houston Texans scheduled for November 29, 2026 at 6:00 PM UTC?",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
       "contract_side": "YES",
       "failed_gates": [
         "liquidity",
@@ -179,32 +135,6 @@
       "resolution_time": "2026-11-29T18:00:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29NOCIN-CIN",
-      "market_title": "Cincinnati wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26NOV29NOCIN-NO",
-      "market_title": "New Orleans wins",
-      "resolution_time": "2026-11-29T18:00:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     },
     {
       "contract_side": "YES",
@@ -220,24 +150,9 @@
       "venue": "PMUS"
     },
     {
-      "contract_side": "YES",
-      "failed_gates": [
-        "liquidity",
-        "edge",
-        "nfl_calibration_safety",
-        "risk_reward"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "2555506",
-      "market_title": "Who will win in the upcoming football event Las Vegas Raiders vs Cleveland Browns scheduled for November 29, 2026 at 6:00 PM UTC?",
-      "resolution_time": "2026-11-30T01:20:00+00:00",
-      "sport": "NFL",
-      "venue": "PMUS"
-    },
-    {
       "contract_side": "NO",
       "failed_gates": [
+        "liquidity",
         "edge",
         "nfl_calibration_safety",
         "risk_reward"
@@ -294,43 +209,16 @@
       "resolution_time": "2026-12-04T01:15:00+00:00",
       "sport": "NFL",
       "venue": "PMUS"
-    },
-    {
-      "contract_side": "NO",
-      "failed_gates": [
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26DEC03KCLAR-KC",
-      "market_title": "Kansas City wins",
-      "resolution_time": "2026-12-04T01:15:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
-    },
-    {
-      "contract_side": "YES",
-      "failed_gates": [
-        "edge",
-        "nfl_calibration_safety"
-      ],
-      "fees_status": "NOT_BUY_CERTIFIED",
-      "label": "RESEARCH ONLY \u2014 NOT A BUY",
-      "market_id": "KXNFLGAME-26DEC03KCLAR-LAR",
-      "market_title": "Los Angeles R wins",
-      "resolution_time": "2026-12-04T01:15:00+00:00",
-      "sport": "NFL",
-      "venue": "KALSHI"
     }
   ],
   "schema_version": "parallax.intelligence.v1",
-  "source_feed_generated_at": "2026-11-28T01:17:51.065428+00:00",
+  "source_feed_generated_at": "2026-11-28T01:23:50.335285+00:00",
   "state": "LIVE",
   "summary": {
     "buy": 6,
     "games": 12,
-    "pass": 24,
-    "research_candidates": 15,
-    "watch": 15
+    "pass": 27,
+    "research_candidates": 7,
+    "watch": 7
   }
 }
