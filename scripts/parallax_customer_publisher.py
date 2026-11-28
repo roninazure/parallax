@@ -187,8 +187,15 @@ def build(lane: str, source: dict, db: Path, now: datetime) -> dict:
             raise ValueError(f"{lane}: certified BUY {market_id} has invalid numeric field")
         if not 0 < numeric["price"] < 1 or not 0 < numeric["model_probability"] < 1:
             raise ValueError(f"{lane}: certified BUY {market_id} has invalid price/probability")
-        buys.append({"sport": sport, "venue": normalized_venue, "market_id": market_id,
-                     "contract_side": side, "matchup": matchup.strip(), "start_time": start, **numeric})
+        customer_play = {"sport": sport, "venue": normalized_venue, "market_id": market_id,
+                         "contract_side": side, "matchup": matchup.strip(), "start_time": start, **numeric}
+        # CFB contract YES/NO does not identify a winning team. Forward only
+        # a previously verified field from the certified source; never infer it.
+        if lane == "cfb":
+            selected_team = play.get("selected_team")
+            if isinstance(selected_team, str) and selected_team.strip():
+                customer_play["selected_team"] = selected_team.strip()
+        buys.append(customer_play)
     expected = source["summary"]["buy"]
     if len(buys) != expected:
         raise ValueError(f"{lane}: BUY mismatch source={expected} customer={len(buys)}")
