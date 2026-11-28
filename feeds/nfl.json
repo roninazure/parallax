@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-28T08:19:22.075830+00:00",
+  "generated_at": "2026-11-28T08:25:11.190867+00:00",
   "lane": "NFL",
   "plays": [
     {
@@ -69,20 +69,20 @@
       "venue": "POLYMARKET"
     },
     {
-      "contract_side": "NO",
+      "contract_side": "YES",
       "edge_pp": 20.1749933,
-      "market_id": "2555514",
+      "market_id": "KXNFLGAME-26NOV29WASARI-ARI",
       "matchup": "WAS at ARI",
       "model_probability": 0.4617499330208197,
       "price": 0.26,
       "sport": "NFL",
       "start_time": "2026-11-29T21:25:00+00:00",
-      "venue": "POLYMARKET"
+      "venue": "KALSHI"
     }
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-28T08:18:26.902416+00:00",
+  "source_feed_generated_at": "2026-11-28T08:24:44.014141+00:00",
   "source_schedule_state": "INCOMPLETE",
   "state": "LIVE",
   "summary": {
