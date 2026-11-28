@@ -1,18 +1,7 @@
 {
-  "generated_at": "2026-11-28T07:58:33.800397+00:00",
+  "generated_at": "2026-11-28T09:02:27.212680+00:00",
   "lane": "CFB",
   "plays": [
-    {
-      "contract_side": "YES",
-      "edge_pp": 49.28658683,
-      "market_id": "2799689",
-      "matchup": "Auburn at Alabama",
-      "model_probability": 0.6428658683059865,
-      "price": 0.15,
-      "sport": "CFB",
-      "start_time": "2026-11-29T00:30:00+00:00",
-      "venue": "POLYMARKET"
-    },
     {
       "contract_side": "YES",
       "edge_pp": 22.90259922,
@@ -27,10 +16,10 @@
   ],
   "read_only": true,
   "schema_version": "parallax.customer.v1",
-  "source_feed_generated_at": "2026-11-28T07:58:31.583560+00:00",
+  "source_feed_generated_at": "2026-11-28T09:02:11.159242+00:00",
   "source_schedule_state": "UNVERIFIED",
   "state": "LIVE",
   "summary": {
-    "buy": 2
+    "buy": 1
   }
 }
