@@ -77,6 +77,41 @@ def test_db_enrichment_requires_exact_sport_venue_market_and_side(tmp_path):
     assert expected["cfb"]["plays"][0]["start_time"] == "2026-10-10T19:30:00+00:00"
 
 
+def test_cfb_publishes_only_verified_selected_team_from_certified_source(tmp_path):
+    feed, db = fixtures(tmp_path)
+    cfb_play = {**play("cfb-selected", title=False, matchup="Georgia at Alabama"),
+                "sport": "CFB", "selected_team": "Alabama", "contract_side": "YES"}
+    (feed / "cfb.json").write_text(json.dumps(source("cfb", plays=[cfb_play])))
+
+    expected, _, _ = publisher.build_all(feed, db, NOW)
+    assert expected["cfb"]["state"] == "LIVE"
+    assert expected["cfb"]["summary"]["buy"] == 1
+    assert expected["cfb"]["plays"][0]["selected_team"] == "Alabama"
+    assert "selected_team" not in expected["nfl"]["plays"][0]
+
+
+def test_cfb_does_not_infer_team_when_upstream_identity_is_missing(tmp_path):
+    feed, db = fixtures(tmp_path)
+    cfb_play = {**play("cfb-unverified", title=False, matchup="Georgia at Alabama"),
+                "sport": "CFB", "contract_side": "NO"}
+    (feed / "cfb.json").write_text(json.dumps(source("cfb", plays=[cfb_play])))
+
+    expected, _, _ = publisher.build_all(feed, db, NOW)
+    assert expected["cfb"]["summary"]["buy"] == 1
+    assert "selected_team" not in expected["cfb"]["plays"][0]
+
+
+def test_cfb_does_not_publish_blank_or_nontext_team(tmp_path):
+    feed, db = fixtures(tmp_path)
+    for value in ("  ", None, ["Alabama"]):
+        cfb_play = {**play("cfb-unverified", title=False, matchup="Georgia at Alabama"),
+                    "sport": "CFB", "selected_team": value}
+        (feed / "cfb.json").write_text(json.dumps(source("cfb", plays=[cfb_play])))
+        expected, _, _ = publisher.build_all(feed, db, NOW)
+        assert expected["cfb"]["summary"]["buy"] == 1
+        assert "selected_team" not in expected["cfb"]["plays"][0]
+
+
 def test_all_lane_source_customer_count_equality_is_mandatory(tmp_path):
     feed, db = fixtures(tmp_path)
     (feed / "nfl.json").write_text(json.dumps(source(buy=2)))
